@@ -41,10 +41,24 @@ public class SymbolicVariableImpl extends VariableImpl implements SymbolicVariab
 		else if (isIntegerTypeName(varType))
 			return new ComplexTerm(DataType.INT, FunctionSymbol.getVarInt, currentState, varNameCode);
 		else if (isRealTypeName(varType))
-			return new ComplexTerm(DataType.REAL, FunctionSymbol.getVarDouble, currentState, varNameCode);
+			return new ComplexTerm(DataType.REAL, FunctionSymbol.getvarReal, currentState, varNameCode);
 		else // TIME 
 			return new ComplexTerm(DataType.INT, FunctionSymbol.getVarInt, currentState, varNameCode);
 	}
+  
+  public static boolean isIntegerTypeName(String typeName) {
+		return "SINT".equals(typeName) 
+				|| "INT".equals(typeName) 
+				|| "DINT".equals(typeName) 
+				|| "LINT".equals(typeName)
+				|| "USINT".equals(typeName)
+				|| "UINT".equals(typeName)
+				|| "UDINT".equals(typeName)
+				|| "ULINT".equals(typeName);
+	}
+	
+	public static boolean isRealTypeName(String typeName) {
+		return "REAL".equals(typeName) || "LREAL".equals(typeName);
 
   /**
    * <!-- begin-user-doc -->

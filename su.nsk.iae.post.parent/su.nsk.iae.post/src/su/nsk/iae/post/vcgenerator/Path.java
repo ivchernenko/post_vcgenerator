@@ -1,10 +1,12 @@
 package su.nsk.iae.post.vcgenerator;
 
 import java.util.List;
+
 import java.util.ArrayList;
 
 import su.nsk.iae.post.poST.*;
-import su.nsk.iae.post.vcgenerator.Constant;
+import su.nsk.iae.post.poST.impl.*;
+
 
 public class Path {
 
@@ -28,10 +30,10 @@ public class Path {
 			Constant varNameCode = globVars.getVariable(variable.getName());
 			if ("BOOL".equals(varType))
 				currentState = new ComplexTerm(FunctionSymbol.setVarBool, currentState, varNameCode, value);
-			else if (ExpressionGenerator.isIntegerTypeName(varType))
+			else if (PrimaryExpressionImpl.isIntegerTypeName(varType))
 				currentState = new ComplexTerm(FunctionSymbol.setVarInt, currentState, varNameCode, value);
-			else if (ExpressionGenerator.isRealTypeName(varType))
-				currentState = new ComplexTerm(FunctionSymbol.setVarDouble, currentState, varNameCode, value);
+			else if (PrimaryExpressionImpl.isRealTypeName(varType))
+				currentState = new ComplexTerm(FunctionSymbol.setVarReal, currentState, varNameCode, value);
 			else // TIME ((getVarInt currentState variable) - 1) div period + 1
 				currentState = new ComplexTerm(FunctionSymbol.setVarInt, currentState, varNameCode, value);
 		}
@@ -42,12 +44,12 @@ public class Path {
 			return;
 		if (statement.isNext()) {
 			Constant stateCode = globVars.getNextState();
-			currentState = new ComplexTerm(FunctionSymbol.setPstate, currentState, currentProcess, stateCode);
+			currentState = new ComplexTerm(FunctionSymbol.setPstate, currentState, globVars.currentProcess, stateCode);
 		}
 		else {
 			String stateName = statement.getState().getName();
 			Constant stateCode = globVars.getState(stateName);
-			currentState = new ComplexTerm(FunctionSymbol.getPstate, currentState, currentProcess, stateCode);
+			currentState = new ComplexTerm(FunctionSymbol.getPstate, currentState, globVars.currentProcess, stateCode);
 		}		
 	}
 

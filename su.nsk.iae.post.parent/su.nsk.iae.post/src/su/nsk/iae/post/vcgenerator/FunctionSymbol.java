@@ -47,7 +47,7 @@ public class FunctionSymbol {
 	//State functions
 	public static final FunctionSymbol getVarBool = new FunctionSymbol("getVarBool", false);
 	public static final FunctionSymbol getVarInt = new FunctionSymbol("getVarInt", false);
-	public static final FunctionSymbol getVarDouble = new FunctionSymbol("getVarDouble", false);
+	public static final FunctionSymbol getvarReal = new FunctionSymbol("getVarDouble", false);
 	public static final FunctionSymbol getPstate = new FunctionSymbol("getPstate", false);
 	public static final FunctionSymbol ltime = new FunctionSymbol("ltime", false);
 	

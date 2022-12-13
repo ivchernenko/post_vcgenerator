@@ -190,19 +190,7 @@ public class PrimaryExpressionImpl extends UnaryExpressionImpl implements Primar
 		return null;
   }
   
-  static boolean isIntegerTypeName(String typeName) {
-		return "SINT".equals(typeName) 
-				|| "INT".equals(typeName) 
-				|| "DINT".equals(typeName) 
-				|| "LINT".equals(typeName)
-				|| "USINT".equals(typeName)
-				|| "UINT".equals(typeName)
-				|| "UDINT".equals(typeName)
-				|| "ULINT".equals(typeName);
-	}
-	
-	static boolean isRealTypeName(String typeName) {
-		return "REAL".equals(typeName) || "LREAL".equals(typeName);
+  
 
   /**
    * <!-- begin-user-doc -->
