@@ -39,7 +39,7 @@ public class FunctionSymbol {
 	public static final FunctionSymbol toCon = new FunctionSymbol("toCon", false);
 	public static final FunctionSymbol setVarBool = new FunctionSymbol("setVarBool", false);
 	public static final FunctionSymbol setVarInt = new FunctionSymbol("setVarInt", false);
-	public static final FunctionSymbol setVarDouble = new FunctionSymbol("setVarDouble", false);
+	public static final FunctionSymbol setVarReal = new FunctionSymbol("setVarReal", false);
 	public static final FunctionSymbol setVarAny = new FunctionSymbol("setVarAny", false);
 	public static final FunctionSymbol setPstate = new FunctionSymbol("setPstate", false);
 	public static final FunctionSymbol reset = new FunctionSymbol("reset", false);
@@ -47,7 +47,7 @@ public class FunctionSymbol {
 	//State functions
 	public static final FunctionSymbol getVarBool = new FunctionSymbol("getVarBool", false);
 	public static final FunctionSymbol getVarInt = new FunctionSymbol("getVarInt", false);
-	public static final FunctionSymbol getvarReal = new FunctionSymbol("getVarDouble", false);
+	public static final FunctionSymbol getvarReal = new FunctionSymbol("getVarReal", false);
 	public static final FunctionSymbol getPstate = new FunctionSymbol("getPstate", false);
 	public static final FunctionSymbol ltime = new FunctionSymbol("ltime", false);
 	

@@ -30,9 +30,9 @@ public class Path {
 			Constant varNameCode = globVars.getVariable(variable.getName());
 			if ("BOOL".equals(varType))
 				currentState = new ComplexTerm(FunctionSymbol.setVarBool, currentState, varNameCode, value);
-			else if (PrimaryExpressionImpl.isIntegerTypeName(varType))
+			else if (SymbolicVariableImpl.isIntegerTypeName(varType))
 				currentState = new ComplexTerm(FunctionSymbol.setVarInt, currentState, varNameCode, value);
-			else if (PrimaryExpressionImpl.isRealTypeName(varType))
+			else if (SymbolicVariableImpl.isRealTypeName(varType))
 				currentState = new ComplexTerm(FunctionSymbol.setVarReal, currentState, varNameCode, value);
 			else // TIME ((getVarInt currentState variable) - 1) div period + 1
 				currentState = new ComplexTerm(FunctionSymbol.setVarInt, currentState, varNameCode, value);
