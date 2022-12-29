@@ -16,6 +16,8 @@ import su.nsk.iae.post.poST.PoSTPackage;
 import su.nsk.iae.post.poST.RepeatStatement;
 
 import su.nsk.iae.post.vcgenerator.*;
+
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -54,8 +56,43 @@ public class RepeatStatementImpl extends IterationStatementImpl implements Repea
   }
   
   @Override
-  public List<Path> applyTo(List<Path> paths, VCGenerator globVars) {
-	  
+  public List<Path> applyTo(List<Path> paths, VCGeneratorState globVars) {
+	  FunctionSymbol loopinv = globVars.nextLoopInv();
+	  Variable s0 = new Variable("s0");
+	  List<Path> result = new ArrayList<>();
+	  for (Path path:paths)
+		  if (path.getStatus() == ExecutionStatus.NORMAL) {
+			  List<Path> afterOneIteration = statement.applyTo(path,  globVars);
+			  for (Path p: afterOneIteration) 
+				  if (p.getStatus() == ExecutionStatus.RETURN)
+					  result.add(p);
+				  else
+					  globVars.addVerificationCondition(path.generateVerificationCondition(loopinv));
+		  }  
+		  else
+			  result.add(path);
+	  Term inv = new ComplexTerm(loopinv, s0);
+	  Term cond = this.cond.generateExpression(s0, globVars);
+	  List<Term> loopBodyPrecondition = new ArrayList<>(2);
+	  loopBodyPrecondition.add(inv);
+	  loopBodyPrecondition.add(cond);
+	  Path loopBody = new Path(loopBodyPrecondition, s0);
+	  List<Path> loopBodyPaths = statement.applyTo(loopBody, globVars);
+	  boolean notAllReturn = false;
+	  for (Path path: loopBodyPaths)
+		  if (path.getStatus() == ExecutionStatus.RETURN)
+			  result.add(path);
+		  else {
+			  globVars.addVerificationCondition(path.generateVerificationCondition(loopinv));
+			  notAllReturn = true;
+		  }
+	  if (notAllReturn) {
+		  List<Term> loopPostcondition = new ArrayList<>(2);
+		  loopPostcondition.add(inv);
+		  loopPostcondition.add(new ComplexTerm(FunctionSymbol.NOT, cond));
+		  result.add(new Path(loopPostcondition, s0));
+	  }
+	  return result;
   }
 
   /**

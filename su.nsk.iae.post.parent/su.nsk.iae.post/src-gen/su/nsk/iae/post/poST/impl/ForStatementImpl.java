@@ -4,6 +4,7 @@
 package su.nsk.iae.post.poST.impl;
 
 import org.eclipse.emf.common.notify.Notification;
+import su.nsk.iae.post.poST.AddExpression;
 import org.eclipse.emf.common.notify.NotificationChain;
 
 import org.eclipse.emf.ecore.EClass;
@@ -15,9 +16,12 @@ import su.nsk.iae.post.poST.ForList;
 import su.nsk.iae.post.poST.ForStatement;
 import su.nsk.iae.post.poST.PoSTPackage;
 import su.nsk.iae.post.poST.SymbolicVariable;
-
-/**
- * <!-- begin-user-doc -->
+import java.util.*;
+import su.nsk.iae.post.vcgenerator.*;
+import su.nsk.iae.post.poST.AssignmentStatement;
+import su.nsk.iae.post.poST.Expression;
+/** 
+ * * <!-- begin-user-doc -->
  * An implementation of the model object '<em><b>For Statement</b></em>'.
  * <!-- end-user-doc -->
  * <p>
@@ -60,6 +64,63 @@ public class ForStatementImpl extends IterationStatementImpl implements ForState
   protected ForStatementImpl()
   {
     super();
+  }
+  
+  @Override
+  public List<Path> applyTo(List<Path> paths, VCGeneratorState globVars) {
+	  List<Path> result = new ArrayList<>();
+	  FunctionSymbol loopinv = globVars.nextLoopInv();
+	  Variable s0 = new Variable("s0");
+	  Term invs0 = new ComplexTerm(loopinv, s0);
+	  for (Path path: paths) {
+		  if (path.getStatus() != ExecutionStatus.NORMAL)
+			  result.add(path);
+		  else {
+			  path.doAssignment(variable, forList.getStart(), globVars);
+			  globVars.addVerificationCondition(path.generateVerificationCondition(loopinv));			  
+		  }
+	  }
+	  Term end = forList.getEnd().generateExpression(s0, globVars);
+	  Expression stepExpr = forList.getStep();
+	  Term step;
+	  if (stepExpr != null)
+		  step = stepExpr.generateExpression(s0, globVars);
+	  else
+		  step = new Constant(1);	  
+	  List<Term> loopBodyPrecondition = new ArrayList<>();
+	  loopBodyPrecondition.add(invs0);
+	  Path posStep = new Path(loopBodyPrecondition, s0);
+	  Term stepGt0 = new ComplexTerm(FunctionSymbol.GREATER, step, new Constant(0));
+	  posStep = posStep.addCondition(stepGt0);
+	  posStep = posStep.addCondition(new ComplexTerm(FunctionSymbol.LEQ, variable.generateVariable(s0, globVars), end));
+	  Path negStep = new Path(loopBodyPrecondition, s0);
+	  Term stepLess0 = new ComplexTerm(FunctionSymbol.LESS, step, new Constant(0));
+	  negStep = negStep.addCondition(stepLess0);
+	  negStep = negStep.addCondition(new ComplexTerm(FunctionSymbol.GEQ, variable.generateVariable(s0, globVars), end));
+	  List<Path> loopBodyPosStep = statement.applyTo(posStep, globVars);
+	  List<Path> loopBodyNegStep = statement.applyTo(negStep, globVars);
+	  List<Path> loopBody = loopBodyPosStep;
+	  loopBody.addAll(loopBodyNegStep);
+	  boolean notAllReturn = false;
+	  for (Path path: loopBody)
+		  if (path.getStatus() == ExecutionStatus.RETURN)
+			  result.add(path);
+		  else {
+			  notAllReturn = true;
+			  path.increment(variable, (AddExpression) forList.getStep(), globVars);
+			  globVars.addVerificationCondition(path.generateVerificationCondition(loopinv));
+		  }
+	  if (notAllReturn) {
+		  posStep = new Path(loopBodyPrecondition, s0);
+		  posStep = posStep.addCondition(stepGt0);
+		  posStep = posStep.addCondition(new ComplexTerm(FunctionSymbol.GREATER, variable.generateVariable(s0, globVars), end));
+		  negStep = new Path(loopBodyPrecondition, s0);
+		  negStep = negStep.addCondition(stepLess0);
+		  negStep = negStep.addCondition(new ComplexTerm(FunctionSymbol.LESS, variable.generateVariable(s0, globVars), end));
+		  result.add(posStep);
+		  result.add(negStep);
+	  }
+	  return result;
   }
 
   /**

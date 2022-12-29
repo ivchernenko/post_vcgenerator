@@ -14,8 +14,11 @@ import org.eclipse.emf.ecore.impl.ENotificationImpl;
 import su.nsk.iae.post.poST.Expression;
 import su.nsk.iae.post.poST.PoSTPackage;
 import su.nsk.iae.post.poST.WhileStatement;
-
+import java.util.*;
+import su.nsk.iae.post.vcgenerator.*;
 /**
+
+
  * <!-- begin-user-doc -->
  * An implementation of the model object '<em><b>While Statement</b></em>'.
  * <!-- end-user-doc -->
@@ -48,6 +51,40 @@ public class WhileStatementImpl extends IterationStatementImpl implements WhileS
   protected WhileStatementImpl()
   {
     super();
+  }
+  
+  @Override
+  public List<Path> applyTo(List<Path> paths, VCGeneratorState globVars) {
+	  FunctionSymbol loopinv = globVars.nextLoopInv();
+	  Variable s0 = new Variable("s0");
+	  List<Path> result = new ArrayList<>();
+	  for (Path path:paths)
+		  if (path.getStatus() == ExecutionStatus.NORMAL)
+			  globVars.addVerificationCondition(path.generateVerificationCondition(loopinv));
+		  else
+			  result.add(path);
+	  Term inv = new ComplexTerm(loopinv, s0);
+	  Term cond = this.cond.generateExpression(s0, globVars);
+	  List<Term> loopBodyPrecondition = new ArrayList<>(2);
+	  loopBodyPrecondition.add(inv);
+	  loopBodyPrecondition.add(cond);
+	  Path loopBody = new Path(loopBodyPrecondition, s0);
+	  List<Path> loopBodyPaths = statement.applyTo(loopBody, globVars);
+	  boolean notAllReturn = false;
+	  for (Path path: loopBodyPaths)
+		  if (path.getStatus() == ExecutionStatus.RETURN)
+			  result.add(path);
+		  else {
+			  globVars.addVerificationCondition(path.generateVerificationCondition(loopinv));
+			  notAllReturn = true;
+		  }
+	  if (notAllReturn) {
+		  List<Term> loopPostcondition = new ArrayList<>(2);
+		  loopPostcondition.add(inv);
+		  loopPostcondition.add(new ComplexTerm(FunctionSymbol.NOT, cond));
+		  result.add(new Path(loopPostcondition, s0));
+	  }
+	  return result;
   }
 
   /**

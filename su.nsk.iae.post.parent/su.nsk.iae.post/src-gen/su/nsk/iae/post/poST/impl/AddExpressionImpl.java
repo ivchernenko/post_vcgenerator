@@ -56,7 +56,7 @@ public class AddExpressionImpl extends EquExpressionImpl implements AddExpressio
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
-	protected AddExpressionImpl()
+	public AddExpressionImpl()
 	{
 		super();
 	}
@@ -77,7 +77,7 @@ public class AddExpressionImpl extends EquExpressionImpl implements AddExpressio
 			return new ComplexTerm(resultType, FunctionSymbol.PLUS, symComputedLeft, symComputedRight);
 		}			
 		else {// MINUS
-			return new ComplexTerm(resultType, FunctionSymbol.MINUS, symComputedLeft, symComputedR
+			return new ComplexTerm(resultType, FunctionSymbol.MINUS, symComputedLeft, symComputedRight);
 		}
 
 	}

@@ -111,7 +111,7 @@ public class PrimaryExpressionImpl extends UnaryExpressionImpl implements Primar
    * <!-- end-user-doc -->
    * @generated
    */
-  protected PrimaryExpressionImpl()
+  public PrimaryExpressionImpl()
   {
     super();
   }
@@ -185,6 +185,8 @@ public class PrimaryExpressionImpl extends UnaryExpressionImpl implements Primar
 			return variable.generateVariable(currentState, globVars);
 		else if (getProcStatus() != null)
 			return generateProcessStatus(getProcStatus(), currentState, globVars);
+		else if (getArray() != null)
+			return array.generateArrayVariable(currentState, globVars);
 		else if (getNestExpr() != null)
 			return getNestExpr().generateExpression(currentState, globVars);
 		return null;

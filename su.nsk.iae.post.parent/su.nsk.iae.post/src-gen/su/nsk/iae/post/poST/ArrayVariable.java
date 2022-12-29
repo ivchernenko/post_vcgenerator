@@ -5,6 +5,9 @@ package su.nsk.iae.post.poST;
 
 import org.eclipse.emf.ecore.EObject;
 
+import su.nsk.iae.post.vcgenerator.Term;
+import su.nsk.iae.post.vcgenerator.VCGeneratorState;
+
 /**
  * <!-- begin-user-doc -->
  * A representation of the model object '<em><b>Array Variable</b></em>'.
@@ -24,6 +27,7 @@ import org.eclipse.emf.ecore.EObject;
  */
 public interface ArrayVariable extends EObject
 {
+	Term generateArrayVariable(Term currentState, VCGeneratorState globVars);
   /**
    * Returns the value of the '<em><b>Variable</b></em>' reference.
    * <!-- begin-user-doc -->

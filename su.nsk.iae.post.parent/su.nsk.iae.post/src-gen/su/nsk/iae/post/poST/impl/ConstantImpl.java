@@ -119,7 +119,7 @@ public class ConstantImpl extends MinimalEObjectImpl.Container implements Consta
 	}
 	
   @Override
-	su.nsk.iae.post.vcgenerator.Constant generateConstant() {
+	public su.nsk.iae.post.vcgenerator.Constant generateConstant() {
 		if (num != null) {
 			NumericLiteral numLiteral = num;
 			if (numLiteral instanceof IntegerLiteral) {

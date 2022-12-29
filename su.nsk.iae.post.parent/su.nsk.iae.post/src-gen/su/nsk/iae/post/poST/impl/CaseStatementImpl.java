@@ -79,7 +79,7 @@ public class CaseStatementImpl extends SelectionStatementImpl implements CaseSta
 			long value = Long.parseLong(element.getValue());
 			if (element.isISig())
 				value = -value;
-			Term transformedElement = new ComplexTerm(FunctionSymbol.EQ, cond, new Constant(null, value));
+			Term transformedElement = new ComplexTerm(FunctionSymbol.EQ, cond, new su.nsk.iae.post.vcgenerator.Constant(value));
 			if (transformedCaseList == null)
 				transformedCaseList = transformedElement;
 			else

@@ -16,6 +16,12 @@ import su.nsk.iae.post.poST.ArrayVariable;
 import su.nsk.iae.post.poST.Expression;
 import su.nsk.iae.post.poST.PoSTPackage;
 import su.nsk.iae.post.poST.SymbolicVariable;
+import su.nsk.iae.post.vcgenerator.ComplexTerm;
+import su.nsk.iae.post.vcgenerator.DataType;
+import su.nsk.iae.post.vcgenerator.FunctionSymbol;
+import su.nsk.iae.post.vcgenerator.Term;
+import su.nsk.iae.post.vcgenerator.Utils;
+import su.nsk.iae.post.vcgenerator.VCGeneratorState;
 
 /**
  * <!-- begin-user-doc -->
@@ -61,6 +67,22 @@ public class ArrayVariableImpl extends MinimalEObjectImpl.Container implements A
   protected ArrayVariableImpl()
   {
     super();
+  }
+  
+  @Override
+  public Term generateArrayVariable(Term currentState, VCGeneratorState globVars) {
+	  Term index = this.index.generateExpression(currentState, globVars);
+	  String varType = globVars.getVarType(variable.getName());
+		su.nsk.iae.post.vcgenerator.Constant varNameCode = globVars.getVariable(variable.getName());
+		if ("BOOL".equals(varType))
+			return new ComplexTerm(DataType.BOOL, FunctionSymbol.getVarArrayBool, currentState, varNameCode, index);
+		else if (Utils.isIntegerTypeName(varType))
+			return new ComplexTerm(DataType.INT, FunctionSymbol.getVarArrayInt, currentState, varNameCode, index);
+		else if (Utils.isRealTypeName(varType))
+			return new ComplexTerm(DataType.REAL, FunctionSymbol.getVarArrayReal, currentState, varNameCode, index);
+		else // TIME 
+			return new ComplexTerm(DataType.INT, FunctionSymbol.getVarArrayInt, currentState, varNameCode, index);
+	
   }
 
   /**

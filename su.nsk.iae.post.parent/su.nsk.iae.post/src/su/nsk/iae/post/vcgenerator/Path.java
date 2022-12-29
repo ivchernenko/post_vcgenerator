@@ -2,11 +2,12 @@ package su.nsk.iae.post.vcgenerator;
 
 import java.util.List;
 
+
 import java.util.ArrayList;
 
 import su.nsk.iae.post.poST.*;
 import su.nsk.iae.post.poST.impl.*;
-
+import su.nsk.iae.post.poST.impl.*;
 
 public class Path {
 
@@ -19,23 +20,54 @@ public class Path {
 		currentState = s0;
 		status = ExecutionStatus.NORMAL;
 	}
+	
+	public void doAssignment(SymbolicVariable variable, Expression valueExpr, VCGeneratorState globVars) {
+		if (status != ExecutionStatus.NORMAL)
+			return;
+		Term value = valueExpr.generateExpression(currentState, globVars);
+		String varType = globVars.getVarType(variable.getName());
+		Constant varNameCode = globVars.getVariable(variable.getName());
+		if ("BOOL".equals(varType))
+			currentState = new ComplexTerm(FunctionSymbol.setVarBool, currentState, varNameCode, value);
+		else if (Utils.isIntegerTypeName(varType))
+			currentState = new ComplexTerm(FunctionSymbol.setVarInt, currentState, varNameCode, value);
+		else if (Utils.isRealTypeName(varType))
+			currentState = new ComplexTerm(FunctionSymbol.setVarReal, currentState, varNameCode, value);
+		else // TIME ((getVarInt currentState variable) - 1) div period + 1
+			currentState = new ComplexTerm(FunctionSymbol.setVarInt, currentState, varNameCode, value);
+	}
+	
+	public void increment(SymbolicVariable variable, AddExpression step, VCGeneratorState globVars) {		
+		PrimaryExpression varExpr = new PrimaryExpressionImpl();
+		varExpr.setVariable(variable);
+		AddExpression newValue = new AddExpressionImpl();
+		newValue.setAddOp(AddOperator.PLUS);
+		newValue.setLeft(varExpr);
+		newValue.setRight(step);
+		doAssignment(variable, newValue, globVars);
+	}
 
 	public void doAssignment(AssignmentStatement statement, VCGeneratorState globVars) {
 		if (status != ExecutionStatus.NORMAL)
 			return;
 		if (statement.getVariable() != null) {
-			SymbolicVariable variable = statement.getVariable();
+			doAssignment(statement.getVariable(), statement.getValue(), globVars);
+		}
+		else { // Array
+			ArrayVariable arrayVariable = statement.getArray();
+			SymbolicVariable variable = arrayVariable.getVariable();
+			Term index = arrayVariable.getIndex().generateExpression(currentState, globVars);
 			Term value = statement.getValue().generateExpression(currentState, globVars);
 			String varType = globVars.getVarType(variable.getName());
 			Constant varNameCode = globVars.getVariable(variable.getName());
 			if ("BOOL".equals(varType))
-				currentState = new ComplexTerm(FunctionSymbol.setVarBool, currentState, varNameCode, value);
-			else if (SymbolicVariableImpl.isIntegerTypeName(varType))
-				currentState = new ComplexTerm(FunctionSymbol.setVarInt, currentState, varNameCode, value);
-			else if (SymbolicVariableImpl.isRealTypeName(varType))
-				currentState = new ComplexTerm(FunctionSymbol.setVarReal, currentState, varNameCode, value);
+				currentState = new ComplexTerm(FunctionSymbol.setVarArrayBool, currentState, varNameCode,index,  value);
+			else if (Utils.isIntegerTypeName(varType))
+				currentState = new ComplexTerm(FunctionSymbol.setVarArrayInt, currentState, varNameCode, index, value);
+			else if (Utils.isRealTypeName(varType))
+				currentState = new ComplexTerm(FunctionSymbol.setVarArrayReal, currentState, varNameCode, index, value);
 			else // TIME ((getVarInt currentState variable) - 1) div period + 1
-				currentState = new ComplexTerm(FunctionSymbol.setVarInt, currentState, varNameCode, value);
+				currentState = new ComplexTerm(FunctionSymbol.setVarArrayInt, currentState, varNameCode, index, value);
 		}
 	}
 
@@ -66,7 +98,7 @@ public class Path {
 			su.nsk.iae.post.poST.Process process = (su.nsk.iae.post.poST.Process) statement.getProcess();
 			String processName = process.getName();
 			Constant processCode = globVars.getProcess(processName);
-			Constant initialState = globVars.getInitialStateOfProcess(processName);
+			Constant initialState = globVars.getInitialState(processName);
 			currentState = new ComplexTerm(FunctionSymbol.setPstate, currentState, processCode, initialState);
 		}
 		else { // RESTART
@@ -118,6 +150,16 @@ public class Path {
 		if (status == ExecutionStatus.NORMAL)
 			status = ExecutionStatus.RETURN;
 	}
+	
+	public Term generateVerificationCondition(FunctionSymbol loopinv) {
+		Term preconditionConj = null;
+		for (Term cond: precondition)
+			if (preconditionConj == null) 
+				preconditionConj = cond;
+			else preconditionConj = new ComplexTerm(FunctionSymbol.AND, preconditionConj, cond);
+		Term inv = new ComplexTerm(loopinv, currentState);
+		return new ComplexTerm(FunctionSymbol.IMPL, preconditionConj, inv);
+	}
 
 	public ExecutionStatus getStatus() {
 		return status;
@@ -127,13 +169,6 @@ public class Path {
 		return currentState;
 	}
 
-	/*
-	Path branch(Expression cond, ExpressionGenerator expressionGenerator) {
-		Term condition = expressionGenerator.generateExpression(cond, currentState);
-		Path anotherBranch = new Path(precondition, currentState);
-		precondition.add(condition);
-		anotherBranch.precondition.add(new ComplexTerm(FunctionSymbol.NOT, condition));
-		return anotherBranch;
-	}*/
+	
 
 }

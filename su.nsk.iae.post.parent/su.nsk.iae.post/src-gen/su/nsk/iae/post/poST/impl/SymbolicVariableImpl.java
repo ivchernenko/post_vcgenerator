@@ -11,6 +11,7 @@ import su.nsk.iae.post.vcgenerator.ComplexTerm;
 import su.nsk.iae.post.vcgenerator.DataType;
 import su.nsk.iae.post.vcgenerator.FunctionSymbol;
 import su.nsk.iae.post.vcgenerator.Term;
+import su.nsk.iae.post.vcgenerator.Utils;
 import su.nsk.iae.post.vcgenerator.VCGeneratorState;
 
 /**
@@ -38,28 +39,14 @@ public class SymbolicVariableImpl extends VariableImpl implements SymbolicVariab
 		su.nsk.iae.post.vcgenerator.Constant varNameCode = globVars.getVariable(name);
 		if ("BOOL".equals(varType))
 			return new ComplexTerm(DataType.BOOL, FunctionSymbol.getVarBool, currentState, varNameCode);
-		else if (isIntegerTypeName(varType))
+		else if (Utils.isIntegerTypeName(varType))
 			return new ComplexTerm(DataType.INT, FunctionSymbol.getVarInt, currentState, varNameCode);
-		else if (isRealTypeName(varType))
+		else if (Utils.isRealTypeName(varType))
 			return new ComplexTerm(DataType.REAL, FunctionSymbol.getvarReal, currentState, varNameCode);
 		else // TIME 
 			return new ComplexTerm(DataType.INT, FunctionSymbol.getVarInt, currentState, varNameCode);
 	}
   
-  public static boolean isIntegerTypeName(String typeName) {
-		return "SINT".equals(typeName) 
-				|| "INT".equals(typeName) 
-				|| "DINT".equals(typeName) 
-				|| "LINT".equals(typeName)
-				|| "USINT".equals(typeName)
-				|| "UINT".equals(typeName)
-				|| "UDINT".equals(typeName)
-				|| "ULINT".equals(typeName);
-	}
-	
-	public static boolean isRealTypeName(String typeName) {
-		return "REAL".equals(typeName) || "LREAL".equals(typeName);
-
   /**
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->

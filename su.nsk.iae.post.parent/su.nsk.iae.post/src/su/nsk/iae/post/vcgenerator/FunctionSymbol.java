@@ -43,6 +43,9 @@ public class FunctionSymbol {
 	public static final FunctionSymbol setVarAny = new FunctionSymbol("setVarAny", false);
 	public static final FunctionSymbol setPstate = new FunctionSymbol("setPstate", false);
 	public static final FunctionSymbol reset = new FunctionSymbol("reset", false);
+	public static final FunctionSymbol setVarArrayBool = new FunctionSymbol("setVarArrayBool", false);
+	public static final FunctionSymbol setVarArrayInt = new FunctionSymbol("setVarArrayInt", false);
+	public static final FunctionSymbol setVarArrayReal = new FunctionSymbol("setVarArrayReal", false);
 	
 	//State functions
 	public static final FunctionSymbol getVarBool = new FunctionSymbol("getVarBool", false);
@@ -50,6 +53,9 @@ public class FunctionSymbol {
 	public static final FunctionSymbol getvarReal = new FunctionSymbol("getVarReal", false);
 	public static final FunctionSymbol getPstate = new FunctionSymbol("getPstate", false);
 	public static final FunctionSymbol ltime = new FunctionSymbol("ltime", false);
+	public static final FunctionSymbol getVarArrayBool = new FunctionSymbol("getVarArrayBool", false);
+	public static final FunctionSymbol getVarArrayInt = new FunctionSymbol("getVarArrayInt", false);
+	public static final FunctionSymbol getVarArrayReal = new FunctionSymbol("getVarArrayReal", false);
 	
 	
 }
