@@ -4,6 +4,8 @@
 package su.nsk.iae.post.poST.impl;
 
 import org.eclipse.emf.ecore.EClass;
+import java.util.List;
+import su.nsk.iae.post.vcgenerator.*;
 
 import org.eclipse.emf.ecore.impl.MinimalEObjectImpl;
 
@@ -27,6 +29,11 @@ public class StatementImpl extends MinimalEObjectImpl.Container implements State
   protected StatementImpl()
   {
     super();
+  }
+  
+  @Override
+  public List<Path> applyTo(List<Path> paths, VCGeneratorState globVars) {
+	  return paths;
   }
 
   /**

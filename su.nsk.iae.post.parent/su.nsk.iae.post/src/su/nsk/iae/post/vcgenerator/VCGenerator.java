@@ -1,12 +1,20 @@
 package su.nsk.iae.post.vcgenerator;
 
 import java.util.*;
+import java.util.stream.Stream;
+
+import org.eclipse.emf.ecore.EObject;
 
 import su.nsk.iae.post.poST.*;
 import su.nsk.iae.post.vcgenerator.Constant;
 
 public class VCGenerator {
-	VCGeneratorState globVars = new VCGeneratorState();
+	VCGeneratorState globVars;
+	int period;
+	
+	public VCGenerator(int defaultPeriod) {
+		period = defaultPeriod;
+	}
 
 	List<Path> generateTimeout(Path path, TimeoutStatement statement) {
 		if (path.getStatus() != ExecutionStatus.NORMAL) {
@@ -17,6 +25,7 @@ public class VCGenerator {
 		Term time;
 		if(statement.getConst() != null) {
 			int timeInMilliseconds = (Integer) statement.getConst().generateConstant().getValue();
+			System.out.println("time: " + globVars.period);
 			int timeInCycles;
 			if (timeInMilliseconds % globVars.period == 0)
 				timeInCycles = timeInMilliseconds / globVars.period;
@@ -142,23 +151,22 @@ public class VCGenerator {
 					if (vars.isConst())
 						globVars.addVars(varDecl, processName, ModificationType.CONSTANT);
 					else
-						globVars.addVars(varDecl, processName ModificationType.VAR);
+						globVars.addVars(varDecl, processName, ModificationType.VAR);
 			//Encoding of states
 			for (State state: process.getStates())
 				globVars.addState(state.getName(), process.getName());
 		}
-		FunctionSymbol init = new FunctionSymbol("init", false);
 		FunctionSymbol env = new FunctionSymbol("env", false);
 		FunctionSymbol inv = new FunctionSymbol("inv", false);
 		Variable s0 = new Variable("s0");
-		Term invs0 = new ComplexTerm(inv s0);
+		Term invs0 = new ComplexTerm(inv, s0);
 		List<Term> setVarAnyArgs = new ArrayList<>();
 		setVarAnyArgs.add(s0);
 		for (Constant envVar: globVars.envVars) {
 			Variable var_value = new Variable(envVar.getName()+"_value");
 			setVarAnyArgs.add(var_value);
 		}
-		Term s1 = new ComplexTerm(FunctionSymbol.setVarAny, (Term[]) setVarAnyArgs.toArray());
+		Term s1 = new ComplexTerm(FunctionSymbol.setVarAny, (Term[]) setVarAnyArgs.toArray(new Term[0]));
 		Term envs1 = new ComplexTerm(env, s1);
 		List<Term> controlLoopBodyPrecondition = new ArrayList<>(2);
 		controlLoopBodyPrecondition.add(invs0);
@@ -176,9 +184,10 @@ public class VCGenerator {
 		Term vcForInitPath =new ComplexTerm(
 				FunctionSymbol.IMPL,
 				new ComplexTerm(FunctionSymbol.EQ, s0, state),
-				new ComplexTerm(inv, s0));		
+				new ComplexTerm(inv, s0));	
+		globVars.addVerificationCondition(vcForInitPath);
 		List<Path> controlLoopBody = new ArrayList<>(1);
-		controlLoopBody.add(new Path(controlLoopBodyPrecondition, s0));
+		controlLoopBody.add(new Path(controlLoopBodyPrecondition, s1));
 		for (su.nsk.iae.post.poST.Process process: program.getProcesses()) {
 			List<Path> afterProcess = new ArrayList<>();
 			for (Path path: controlLoopBody)
@@ -188,5 +197,23 @@ public class VCGenerator {
 		for (Path path: controlLoopBody)
 			globVars.addVerificationCondition(path.generateVerificationCondition(inv));
 
+	}
+	
+	public List<Term> generateVCsForConfiguredProgram(Model model) {
+		String programName = model.getPrograms().get(0).getName();
+		Configuration conf = model.getConf();
+		if (conf != null) {
+			Stream<EObject> pconfs= Utils.asStream(conf.eAllContents()).filter((e) -> {return e instanceof ProgramConfiguration;});
+			Optional<EObject> pconf = pconfs.filter((e) -> ((ProgramConfiguration) e).getProgram().getName().equals(programName)).findFirst();
+			if (pconf.isPresent()) {
+				Task task = ((ProgramConfiguration) pconf.get()).getTask();
+				su.nsk.iae.post.poST.Constant interval = task.getInit().getInterval();
+				if (interval != null)
+					period = (Integer) interval.generateConstant().getValue();
+			}			
+		}
+		globVars = new VCGeneratorState(period);
+		generateProgram(model.getPrograms().get(0));
+		return globVars.vcSet;
 	}
 }

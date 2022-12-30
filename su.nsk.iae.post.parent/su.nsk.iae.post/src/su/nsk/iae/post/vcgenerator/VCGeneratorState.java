@@ -26,7 +26,8 @@ public class VCGeneratorState {
 	int varNumber = 0;
 	int processNumber = 0;
 	
-	public VCGeneratorState() {
+	public VCGeneratorState(int period) {
+		this.period = period;
 		varTypes = new HashMap<>();
 		variables = new HashMap<>();
 		envVars = new ArrayList<>();
@@ -36,6 +37,7 @@ public class VCGeneratorState {
 		constants = new ArrayList<>();
 		localVars = new HashMap<>();
 		localVarTypes = new HashMap<>();
+		processStates = new HashMap<>();
 	}
 	
 	

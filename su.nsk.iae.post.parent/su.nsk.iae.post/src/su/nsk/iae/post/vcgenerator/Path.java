@@ -81,7 +81,7 @@ public class Path {
 		else {
 			String stateName = statement.getState().getName();
 			Constant stateCode = globVars.getState(stateName);
-			currentState = new ComplexTerm(FunctionSymbol.getPstate, currentState, globVars.currentProcess, stateCode);
+			currentState = new ComplexTerm(FunctionSymbol.setPstate, currentState, globVars.currentProcess, stateCode);
 		}		
 	}
 

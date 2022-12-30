@@ -77,6 +77,7 @@ public class SetStateStatementImpl extends StatementImpl implements SetStateStat
   public List<Path> applyTo(List<Path> paths, VCGeneratorState globVars) {
 	  for (Path path: paths)
 		  path.setState(this, globVars);
+	  return paths;
   }
 
   /**

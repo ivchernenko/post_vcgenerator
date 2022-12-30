@@ -104,7 +104,10 @@ public class CaseStatementImpl extends SelectionStatementImpl implements CaseSta
 		Path defaultBranch = path;
 		for (Term caseElement: cases)
 			defaultBranch = defaultBranch.addCondition(caseElement);
-		result.addAll(elseStatement.applyTo(defaultBranch, globVars));
+		if (elseStatement == null)
+			result.add(defaultBranch);
+		else 
+			result.addAll(elseStatement.applyTo(defaultBranch, globVars));
 		return result;
 	}
 	

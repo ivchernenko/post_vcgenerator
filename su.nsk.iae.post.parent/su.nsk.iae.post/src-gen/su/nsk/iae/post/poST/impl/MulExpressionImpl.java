@@ -79,7 +79,7 @@ public class MulExpressionImpl extends AddExpressionImpl implements MulExpressio
 			
 		else if (op == MulOperator.DIV)
 			if (symComputedLeft.isReal() || symComputedRight.isReal())
-				return new ComplexTerm(DataType.Real, FunctionSymbol.RDIV, symComputedLeft, symComputedRight);
+				return new ComplexTerm(DataType.REAL, FunctionSymbol.RDIV, symComputedLeft, symComputedRight);
 			else return new ComplexTerm(DataType.INT, FunctionSymbol.DIV, symComputedLeft, symComputedRight);
 		else // MOD
 			return new ComplexTerm(DataType.INT, FunctionSymbol.MOD, symComputedLeft, symComputedRight);
