@@ -117,8 +117,7 @@ public class ForStatementImpl extends IterationStatementImpl implements ForState
 		  negStep = new Path(loopBodyPrecondition, s0);
 		  negStep = negStep.addCondition(stepLess0);
 		  negStep = negStep.addCondition(new ComplexTerm(FunctionSymbol.LESS, variable.generateVariable(s0, globVars), end));
-		  result.add(posStep);
-		  result.add(negStep);
+		  result.add(new Path(loopBodyPrecondition, s0));
 	  }
 	  return result;
   }

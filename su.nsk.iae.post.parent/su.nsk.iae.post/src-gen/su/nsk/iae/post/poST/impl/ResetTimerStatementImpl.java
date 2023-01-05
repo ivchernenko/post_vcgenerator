@@ -33,7 +33,7 @@ public class ResetTimerStatementImpl extends StatementImpl implements ResetTimer
 	@Override
 	public List<Path> applyTo(List<Path> paths, VCGeneratorState globVars) {
 		for (Path path: paths)
-			  path.resetTimer(this, null);
+			  path.resetTimer(this, globVars);
 		return paths;
 	}
 

@@ -37,6 +37,8 @@ public class SymbolicVariableImpl extends VariableImpl implements SymbolicVariab
   public Term generateVariable(Term currentState, VCGeneratorState globVars) {
 		String varType = globVars.getVarType(name);
 		su.nsk.iae.post.vcgenerator.Constant varNameCode = globVars.getVariable(name);
+		if (globVars.isConstant(varNameCode))
+			return globVars.getConstantValue(varNameCode);
 		if ("BOOL".equals(varType))
 			return new ComplexTerm(DataType.BOOL, FunctionSymbol.getVarBool, currentState, varNameCode);
 		else if (Utils.isIntegerTypeName(varType))

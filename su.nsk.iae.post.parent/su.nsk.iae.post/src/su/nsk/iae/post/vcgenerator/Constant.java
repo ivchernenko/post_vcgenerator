@@ -1,9 +1,8 @@
 package su.nsk.iae.post.vcgenerator;
 
-public class Constant extends Term {
+public class Constant extends Term  {
 	
 	private String name;
-	private Object value;
 	
 	public Constant(DataType type, String name, Object value) {
 		this.type = type;
@@ -25,10 +24,6 @@ public class Constant extends Term {
 	
 	public String getName() {
 		return name;
-	}
-	
-	public Object getValue() {
-		return value;
 	}
 	
 	@Override

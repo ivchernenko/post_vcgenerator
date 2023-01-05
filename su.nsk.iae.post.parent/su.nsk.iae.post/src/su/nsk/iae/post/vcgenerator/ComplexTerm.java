@@ -5,10 +5,15 @@ public class ComplexTerm extends Term {
 	private FunctionSymbol function;
 	Term[] args;
 
-	public ComplexTerm(DataType type, FunctionSymbol f, Term... args) {
+	public ComplexTerm(DataType type, Object value, FunctionSymbol f, Term... args) {
 		this.type = type;
+		this.value = value;
 		this.function = f;
 		this.args = args;
+	}
+	
+	public ComplexTerm(DataType type, FunctionSymbol f, Term... args) {
+		this(type, null, f, args);
 	}
 
 	public ComplexTerm(FunctionSymbol f, Term... args) {
@@ -31,5 +36,4 @@ public class ComplexTerm extends Term {
 			return sb.append(")").toString();
 		}
 	}
-
 }

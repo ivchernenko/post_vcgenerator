@@ -55,7 +55,5 @@ public class FunctionSymbol {
 	public static final FunctionSymbol ltime = new FunctionSymbol("ltime", false);
 	public static final FunctionSymbol getVarArrayBool = new FunctionSymbol("getVarArrayBool", false);
 	public static final FunctionSymbol getVarArrayInt = new FunctionSymbol("getVarArrayInt", false);
-	public static final FunctionSymbol getVarArrayReal = new FunctionSymbol("getVarArrayReal", false);
-	
-	
+	public static final FunctionSymbol getVarArrayReal = new FunctionSymbol("getVarArrayReal", false);	
 }

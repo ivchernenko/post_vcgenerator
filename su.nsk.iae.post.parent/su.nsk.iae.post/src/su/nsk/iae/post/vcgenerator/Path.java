@@ -20,7 +20,7 @@ public class Path {
 		currentState = s0;
 		status = ExecutionStatus.NORMAL;
 	}
-	
+
 	public void doAssignment(SymbolicVariable variable, Expression valueExpr, VCGeneratorState globVars) {
 		if (status != ExecutionStatus.NORMAL)
 			return;
@@ -36,7 +36,7 @@ public class Path {
 		else // TIME ((getVarInt currentState variable) - 1) div period + 1
 			currentState = new ComplexTerm(FunctionSymbol.setVarInt, currentState, varNameCode, value);
 	}
-	
+
 	public void increment(SymbolicVariable variable, AddExpression step, VCGeneratorState globVars) {		
 		PrimaryExpression varExpr = new PrimaryExpressionImpl();
 		varExpr.setVariable(variable);
@@ -150,14 +150,14 @@ public class Path {
 		if (status == ExecutionStatus.NORMAL)
 			status = ExecutionStatus.RETURN;
 	}
-	
+
 	public Term generateVerificationCondition(FunctionSymbol loopinv) {
 		Term preconditionConj = null;
 		for (Term cond: precondition)
 			if (preconditionConj == null) 
 				preconditionConj = cond;
 			else preconditionConj = new ComplexTerm(FunctionSymbol.AND, preconditionConj, cond);
-		Term inv = new ComplexTerm(loopinv, currentState);
+		Term inv = new ComplexTerm(loopinv, new ComplexTerm(FunctionSymbol.toEnv, currentState));
 		return new ComplexTerm(FunctionSymbol.IMPL, preconditionConj, inv);
 	}
 
@@ -169,6 +169,6 @@ public class Path {
 		return currentState;
 	}
 
-	
+
 
 }

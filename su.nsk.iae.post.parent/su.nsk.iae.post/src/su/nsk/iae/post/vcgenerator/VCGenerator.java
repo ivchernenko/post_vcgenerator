@@ -11,9 +11,18 @@ import su.nsk.iae.post.vcgenerator.Constant;
 public class VCGenerator {
 	VCGeneratorState globVars;
 	int period;
-	
+
 	public VCGenerator(int defaultPeriod) {
 		period = defaultPeriod;
+	}
+
+	Constant millisecondsToCycles(int timeInMilliseconds) {
+		int timeInCycles;
+		if (timeInMilliseconds % globVars.period == 0)
+			timeInCycles = timeInMilliseconds / globVars.period;
+		else
+			timeInCycles = timeInMilliseconds / globVars.period + 1;
+		return new Constant(timeInCycles);
 	}
 
 	List<Path> generateTimeout(Path path, TimeoutStatement statement) {
@@ -25,23 +34,27 @@ public class VCGenerator {
 		Term time;
 		if(statement.getConst() != null) {
 			int timeInMilliseconds = (Integer) statement.getConst().generateConstant().getValue();
-			System.out.println("time: " + globVars.period);
-			int timeInCycles;
-			if (timeInMilliseconds % globVars.period == 0)
-				timeInCycles = timeInMilliseconds / globVars.period;
-			else
-				timeInCycles = timeInMilliseconds / globVars.period + 1;
-			time = new Constant(timeInCycles);
+			time = millisecondsToCycles(timeInMilliseconds);
 		}
 		else { // Variable
-			Term symComputedVar = statement.getVariable().generateVariable(path.getCurrentState(), globVars);
-			time = new ComplexTerm(
-					FunctionSymbol.PLUS,
-					new ComplexTerm(
-							FunctionSymbol.DIV,
-							new ComplexTerm(FunctionSymbol.MINUS, symComputedVar, new Constant(1)),
-							new Constant(globVars.period)),
-					new Constant(1));
+			SymbolicVariable timeoutVar = statement.getVariable();
+			Constant varCode = globVars.getVariable(timeoutVar.getName());
+			time = null;
+			if (globVars.isConstant(varCode)) {
+				Integer timeInMilliseconds = (Integer) globVars.getConstantValue(varCode).getValue();
+				if (timeInMilliseconds != null)
+					time = millisecondsToCycles(timeInMilliseconds);
+			}
+			if (time == null) {
+				Term symComputedVar = timeoutVar.generateVariable(path.getCurrentState(), globVars);
+				time = new ComplexTerm(
+						FunctionSymbol.PLUS,
+						new ComplexTerm(
+								FunctionSymbol.DIV,
+								new ComplexTerm(FunctionSymbol.MINUS, symComputedVar, new Constant(1)),
+								new Constant(globVars.period)),
+						new Constant(1));
+			}
 		}
 		Term timeExpiredCondition = new ComplexTerm(
 				FunctionSymbol.LEQ,
@@ -133,6 +146,7 @@ public class VCGenerator {
 		for (su.nsk.iae.post.poST.Process process: program.getProcesses()) {
 			String processName = process.getName();
 			globVars.addProcess(process);
+			globVars.setCurrentProcess(processName);
 			//Encoding of input variables
 			for (InputVarDeclaration inVars: process.getProcInVars())
 				for (VarInitDeclaration varDecl: inVars.getVars())
@@ -174,16 +188,19 @@ public class VCGenerator {
 		boolean initialProcess = true;
 		Term state = Constant.emptyState;
 		for (su.nsk.iae.post.poST.Process process: program.getProcesses()) {
+			globVars.setCurrentProcess(process.getName());
 			Constant processCode = globVars.getProcess(process.getName());
 			if (initialProcess) {
 				Constant initialState = globVars.getInitialState(process.getName());
 				state = new ComplexTerm(FunctionSymbol.setPstate, state, processCode, initialState);
 			}
+			for (Constant initializedVar: globVars.getInitializedVars(processCode.getName()))
+				state = globVars.initializeVar(initializedVar, state);
 			initialProcess = false;	
 		}
 		Term vcForInitPath =new ComplexTerm(
 				FunctionSymbol.IMPL,
-				new ComplexTerm(FunctionSymbol.EQ, s0, state),
+				new ComplexTerm(FunctionSymbol.EQ, s0, new ComplexTerm(FunctionSymbol.toEnv, state)),
 				new ComplexTerm(inv, s0));	
 		globVars.addVerificationCondition(vcForInitPath);
 		List<Path> controlLoopBody = new ArrayList<>(1);
@@ -198,7 +215,7 @@ public class VCGenerator {
 			globVars.addVerificationCondition(path.generateVerificationCondition(inv));
 
 	}
-	
+
 	public List<Term> generateVCsForConfiguredProgram(Model model) {
 		String programName = model.getPrograms().get(0).getName();
 		Configuration conf = model.getConf();

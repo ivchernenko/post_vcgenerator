@@ -2,112 +2,131 @@ package su.nsk.iae.post.vcgenerator;
 
 import java.util.*;
 
+import su.nsk.iae.post.poST.ArrayInterval;
+import su.nsk.iae.post.poST.ArraySpecificationInit;
+import su.nsk.iae.post.poST.Expression;
 import su.nsk.iae.post.poST.SimpleSpecificationInit;
-import su.nsk.iae.post.poST.State;
 import su.nsk.iae.post.poST.SymbolicVariable;
 import su.nsk.iae.post.poST.VarInitDeclaration;
 
 public class VCGeneratorState {
-	Map<String, String> varTypes;
-	Map <String, Constant> variables;
-	List<Constant> constants;
-	Map<String, Map<String, Constant>> localVars;
-	Map<String, Map<String, String>> localVarTypes;
-	List<Constant> envVars;
+	Map<String, String> varTypes = new HashMap<>();
+	Map <String, Constant> variables = new HashMap<>();
+	List<Constant> constants = new ArrayList<>();
+	Map<Constant, Term> constantValues = new HashMap<>();
+	Map<String, Map<String, Constant>> localVars = new HashMap<>();
+	Map<String, Map<String, String>> localVarTypes = new HashMap<>();
+	List<Constant> envVars = new ArrayList<>();
+	Map<String, List<Constant>> initializedVars = new HashMap<>();
+	Map<Constant, SimpleSpecificationInit> varSpecifications = new HashMap<>();
+	Map<Constant, ArraySpecificationInit> arraySpecifications = new HashMap<>();
+	Map<Constant, IndexRange> indexRanges = new HashMap<>();
+	Map<Constant, List<Term>> arrayConstantValues = new HashMap<>();
 	int currentProcessState;
-	Map<String, StateList> processStates;
+	Map<String, StateList> processStates = new HashMap<>();
 	Constant currentProcess;
-	Map<String, Constant> processes;
-	Map<String, Constant> initialStates;
+	Map<String, Constant> processes = new HashMap<>();
+	Map<String, Constant> initialStates = new HashMap<>();
 	int period;
-	List<Term> vcSet;
+	List<Term> vcSet = new ArrayList<>();
 	int loopNumber = 0;
 	int pstateNumber = 1;
 	int varNumber = 0;
 	int processNumber = 0;
-	
+
 	public VCGeneratorState(int period) {
 		this.period = period;
-		varTypes = new HashMap<>();
-		variables = new HashMap<>();
-		envVars = new ArrayList<>();
-		processes = new HashMap<>();
-		initialStates = new HashMap<>();
-		vcSet = new ArrayList<>();	
-		constants = new ArrayList<>();
-		localVars = new HashMap<>();
-		localVarTypes = new HashMap<>();
-		processStates = new HashMap<>();
 	}
-	
-	
+
 	public String getVarType(String name) {
 		Map<String, String> localScope = localVarTypes.get(currentProcess.getValue());
 		if (localScope != null && localScope.get(name) != null)
 			return localScope.get(name);
 		return varTypes.get(name);
 	}
-	
+
 	public Constant getVariable(String name) {
 		Map<String, Constant> localScope = localVars.get(currentProcess.getValue());
 		if (localScope != null && localScope.get(name) != null)
 			return localScope.get(name);
 		return variables.get(name);
 	}
-	
+
 	public boolean isConstant(Constant varCode) {
 		return constants.contains(varCode);
 	}
+
+	public Term getConstantValue(Constant c) {
+		return constantValues.get(c);
+	}
 	
+	public Term getArrayConstantValue(Constant array, Term index) {
+		if (index.getValue() == null)
+			return null;
+		int arrayIndex = (Integer) index.getValue();
+		Integer start = (Integer) indexRanges.get(array).getStart().getValue();
+		if (start == null)
+			return null;
+		int startIndex = start;
+		return arrayConstantValues.get(array).get(arrayIndex - startIndex);
+	}
+
 	public Constant getState(String name) {
 		return processStates.get(currentProcess.getName()).getState(name);
 	}
-	
+
 	public Constant getCurrentState() {
 		return processStates.get(currentProcess.getName()).getState(currentProcessState);
 	}
-	
+
 	public Constant getNextState() {
 		return processStates.get(currentProcess.getName()).getState(currentProcessState + 1);
 	}
-	
+
 	public Constant getProcess(String name) {
 		return processes.get(name);
 	}
-	
+
 	public Constant getInitialState() {
 		return getInitialState(currentProcess.getName());
 	}
-	
+
 	public Constant getInitialState(String processName) {
 		return processStates.get(processName).getState(0);
 	}
-	
+
 	public void addVerificationCondition(Term vc) {
 		vcSet.add(vc);
 	}
-	
+
 	public FunctionSymbol nextLoopInv() {
 		++loopNumber;
 		return new FunctionSymbol("loopinv"+loopNumber, false);
 	}
-	
+
 	public void addState(String stateName, String prefix) {
 		++pstateNumber;
 		processStates.get(prefix).addState(stateName, prefix, pstateNumber);
 	}
-	
+
 	public void setCurrentProcess(String processName) {
 		currentProcess = processes.get(processName);
 		currentProcessState = 0;
 	}
-	
+
 	public void addVars(VarInitDeclaration varDecl, String prefix, ModificationType modType) {
+		List<Constant> 	initializedVars = this.initializedVars.get(prefix);
 		String varType;
-		if (varDecl.getSpec() != null)
+		Expression value = null;
+		ArraySpecificationInit arraySpec = null;
+		if (varDecl.getSpec() != null) {
 			varType = varDecl.getSpec().getType();
-		else
-			varType = varDecl.getArrSpec().getInit().getType();
+			value = varDecl.getSpec().getValue();				
+		}			
+		else {			
+			arraySpec = varDecl.getArrSpec();
+			varType = arraySpec.getInit().getType();
+		}			
 		for (SymbolicVariable symVar: varDecl.getVarList().getVars()) {
 			++varNumber;
 			String fullVarName;
@@ -116,6 +135,13 @@ public class VCGeneratorState {
 			else
 				fullVarName = prefix + "_" + symVar.getName();
 			Constant varCode = new Constant(fullVarName, varNumber);
+			if (value != null && modType != ModificationType.CONSTANT || arraySpec != null) {
+				initializedVars.add(varCode);
+				if (value != null)
+					varSpecifications.put(varCode, varDecl.getSpec());
+				else
+					arraySpecifications.put(varCode, arraySpec);
+			}				
 			if (prefix == null) {
 				variables.put(symVar.getName(), varCode);
 				varTypes.put(symVar.getName(), varType);
@@ -134,40 +160,94 @@ public class VCGeneratorState {
 				}
 				varTypesInScope.put(symVar.getName(), varType);
 			}
-			if (modType == ModificationType.CONSTANT)
+			if (modType == ModificationType.CONSTANT) {
 				constants.add(varCode);
+				if (value != null) {
+					Term constantValue = value.generateExpression(Constant.emptyState, this);
+					if ("BOOL".equals(varType))
+						constantValue.type = DataType.BOOL;
+					else if (Utils.isIntegerTypeName(varType))
+						constantValue.type = DataType.INT;
+					else if (Utils.isRealTypeName(varType))
+						constantValue.type = DataType.REAL;
+					else // TIME 
+						constantValue.type = DataType.INT;
+					constantValues.put(varCode, constantValue);
+				}				
+			}				
 			else if (modType == ModificationType.ENV_VAR)
 				envVars.add(varCode);
 		}
 	}
 	
-	Constant addProcess(su.nsk.iae.post.poST.Process process) {
+	public List<Constant> getInitializedVars(String prefix) {
+		return initializedVars.get(prefix);
+	}
+
+	public Constant addProcess(su.nsk.iae.post.poST.Process process) {
 		++processNumber;
 		String processName = process.getName();
 		Constant processCode = new Constant(processName, processNumber);
 		processes.put(processName, processCode);
 		processStates.put(processName, new StateList());
+		initializedVars.put(processName, new ArrayList<>());
 		return processCode;
+	}
+	
+	public Term initializeVar(Constant variable, Term state) {
+		if (isArray(variable))
+			return initializeArray(variable, state);
+		else
+			return initializeSimpleVar(variable, state);
+	}
+
+	private Term initializeSimpleVar(Constant variable, Term state) {
+		SimpleSpecificationInit varSpec = varSpecifications.get(variable);
+		return TermFactory.setVar(varSpec.getType(), state, variable, varSpec.getValue().generateExpression(state, this));
+	}
+
+	private Term initializeArray(Constant variable, Term state) {
+		ArraySpecificationInit arraySpec = arraySpecifications.get(variable);
+		ArrayInterval interval = arraySpec.getInit().getInterval();
+		IndexRange range = new IndexRange(interval.getStart().generateExpression(state, this), interval.getEnd().generateExpression(state, this));	
+		indexRanges.put(variable, range);
+		List<Expression> values = arraySpec.getValues().getElements();
+		if (values != null) {
+			int i = 0;
+			List<Term> arrayValues =new ArrayList<>();
+			for (Expression expr: values) {
+				Term arrayIndex = range.get(i);
+				Term value = expr.generateExpression(state, this);
+				arrayValues.add(value);
+				state = TermFactory.setVarArray(arraySpec.getInit().getType(), state, variable, arrayIndex, value);
+			}
+			arrayConstantValues.put(variable, arrayValues);
+		}
+		return state;
+	}
+
+	private boolean isArray(Constant variable) {
+		return arraySpecifications.containsKey(variable);
 	}
 }
 
 class StateList {
 	List<String> stateNames;
 	Map<String, Constant> pstates;
-	
+
 	StateList() {
 		stateNames = new ArrayList<>();
 		pstates = new HashMap<>();
 	}
-	
+
 	Constant getState(String name) {
 		return pstates.get(name);
 	}
-	
+
 	Constant getState(int index) {
 		return getState(stateNames.get(index));
 	}
-	
+
 	void addState(String stateName, String prefix, int stateCode) {
 		stateNames.add(stateName);
 		pstates.put(stateName, new Constant(prefix + "_" + stateName, stateCode));
