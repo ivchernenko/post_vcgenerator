@@ -187,6 +187,8 @@ public class VCGenerator {
 		controlLoopBodyPrecondition.add(envs1);
 		boolean initialProcess = true;
 		Term state = Constant.emptyState;
+		for (Constant  initializedVar: globVars.getInitializedVars(null))
+			state = globVars.initializeVar(initializedVar, state);
 		for (su.nsk.iae.post.poST.Process process: program.getProcesses()) {
 			globVars.setCurrentProcess(process.getName());
 			Constant processCode = globVars.getProcess(process.getName());
@@ -198,6 +200,8 @@ public class VCGenerator {
 				state = globVars.initializeVar(initializedVar, state);
 			initialProcess = false;	
 		}
+		if (state.getPrecondition() != null)
+			globVars.addVerificationCondition(state.getPrecondition());
 		Term vcForInitPath =new ComplexTerm(
 				FunctionSymbol.IMPL,
 				new ComplexTerm(FunctionSymbol.EQ, s0, new ComplexTerm(FunctionSymbol.toEnv, state)),
@@ -211,9 +215,10 @@ public class VCGenerator {
 				afterProcess.addAll(generateProcess(path, process));
 			controlLoopBody = afterProcess;
 		}
-		for (Path path: controlLoopBody)
+		for (Path path: controlLoopBody) {
+			path.toEnv();
 			globVars.addVerificationCondition(path.generateVerificationCondition(inv));
-
+		}
 	}
 
 	public List<Term> generateVCsForConfiguredProgram(Model model) {

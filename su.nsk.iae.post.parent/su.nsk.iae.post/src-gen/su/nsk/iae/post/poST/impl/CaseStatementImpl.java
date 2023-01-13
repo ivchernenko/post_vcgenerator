@@ -95,6 +95,7 @@ public class CaseStatementImpl extends SelectionStatementImpl implements CaseSta
 			return result;
 		}		
 		Term symComputedCond = cond.generateExpression(path.getCurrentState(), globVars);
+		path.assertion(symComputedCond.getPrecondition(), globVars);
 		List<Term> cases = new ArrayList<>();
 		for (CaseElement element: caseElements) {
 			Term caseList = generateCaseList(element.getCaseList(), symComputedCond);

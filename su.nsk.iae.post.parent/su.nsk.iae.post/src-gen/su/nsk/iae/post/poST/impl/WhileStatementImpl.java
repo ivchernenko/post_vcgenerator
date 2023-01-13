@@ -58,17 +58,18 @@ public class WhileStatementImpl extends IterationStatementImpl implements WhileS
 	  FunctionSymbol loopinv = globVars.nextLoopInv();
 	  Variable s0 = new Variable("s0");
 	  List<Path> result = new ArrayList<>();
-	  for (Path path:paths)
+	  for (Path path : paths)
 		  if (path.getStatus() == ExecutionStatus.NORMAL)
 			  globVars.addVerificationCondition(path.generateVerificationCondition(loopinv));
 		  else
 			  result.add(path);
 	  Term inv = new ComplexTerm(loopinv, s0);
 	  Term cond = this.cond.generateExpression(s0, globVars);
-	  List<Term> loopBodyPrecondition = new ArrayList<>(2);
+	  List<Term> loopBodyPrecondition = new ArrayList<>(1);
 	  loopBodyPrecondition.add(inv);
-	  loopBodyPrecondition.add(cond);
 	  Path loopBody = new Path(loopBodyPrecondition, s0);
+	  loopBody.assertion(cond.getPrecondition(), globVars);
+	  loopBody.addCondition(cond);
 	  List<Path> loopBodyPaths = statement.applyTo(loopBody, globVars);
 	  boolean notAllReturn = false;
 	  for (Path path: loopBodyPaths)
@@ -81,6 +82,8 @@ public class WhileStatementImpl extends IterationStatementImpl implements WhileS
 	  if (notAllReturn) {
 		  List<Term> loopPostcondition = new ArrayList<>(2);
 		  loopPostcondition.add(inv);
+		  if (cond.getPrecondition() != null)
+			  loopPostcondition.add(cond.getPrecondition());
 		  loopPostcondition.add(new ComplexTerm(FunctionSymbol.NOT, cond));
 		  result.add(new Path(loopPostcondition, s0));
 	  }

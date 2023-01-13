@@ -152,7 +152,11 @@ public class ConstantImpl extends MinimalEObjectImpl.Container implements Consta
 				return new su.nsk.iae.post.vcgenerator.Constant(DataType.INT, number);
 			}
 			else { // BOOLEAN_LITERAL
-				return new su.nsk.iae.post.vcgenerator.Constant(DataType.BOOL, Boolean.parseBoolean(oth));
+				boolean value = Boolean.parseBoolean(oth);
+				if (value == true)
+					return su.nsk.iae.post.vcgenerator.Constant.True;
+				else
+					return su.nsk.iae.post.vcgenerator.Constant.False;
 			}
 		}
 	}

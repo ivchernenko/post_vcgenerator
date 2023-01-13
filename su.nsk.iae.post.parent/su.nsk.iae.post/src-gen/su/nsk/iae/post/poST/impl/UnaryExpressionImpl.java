@@ -31,164 +31,167 @@ import su.nsk.iae.post.vcgenerator.*;
  */
 public class UnaryExpressionImpl extends PowerExpressionImpl implements UnaryExpression
 {
-  /**
-   * The default value of the '{@link #getUnOp() <em>Un Op</em>}' attribute.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @see #getUnOp()
-   * @generated
-   * @ordered
-   */
-  protected static final UnaryOperator UN_OP_EDEFAULT = UnaryOperator.NOT;
+	/**
+	 * The default value of the '{@link #getUnOp() <em>Un Op</em>}' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @see #getUnOp()
+	 * @generated
+	 * @ordered
+	 */
+	protected static final UnaryOperator UN_OP_EDEFAULT = UnaryOperator.NOT;
 
-  /**
-   * The cached value of the '{@link #getUnOp() <em>Un Op</em>}' attribute.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @see #getUnOp()
-   * @generated
-   * @ordered
-   */
-  protected UnaryOperator unOp = UN_OP_EDEFAULT;
+	/**
+	 * The cached value of the '{@link #getUnOp() <em>Un Op</em>}' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @see #getUnOp()
+	 * @generated
+	 * @ordered
+	 */
+	protected UnaryOperator unOp = UN_OP_EDEFAULT;
 
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  protected UnaryExpressionImpl()
-  {
-    super();
-  }
-  
-  @Override
-  public Term generateExpression(Term currentState, VCGeneratorState globVars) {
-	  Expression right = getRight();
-	  UnaryOperator op = getUnOp();
-	  Term symComputedRight = right.generateExpression(currentState, globVars);
-	  if (op == UnaryOperator.NOT)
-		  return new ComplexTerm(DataType.BOOL, FunctionSymbol.NOT, symComputedRight);
-	  else // UNMINUS
-		  return new ComplexTerm(symComputedRight.getType(), FunctionSymbol.UNMINUS, symComputedRight);
-  }
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	protected UnaryExpressionImpl()
+	{
+		super();
+	}
 
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  @Override
-  protected EClass eStaticClass()
-  {
-    return PoSTPackage.Literals.UNARY_EXPRESSION;
-  }
+	@Override
+	public Term generateExpression(Term currentState, VCGeneratorState globVars) {
+		Expression right = getRight();
+		UnaryOperator op = getUnOp();
+		Term symComputedRight = right.generateExpression(currentState, globVars);
+		Term result;
+		if (op == UnaryOperator.NOT)
+			result = TermFactory.not(symComputedRight);
+		else // UMINUS
+			result = TermFactory.uminus(symComputedRight);
+		result.addCondition(symComputedRight.getPrecondition());
+		return result;
+	}
 
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  @Override
-  public UnaryOperator getUnOp()
-  {
-    return unOp;
-  }
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	protected EClass eStaticClass()
+	{
+		return PoSTPackage.Literals.UNARY_EXPRESSION;
+	}
 
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  @Override
-  public void setUnOp(UnaryOperator newUnOp)
-  {
-    UnaryOperator oldUnOp = unOp;
-    unOp = newUnOp == null ? UN_OP_EDEFAULT : newUnOp;
-    if (eNotificationRequired())
-      eNotify(new ENotificationImpl(this, Notification.SET, PoSTPackage.UNARY_EXPRESSION__UN_OP, oldUnOp, unOp));
-  }
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public UnaryOperator getUnOp()
+	{
+		return unOp;
+	}
 
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  @Override
-  public Object eGet(int featureID, boolean resolve, boolean coreType)
-  {
-    switch (featureID)
-    {
-      case PoSTPackage.UNARY_EXPRESSION__UN_OP:
-        return getUnOp();
-    }
-    return super.eGet(featureID, resolve, coreType);
-  }
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public void setUnOp(UnaryOperator newUnOp)
+	{
+		UnaryOperator oldUnOp = unOp;
+		unOp = newUnOp == null ? UN_OP_EDEFAULT : newUnOp;
+		if (eNotificationRequired())
+			eNotify(new ENotificationImpl(this, Notification.SET, PoSTPackage.UNARY_EXPRESSION__UN_OP, oldUnOp, unOp));
+	}
 
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  @Override
-  public void eSet(int featureID, Object newValue)
-  {
-    switch (featureID)
-    {
-      case PoSTPackage.UNARY_EXPRESSION__UN_OP:
-        setUnOp((UnaryOperator)newValue);
-        return;
-    }
-    super.eSet(featureID, newValue);
-  }
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public Object eGet(int featureID, boolean resolve, boolean coreType)
+	{
+		switch (featureID)
+		{
+		case PoSTPackage.UNARY_EXPRESSION__UN_OP:
+			return getUnOp();
+		}
+		return super.eGet(featureID, resolve, coreType);
+	}
 
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  @Override
-  public void eUnset(int featureID)
-  {
-    switch (featureID)
-    {
-      case PoSTPackage.UNARY_EXPRESSION__UN_OP:
-        setUnOp(UN_OP_EDEFAULT);
-        return;
-    }
-    super.eUnset(featureID);
-  }
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public void eSet(int featureID, Object newValue)
+	{
+		switch (featureID)
+		{
+		case PoSTPackage.UNARY_EXPRESSION__UN_OP:
+			setUnOp((UnaryOperator)newValue);
+			return;
+		}
+		super.eSet(featureID, newValue);
+	}
 
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  @Override
-  public boolean eIsSet(int featureID)
-  {
-    switch (featureID)
-    {
-      case PoSTPackage.UNARY_EXPRESSION__UN_OP:
-        return unOp != UN_OP_EDEFAULT;
-    }
-    return super.eIsSet(featureID);
-  }
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public void eUnset(int featureID)
+	{
+		switch (featureID)
+		{
+		case PoSTPackage.UNARY_EXPRESSION__UN_OP:
+			setUnOp(UN_OP_EDEFAULT);
+			return;
+		}
+		super.eUnset(featureID);
+	}
 
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  @Override
-  public String toString()
-  {
-    if (eIsProxy()) return super.toString();
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public boolean eIsSet(int featureID)
+	{
+		switch (featureID)
+		{
+		case PoSTPackage.UNARY_EXPRESSION__UN_OP:
+			return unOp != UN_OP_EDEFAULT;
+		}
+		return super.eIsSet(featureID);
+	}
 
-    StringBuilder result = new StringBuilder(super.toString());
-    result.append(" (unOp: ");
-    result.append(unOp);
-    result.append(')');
-    return result.toString();
-  }
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public String toString()
+	{
+		if (eIsProxy()) return super.toString();
+
+		StringBuilder result = new StringBuilder(super.toString());
+		result.append(" (unOp: ");
+		result.append(unOp);
+		result.append(')');
+		return result.toString();
+	}
 
 } //UnaryExpressionImpl

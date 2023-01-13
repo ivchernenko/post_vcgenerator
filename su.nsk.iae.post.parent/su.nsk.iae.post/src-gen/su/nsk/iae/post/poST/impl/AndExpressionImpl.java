@@ -36,7 +36,11 @@ public class AndExpressionImpl extends XorExpressionImpl implements AndExpressio
 		Expression right = getRight();
 		Term symComputedLeft = left.generateExpression(currentState, globVars);
 		Term symComputedRight = right.generateExpression(currentState, globVars);
-		return new ComplexTerm(DataType.BOOL, FunctionSymbol.AND, symComputedLeft, symComputedRight);
+		Term result = TermFactory.and(symComputedLeft, symComputedRight);
+		result.addCondition(symComputedLeft.getPrecondition());
+		if (symComputedRight.getPrecondition() != null)
+			result.addCondition(TermFactory.impl(symComputedLeft, symComputedRight.getPrecondition()));
+		return result;
 	}
 
 	/**

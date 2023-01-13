@@ -68,14 +68,18 @@ public class EquExpressionImpl extends CompExpressionImpl implements EquExpressi
 		EquOperator op = getEquOp();
 		Term symComputedLeft = left.generateExpression(currentState, globVars);
 		Term symComputedRight = right.generateExpression(currentState, globVars);
+		Term result;
 		if (op == EquOperator.LESS)
-			return new ComplexTerm(DataType.BOOL, FunctionSymbol.LESS, symComputedLeft, symComputedRight);
+			result = TermFactory.less(symComputedLeft, symComputedRight);
 		else if (op == EquOperator.GREATER)
-			return new ComplexTerm(DataType.BOOL, FunctionSymbol.GREATER, symComputedLeft, symComputedRight);
+			result = TermFactory.greater(symComputedLeft, symComputedRight);
 		else if (op == EquOperator.LESS_EQU)
-			return new ComplexTerm(DataType.BOOL, FunctionSymbol.LEQ, symComputedLeft, symComputedRight);
+			result = TermFactory.leq(symComputedLeft, symComputedRight);
 		else // GREATER_EQU
-			return new ComplexTerm(DataType.BOOL, FunctionSymbol.GEQ, symComputedLeft, symComputedRight);
+			result = TermFactory.geq(symComputedLeft, symComputedRight);
+		result.addCondition(symComputedLeft.getPrecondition());
+		result.addCondition(symComputedRight.getPrecondition());
+		return result;
 	}
 	
 	/**

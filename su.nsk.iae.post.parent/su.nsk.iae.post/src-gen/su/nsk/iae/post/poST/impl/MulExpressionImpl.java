@@ -67,24 +67,37 @@ public class MulExpressionImpl extends AddExpressionImpl implements MulExpressio
 		Expression right = getRight();
 		MulOperator op = getMulOp();
 		Term symComputedLeft = left.generateExpression(currentState, globVars);
-		Term symComputedRight = generateExpression(currentState, globVars);
+		Term symComputedRight = right.generateExpression(currentState, globVars);
 		if (op == MulOperator.MUL) {
-			DataType resultType;
-			if (symComputedLeft.isReal() || symComputedRight.isReal())
-				resultType = DataType.REAL;
-			else
-				resultType = DataType.INT;
-			return new ComplexTerm(resultType, FunctionSymbol.MUL, symComputedLeft, symComputedRight);
+			Term result = TermFactory.mul(symComputedLeft, symComputedRight);
+			result.addCondition(symComputedLeft.getPrecondition());
+			result.addCondition(symComputedRight.getPrecondition());
+			return result;
 		}
-			
+
 		else if (op == MulOperator.DIV)
-			if (symComputedLeft.isReal() || symComputedRight.isReal())
-				return new ComplexTerm(DataType.REAL, FunctionSymbol.RDIV, symComputedLeft, symComputedRight);
-			else return new ComplexTerm(DataType.INT, FunctionSymbol.DIV, symComputedLeft, symComputedRight);
-		else // MOD
-			return new ComplexTerm(DataType.INT, FunctionSymbol.MOD, symComputedLeft, symComputedRight);
+			if (symComputedLeft.isReal() || symComputedRight.isReal()) {
+				Term result = TermFactory.rdiv(symComputedLeft, symComputedRight);
+				result.addCondition(symComputedLeft.getPrecondition());
+				result.addCondition(symComputedRight.getPrecondition());
+				return result;
+			}				
+			else {
+				Term result = TermFactory.div(symComputedLeft, symComputedRight);
+				result.addCondition(symComputedLeft.getPrecondition());
+				result.addCondition(symComputedRight.getPrecondition());
+				result.addCondition(TermFactory.noteq(symComputedRight, new Constant(0)));
+				return result;
+			}
+		else { // MOD
+			Term result = TermFactory.mod(symComputedLeft, symComputedRight);
+			result.addCondition(symComputedLeft.getPrecondition());
+			result.addCondition(symComputedRight.getPrecondition());
+			result.addCondition(TermFactory.noteq(symComputedRight, new Constant(0)));
+			return result;
+		}
 	}
-	
+
 	/**
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->

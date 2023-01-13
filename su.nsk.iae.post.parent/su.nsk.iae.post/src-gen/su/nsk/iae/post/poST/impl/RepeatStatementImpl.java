@@ -73,10 +73,11 @@ public class RepeatStatementImpl extends IterationStatementImpl implements Repea
 			  result.add(path);
 	  Term inv = new ComplexTerm(loopinv, s0);
 	  Term cond = this.cond.generateExpression(s0, globVars);
-	  List<Term> loopBodyPrecondition = new ArrayList<>(2);
+	  List<Term> loopBodyPrecondition = new ArrayList<>(1);
 	  loopBodyPrecondition.add(inv);
-	  loopBodyPrecondition.add(cond);
 	  Path loopBody = new Path(loopBodyPrecondition, s0);
+	  loopBody.assertion(cond.getPrecondition(), globVars);
+	  loopBody = loopBody.addCondition(cond);
 	  List<Path> loopBodyPaths = statement.applyTo(loopBody, globVars);
 	  boolean notAllReturn = false;
 	  for (Path path: loopBodyPaths)
@@ -89,6 +90,7 @@ public class RepeatStatementImpl extends IterationStatementImpl implements Repea
 	  if (notAllReturn) {
 		  List<Term> loopPostcondition = new ArrayList<>(2);
 		  loopPostcondition.add(inv);
+		  loopPostcondition.add(cond.getPrecondition());
 		  loopPostcondition.add(new ComplexTerm(FunctionSymbol.NOT, cond));
 		  result.add(new Path(loopPostcondition, s0));
 	  }

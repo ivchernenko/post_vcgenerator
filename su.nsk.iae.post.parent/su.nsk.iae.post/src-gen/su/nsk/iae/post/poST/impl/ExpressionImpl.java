@@ -70,7 +70,11 @@ public class ExpressionImpl extends MinimalEObjectImpl.Container implements Expr
 		Expression right = getRight();
 		Term symComputedLeft = left.generateExpression(currentState, globVars);
 		Term symComputedRight = right.generateExpression(currentState, globVars);
-		return new ComplexTerm(DataType.BOOL, FunctionSymbol.OR, symComputedLeft, symComputedRight);
+		Term result = TermFactory.or(symComputedLeft, symComputedRight);
+		result.addCondition(symComputedLeft.getPrecondition());
+		if (symComputedRight.getPrecondition() != null)
+			result.addCondition(TermFactory.impl(TermFactory.not(symComputedRight), symComputedRight.getPrecondition()));
+		return result;
 	}
 
 	/**

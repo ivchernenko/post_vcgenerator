@@ -90,10 +90,20 @@ public class ForStatementImpl extends IterationStatementImpl implements ForState
 	  List<Term> loopBodyPrecondition = new ArrayList<>();
 	  loopBodyPrecondition.add(invs0);
 	  Path posStep = new Path(loopBodyPrecondition, s0);
+	  Term nonzeroStep = TermFactory.noteq(step, new Constant(0));
+	  if (step.getPrecondition() != null)
+		  nonzeroStep = TermFactory.and(step.getPrecondition(), nonzeroStep);
+	  Term assertion;
+	  if (end.getPrecondition() != null)
+		  assertion = TermFactory.and(end.getPrecondition(), nonzeroStep);
+	  else
+		  assertion = nonzeroStep;
+	  posStep.assertion(assertion, globVars);
 	  Term stepGt0 = new ComplexTerm(FunctionSymbol.GREATER, step, new Constant(0));
 	  posStep = posStep.addCondition(stepGt0);
 	  posStep = posStep.addCondition(new ComplexTerm(FunctionSymbol.LEQ, variable.generateVariable(s0, globVars), end));
 	  Path negStep = new Path(loopBodyPrecondition, s0);
+	  negStep = negStep.addCondition(assertion);
 	  Term stepLess0 = new ComplexTerm(FunctionSymbol.LESS, step, new Constant(0));
 	  negStep = negStep.addCondition(stepLess0);
 	  negStep = negStep.addCondition(new ComplexTerm(FunctionSymbol.GEQ, variable.generateVariable(s0, globVars), end));
@@ -117,6 +127,7 @@ public class ForStatementImpl extends IterationStatementImpl implements ForState
 		  negStep = new Path(loopBodyPrecondition, s0);
 		  negStep = negStep.addCondition(stepLess0);
 		  negStep = negStep.addCondition(new ComplexTerm(FunctionSymbol.LESS, variable.generateVariable(s0, globVars), end));
+		  loopBodyPrecondition.add(assertion);
 		  result.add(new Path(loopBodyPrecondition, s0));
 	  }
 	  return result;

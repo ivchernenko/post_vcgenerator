@@ -27,6 +27,7 @@ public class Path {
 		Term value = valueExpr.generateExpression(currentState, globVars);
 		String varType = globVars.getVarType(variable.getName());
 		Constant varNameCode = globVars.getVariable(variable.getName());
+		assertion(value.getPrecondition(), globVars);
 		if ("BOOL".equals(varType))
 			currentState = new ComplexTerm(FunctionSymbol.setVarBool, currentState, varNameCode, value);
 		else if (Utils.isIntegerTypeName(varType))
@@ -60,6 +61,13 @@ public class Path {
 			Term value = statement.getValue().generateExpression(currentState, globVars);
 			String varType = globVars.getVarType(variable.getName());
 			Constant varNameCode = globVars.getVariable(variable.getName());
+			IndexRange range = globVars.getIndexRange(varNameCode);
+			Term assertion = range.contains(index);
+			assertion(assertion, globVars);
+			if (index.getPrecondition() != null)
+				assertion = TermFactory.and(index.getPrecondition(), assertion);
+			if (value.getPrecondition() != null)
+				assertion = TermFactory.and(assertion, value.getPrecondition());
 			if ("BOOL".equals(varType))
 				currentState = new ComplexTerm(FunctionSymbol.setVarArrayBool, currentState, varNameCode,index,  value);
 			else if (Utils.isIntegerTypeName(varType))
@@ -151,14 +159,28 @@ public class Path {
 			status = ExecutionStatus.RETURN;
 	}
 
-	public Term generateVerificationCondition(FunctionSymbol loopinv) {
+	public Term generateVerificationCondition(Term postcondition) {
 		Term preconditionConj = null;
 		for (Term cond: precondition)
 			if (preconditionConj == null) 
 				preconditionConj = cond;
 			else preconditionConj = new ComplexTerm(FunctionSymbol.AND, preconditionConj, cond);
-		Term inv = new ComplexTerm(loopinv, new ComplexTerm(FunctionSymbol.toEnv, currentState));
-		return new ComplexTerm(FunctionSymbol.IMPL, preconditionConj, inv);
+		return new ComplexTerm(FunctionSymbol.IMPL, preconditionConj, postcondition);
+	}
+
+	public Term generateVerificationCondition(FunctionSymbol loopinv) {
+		return generateVerificationCondition(new ComplexTerm(loopinv, currentState));
+	}
+
+	public void toEnv() {
+		currentState = TermFactory.toEnv(currentState);
+	}
+
+	public void assertion(Term assertion, VCGeneratorState globVars) {
+		if (status == ExecutionStatus.NORMAL && assertion != null) {
+			globVars.addVerificationCondition(generateVerificationCondition(assertion));
+			precondition.add(assertion);
+		}		
 	}
 
 	public ExecutionStatus getStatus() {

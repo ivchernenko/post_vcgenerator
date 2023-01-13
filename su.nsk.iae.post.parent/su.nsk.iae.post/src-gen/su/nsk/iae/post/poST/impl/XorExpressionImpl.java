@@ -36,7 +36,10 @@ public class XorExpressionImpl extends ExpressionImpl implements XorExpression
 		Expression right = getRight();
 		Term symComputedLeft = left.generateExpression(currentState, globVars);
 		Term symComputedRight = right.generateExpression(currentState, globVars);
-		return new ComplexTerm(DataType.BOOL, FunctionSymbol.NOTEQ, symComputedLeft, symComputedRight);
+		Term result = TermFactory.noteq(symComputedLeft, symComputedRight);
+		result.addCondition(symComputedLeft.getPrecondition());
+		result.addCondition(symComputedRight.getPrecondition());
+		return result;
 	}
 
 	/**

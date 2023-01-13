@@ -36,6 +36,7 @@ public class VCGeneratorState {
 
 	public VCGeneratorState(int period) {
 		this.period = period;
+		initializedVars.put(null, new ArrayList<>());
 	}
 
 	public String getVarType(String name) {
@@ -164,14 +165,10 @@ public class VCGeneratorState {
 				constants.add(varCode);
 				if (value != null) {
 					Term constantValue = value.generateExpression(Constant.emptyState, this);
-					if ("BOOL".equals(varType))
-						constantValue.type = DataType.BOOL;
-					else if (Utils.isIntegerTypeName(varType))
-						constantValue.type = DataType.INT;
-					else if (Utils.isRealTypeName(varType))
-						constantValue.type = DataType.REAL;
-					else // TIME 
-						constantValue.type = DataType.INT;
+					if (constantValue.equals(Constant.True))
+						constantValue = new Constant(DataType.BOOL, varCode.getName(), true);
+					if (constantValue.equals(Constant.False))
+						constantValue = new Constant(DataType.BOOL, varCode.getName(), false);
 					constantValues.put(varCode, constantValue);
 				}				
 			}				
@@ -200,18 +197,30 @@ public class VCGeneratorState {
 		else
 			return initializeSimpleVar(variable, state);
 	}
+	
+	public IndexRange getIndexRange(Constant varCode) {
+		return indexRanges.get(varCode);
+	}
 
 	private Term initializeSimpleVar(Constant variable, Term state) {
 		SimpleSpecificationInit varSpec = varSpecifications.get(variable);
-		return TermFactory.setVar(varSpec.getType(), state, variable, varSpec.getValue().generateExpression(state, this));
+		Term value = varSpec.getValue().generateExpression(state, this);
+		Term newState = TermFactory.setVar(varSpec.getType(), state, variable, value);
+		newState.addCondition(state.getPrecondition());
+		newState.addCondition(value.getPrecondition());
+		return newState;
 	}
 
 	private Term initializeArray(Constant variable, Term state) {
 		ArraySpecificationInit arraySpec = arraySpecifications.get(variable);
 		ArrayInterval interval = arraySpec.getInit().getInterval();
-		IndexRange range = new IndexRange(interval.getStart().generateExpression(state, this), interval.getEnd().generateExpression(state, this));	
+		Term start = interval.getStart().generateExpression(state, this);
+		Term end = interval.getEnd().generateExpression(state, this);
+		IndexRange range = new IndexRange(start, end);	
 		indexRanges.put(variable, range);
 		List<Expression> values = arraySpec.getValues().getElements();
+		state.addCondition(start.getPrecondition());
+		state.addCondition(end.getPrecondition());
 		if (values != null) {
 			int i = 0;
 			List<Term> arrayValues =new ArrayList<>();
@@ -219,7 +228,10 @@ public class VCGeneratorState {
 				Term arrayIndex = range.get(i);
 				Term value = expr.generateExpression(state, this);
 				arrayValues.add(value);
-				state = TermFactory.setVarArray(arraySpec.getInit().getType(), state, variable, arrayIndex, value);
+				Term newState = TermFactory.setVarArray(arraySpec.getInit().getType(), state, variable, arrayIndex, value);
+				newState.addCondition(state.getPrecondition());
+				newState.addCondition(value.getPrecondition());
+				state = newState;
 			}
 			arrayConstantValues.put(variable, arrayValues);
 		}

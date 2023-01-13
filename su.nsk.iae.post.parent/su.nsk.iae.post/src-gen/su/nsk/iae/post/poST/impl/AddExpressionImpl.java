@@ -68,18 +68,16 @@ public class AddExpressionImpl extends EquExpressionImpl implements AddExpressio
 		AddOperator op = getAddOp();
 		Term symComputedLeft = left.generateExpression(currentState, globVars);
 		Term symComputedRight = right.generateExpression(currentState, globVars);
-		DataType resultType;
-		if (symComputedLeft.isReal() || symComputedRight.isReal())
-			resultType = DataType.REAL;
-		else
-			resultType = DataType.INT;
+		Term result;
 		if (op == AddOperator.PLUS) {
-			return new ComplexTerm(resultType, FunctionSymbol.PLUS, symComputedLeft, symComputedRight);
+			result = TermFactory.plus(symComputedLeft, symComputedRight);
 		}			
 		else {// MINUS
-			return new ComplexTerm(resultType, FunctionSymbol.MINUS, symComputedLeft, symComputedRight);
+			result = TermFactory.minus(symComputedLeft, symComputedRight);
 		}
-
+		result.addCondition(symComputedLeft.getPrecondition());
+		result.addCondition(symComputedRight.getPrecondition());
+		return result;
 	}
 	/**
 	 * <!-- begin-user-doc -->

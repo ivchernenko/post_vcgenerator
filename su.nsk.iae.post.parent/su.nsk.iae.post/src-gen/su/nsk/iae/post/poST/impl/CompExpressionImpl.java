@@ -68,10 +68,14 @@ public class CompExpressionImpl extends AndExpressionImpl implements CompExpress
 		CompOperator op = getCompOp();
 		Term symComputedLeft = left.generateExpression(currentState, globVars);
 		Term symComputedRight = right.generateExpression(currentState, globVars);
+		Term result;
 		if (op == CompOperator.EQUAL)
-			return new ComplexTerm(DataType.BOOL, FunctionSymbol.EQ, symComputedLeft, symComputedRight);
+			result = TermFactory.eq(symComputedLeft, symComputedRight);
 		else // NOT_EQUAL
-			return new ComplexTerm(DataType.BOOL, FunctionSymbol.NOTEQ, symComputedLeft, symComputedRight);
+			result = TermFactory.noteq(symComputedLeft, symComputedRight);
+		result.addCondition(symComputedLeft.getPrecondition());
+		result.addCondition(symComputedRight.getPrecondition());
+		return result;
 	}
 
 	/**

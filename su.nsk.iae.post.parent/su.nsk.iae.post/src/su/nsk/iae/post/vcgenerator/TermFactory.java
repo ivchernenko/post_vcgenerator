@@ -1,5 +1,7 @@
 package su.nsk.iae.post.vcgenerator;
 
+import java.util.*;
+
 public class TermFactory {
 	public static Term  plus(Term left, Term right) {
 		DataType resultType;
@@ -185,5 +187,28 @@ public class TermFactory {
 		else // TIME 
 			return setVarArrayInt(state, variable, index, value);
 	}
-
+	
+	public static Term getVar(String varType, Term state, Constant variable) {
+		if ("BOOL".equals(varType))
+			return getVarBool(state, variable);
+		else if (Utils.isIntegerTypeName(varType))
+			return getVarInt(state, variable);
+		else if (Utils.isRealTypeName(varType))
+			return getVarReal(state, variable);
+		else // TIME 
+			return getVarInt(state, variable);
+	}
+	
+	public static Term getVarArray(String varType, Term state, Constant variable, Term index) {
+		Term value;
+		if ("BOOL".equals(varType))
+			value = getVarArrayBool(state, variable, index);
+		else if (Utils.isIntegerTypeName(varType))
+			value = getVarArrayInt(state, variable, index);
+		else if (Utils.isRealTypeName(varType))
+			value = getVarArrayReal(state, variable, index);
+		else // TIME 
+			value = getVarArrayInt(state, variable, index);
+		return value;
+	}
 }

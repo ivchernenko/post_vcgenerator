@@ -99,6 +99,7 @@ public class IfStatementImpl extends SelectionStatementImpl implements IfStateme
 			return result;
 		}
 		Term mainCondition = mainCond.generateExpression(path.getCurrentState(), globVars);
+		path.assertion(mainCondition.getPrecondition(), globVars);
 		Path thenBranch = path.addCondition(mainCondition);
 		Path elseBranch = path.addCondition(new ComplexTerm(FunctionSymbol.NOT, mainCondition));
 		result.addAll(mainStatement.applyTo(thenBranch, globVars));
@@ -107,6 +108,7 @@ public class IfStatementImpl extends SelectionStatementImpl implements IfStateme
 			Iterator<StatementList> elsifStatements = elseIfStatements.iterator();
 			for (Expression cond: elseIfCond) {
 				Term elseIfCondition = cond.generateExpression(path.getCurrentState(), globVars);
+				path.assertion(elseIfCondition.getPrecondition(), globVars);
 				thenBranch = path.addCondition(elseIfCondition);
 				elseBranch = path.addCondition(new ComplexTerm(FunctionSymbol.NOT, elseIfCondition));
 				result.addAll(elsifStatements.next().applyTo(thenBranch, globVars));

@@ -2,8 +2,6 @@ package su.nsk.iae.post.vcgenerator;
 
 public class Constant extends Term  {
 	
-	private String name;
-	
 	public Constant(DataType type, String name, Object value) {
 		this.type = type;
 		this.name = name;
@@ -22,10 +20,6 @@ public class Constant extends Term  {
 		this(null, null, value);
 	}
 	
-	public String getName() {
-		return name;
-	}
-	
 	@Override
 	public String toString() {
 		if (name != null) 
@@ -37,5 +31,6 @@ public class Constant extends Term  {
 	public static Constant emptyState = new Constant("emptyState", null);
 	public static Constant stop = new Constant("stop", 0);
 	public static Constant error = new Constant( "error", 1);
-
+	public static Constant True = new Constant(DataType.BOOL, "True", true);
+	public static Constant False = new Constant(DataType.BOOL, "False", false);
 }
