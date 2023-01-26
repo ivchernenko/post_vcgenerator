@@ -2,7 +2,7 @@ package su.nsk.iae.post.vcgenerator;
 
 import java.util.List;
 
-public class Term {
+public abstract class Term {
 	DataType type;
 	Object value;
 	Term precondition;
@@ -40,5 +40,6 @@ public class Term {
 				precondition = new ComplexTerm(FunctionSymbol.AND, precondition, condition);
 		}
 	}
-
+	
+	public abstract boolean equalsUpToMatching(Term term, VariableMatching matching);
 }

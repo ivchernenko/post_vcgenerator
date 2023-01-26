@@ -116,7 +116,24 @@ public class PrimaryExpressionImpl extends UnaryExpressionImpl implements Primar
     super();
   }
 	
-	Term generateProcessStatus(ProcessStatusExpression procStatus, Term currentState, VCGeneratorState globVars) {
+	
+  
+  @Override
+  public Term generateExpression(Term currentState, VCGeneratorState globVars) {
+	  if (getConst() != null)
+			return getConst().generateConstant();
+		else if (getVariable() != null) 
+			return variable.generateVariable(currentState, globVars);
+		else if (getProcStatus() != null)
+			return generateProcessStatus(getProcStatus(), currentState, globVars);
+		else if (getArray() != null)
+			return array.generateArrayVariable(currentState, globVars);
+		else if (getNestExpr() != null)
+			return getNestExpr().generateExpression(currentState, globVars);
+		return null;
+  }
+  
+  private Term generateProcessStatus(ProcessStatusExpression procStatus, Term currentState, VCGeneratorState globVars) {
 		su.nsk.iae.post.poST.Process process = (su.nsk.iae.post.poST.Process) procStatus.getProcess();
 		su.nsk.iae.post.vcgenerator.Constant procCode = globVars.getProcess(process.getName());
 		if (procStatus.isStop())
@@ -176,23 +193,6 @@ public class PrimaryExpressionImpl extends UnaryExpressionImpl implements Primar
 										su.nsk.iae.post.vcgenerator.Constant.error))
 						);
 	}
-  
-  @Override
-  public Term generateExpression(Term currentState, VCGeneratorState globVars) {
-	  if (getConst() != null)
-			return getConst().generateConstant();
-		else if (getVariable() != null) 
-			return variable.generateVariable(currentState, globVars);
-		else if (getProcStatus() != null)
-			return generateProcessStatus(getProcStatus(), currentState, globVars);
-		else if (getArray() != null)
-			return array.generateArrayVariable(currentState, globVars);
-		else if (getNestExpr() != null)
-			return getNestExpr().generateExpression(currentState, globVars);
-		return null;
-  }
-  
-  
 
   /**
    * <!-- begin-user-doc -->

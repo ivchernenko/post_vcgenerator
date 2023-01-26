@@ -16,13 +16,8 @@ public class VCGenerator {
 		period = defaultPeriod;
 	}
 
-	Constant millisecondsToCycles(int timeInMilliseconds) {
-		int timeInCycles;
-		if (timeInMilliseconds % globVars.period == 0)
-			timeInCycles = timeInMilliseconds / globVars.period;
-		else
-			timeInCycles = timeInMilliseconds / globVars.period + 1;
-		return new Constant(timeInCycles);
+	public VCGenerator() {
+		this(0);
 	}
 
 	List<Path> generateTimeout(Path path, TimeoutStatement statement) {
@@ -34,16 +29,14 @@ public class VCGenerator {
 		Term time;
 		if(statement.getConst() != null) {
 			int timeInMilliseconds = (Integer) statement.getConst().generateConstant().getValue();
-			time = millisecondsToCycles(timeInMilliseconds);
+			time = globVars.millisecondsToCycles(timeInMilliseconds);
 		}
 		else { // Variable
 			SymbolicVariable timeoutVar = statement.getVariable();
 			Constant varCode = globVars.getVariable(timeoutVar.getName());
 			time = null;
 			if (globVars.isConstant(varCode)) {
-				Integer timeInMilliseconds = (Integer) globVars.getConstantValue(varCode).getValue();
-				if (timeInMilliseconds != null)
-					time = millisecondsToCycles(timeInMilliseconds);
+				time = globVars.getTimeoutConstantValue(varCode);
 			}
 			if (time == null) {
 				Term symComputedVar = timeoutVar.generateVariable(path.getCurrentState(), globVars);
@@ -143,35 +136,10 @@ public class VCGenerator {
 				else
 					globVars.addVars(varDecl, null, ModificationType.VAR);
 		//Encoding of processes
-		for (su.nsk.iae.post.poST.Process process: program.getProcesses()) {
-			String processName = process.getName();
+		for (su.nsk.iae.post.poST.Process process: program.getProcesses())
 			globVars.addProcess(process);
-			globVars.setCurrentProcess(processName);
-			//Encoding of input variables
-			for (InputVarDeclaration inVars: process.getProcInVars())
-				for (VarInitDeclaration varDecl: inVars.getVars())
-					globVars.addVars(varDecl, processName, ModificationType.ENV_VAR);
-			//Encoding of output variables
-			for (OutputVarDeclaration outVars: process.getProcOutVars())
-				for (VarInitDeclaration varDecl: outVars.getVars())
-					globVars.addVars(varDecl, processName, ModificationType.VAR);
-			//Encoding of input output variables
-			for (InputOutputVarDeclaration inOutVars: process.getProcInOutVars())
-				for (VarInitDeclaration varDecl: inOutVars.getVars())
-					globVars.addVars(varDecl, processName, ModificationType.ENV_VAR);
-			//Encoding of variables
-			for (VarDeclaration vars: process.getProcVars())
-				for (VarInitDeclaration varDecl: vars.getVars())
-					if (vars.isConst())
-						globVars.addVars(varDecl, processName, ModificationType.CONSTANT);
-					else
-						globVars.addVars(varDecl, processName, ModificationType.VAR);
-			//Encoding of states
-			for (State state: process.getStates())
-				globVars.addState(state.getName(), process.getName());
-		}
-		FunctionSymbol env = new FunctionSymbol("env", false);
-		FunctionSymbol inv = new FunctionSymbol("inv", false);
+		FunctionSymbol env = new FunctionSymbol("env", true);
+		FunctionSymbol inv = new FunctionSymbol("inv", true);
 		Variable s0 = new Variable("s0");
 		Term invs0 = new ComplexTerm(inv, s0);
 		List<Term> setVarAnyArgs = new ArrayList<>();
@@ -182,9 +150,6 @@ public class VCGenerator {
 		}
 		Term s1 = new ComplexTerm(FunctionSymbol.setVarAny, (Term[]) setVarAnyArgs.toArray(new Term[0]));
 		Term envs1 = new ComplexTerm(env, s1);
-		List<Term> controlLoopBodyPrecondition = new ArrayList<>(2);
-		controlLoopBodyPrecondition.add(invs0);
-		controlLoopBodyPrecondition.add(envs1);
 		boolean initialProcess = true;
 		Term state = Constant.emptyState;
 		for (Constant  initializedVar: globVars.getInitializedVars(null))
@@ -194,21 +159,26 @@ public class VCGenerator {
 			Constant processCode = globVars.getProcess(process.getName());
 			if (initialProcess) {
 				Constant initialState = globVars.getInitialState(process.getName());
-				state = new ComplexTerm(FunctionSymbol.setPstate, state, processCode, initialState);
+				Term setInitialPstate = new ComplexTerm(FunctionSymbol.setPstate, state, processCode, initialState);
+				setInitialPstate.addCondition(state.getPrecondition());
+				state = setInitialPstate;
 			}
 			for (Constant initializedVar: globVars.getInitializedVars(processCode.getName()))
 				state = globVars.initializeVar(initializedVar, state);
 			initialProcess = false;	
 		}
-		if (state.getPrecondition() != null)
+		if (state.getPrecondition() != null) {
 			globVars.addVerificationCondition(state.getPrecondition());
+		}
 		Term vcForInitPath =new ComplexTerm(
 				FunctionSymbol.IMPL,
 				new ComplexTerm(FunctionSymbol.EQ, s0, new ComplexTerm(FunctionSymbol.toEnv, state)),
 				new ComplexTerm(inv, s0));	
 		globVars.addVerificationCondition(vcForInitPath);
 		List<Path> controlLoopBody = new ArrayList<>(1);
-		controlLoopBody.add(new Path(controlLoopBodyPrecondition, s1));
+		Path controlLoopBodyPath = new Path(invs0, s1);
+		controlLoopBodyPath = controlLoopBodyPath.addCondition(envs1);
+		controlLoopBody.add(controlLoopBodyPath);
 		for (su.nsk.iae.post.poST.Process process: program.getProcesses()) {
 			List<Path> afterProcess = new ArrayList<>();
 			for (Path path: controlLoopBody)
@@ -221,7 +191,7 @@ public class VCGenerator {
 		}
 	}
 
-	public List<Term> generateVCsForConfiguredProgram(Model model) {
+	public VCGeneratorState generateVCsForConfiguredProgram(Model model) {
 		String programName = model.getPrograms().get(0).getName();
 		Configuration conf = model.getConf();
 		if (conf != null) {
@@ -229,13 +199,15 @@ public class VCGenerator {
 			Optional<EObject> pconf = pconfs.filter((e) -> ((ProgramConfiguration) e).getProgram().getName().equals(programName)).findFirst();
 			if (pconf.isPresent()) {
 				Task task = ((ProgramConfiguration) pconf.get()).getTask();
-				su.nsk.iae.post.poST.Constant interval = task.getInit().getInterval();
-				if (interval != null)
-					period = (Integer) interval.generateConstant().getValue();
-			}			
+				if (task != null) {
+					su.nsk.iae.post.poST.Constant interval = task.getInit().getInterval();
+					if (interval != null)
+						period = (Integer) interval.generateConstant().getValue();
+				}			
+			}
 		}
 		globVars = new VCGeneratorState(period);
 		generateProgram(model.getPrograms().get(0));
-		return globVars.vcSet;
+		return globVars;
 	}
 }

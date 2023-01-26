@@ -15,7 +15,6 @@ import su.nsk.iae.post.poST.*;
 import su.nsk.iae.post.vcgenerator.Term;
 import su.nsk.iae.post.vcgenerator.VCGenerator;
 import su.nsk.iae.post.*;
-
 import com.google.inject.Injector;
 
 public class AutoExec {
@@ -24,10 +23,10 @@ public class AutoExec {
 	static String outFile = null; //"VC.txt";
 	static String text = "PROGRAM Controller\r\n"
 			+ "	VAR_INPUT\r\n"
-			+ "		requestButton: BOOL;\r\n"
+			+ "		a, b: INT;\r\n"
 			+ "	END_VAR\r\n"
 			+ "	VAR_OUTPUT\r\n"
-			+ "		trafficLight: BOOL;\r\n"
+			+ "		c: INT;\r\n"
 			+ "	END_VAR\r\n"
 			+ "	VAR\r\n"
 			+ "		requestButtonPressed: BOOL;\r\n"
@@ -45,34 +44,11 @@ public class AutoExec {
 			+ "\r\n"
 			+ "	PROCESS controller \r\n"
 			+ "		STATE minimalRed\r\n"
-			+ "			IF requestButton THEN \r\n"
-			+ "				requestButtonPressed := TRUE;\r\n"
-			+ "			END_IF\r\n"
-			+ "			TIMEOUT MINIMAL_RED_TIME_LIMIT  THEN\r\n"
-			+ "				SET NEXT;\r\n"
-			+ "			END_TIMEOUT\r\n"
+			+ "			WHILE a/b =0 DO\r\n"
+			+ "			 c:=0;\r\n"
+			+ "			END_WHILE\r\n"
 			+ "		END_STATE\r\n"
 			+ "\r\n"
-			+ "		STATE redAfterMinimalRed\r\n"
-			+ "			IF requestButtonPressed OR requestButton THEN\r\n"
-			+ "				SET NEXT;\r\n"
-			+ "			END_IF\r\n"
-			+ "		END_STATE\r\n"
-			+ "\r\n"
-			+ "		STATE redToGreen\r\n"
-			+ "			TIMEOUT RED_TO_GREEN_TIME_LIMIT THEN\r\n"
-			+ "				trafficLight := GREEN;\r\n"
-			+ "				requestButtonPressed := FALSE;\r\n"
-			+ "				SET NEXT;\r\n"
-			+ "			END_TIMEOUT\r\n"
-			+ "		END_STATE\r\n"
-			+ "\r\n"
-			+ "		STATE green\r\n"
-			+ "			TIMEOUT GREEN_TIME_LIMIT THEN\r\n"
-			+ "				trafficLight := RED;\r\n"
-			+ "				SET STATE minimalRed;\r\n"
-			+ "			END_TIMEOUT\r\n"
-			+ "		END_STATE\r\n"
 			+ "	END_PROCESS\r\n"
 			+ "END_PROGRAM\r\n"
 			+ "CONFIGURATION Conf\r\n"
@@ -105,7 +81,7 @@ public class AutoExec {
 			}
 			Model model = (Model) resource.getContents().get(0);
 			VCGenerator vcGen = new VCGenerator(period);			
-			List<Term> verificationConditions = vcGen.generateVCsForConfiguredProgram(model);
+			List<Term> verificationConditions = vcGen.generateVCsForConfiguredProgram(model).getVcSet();
 			PrintStream out;
 			if (outFile != null)
 				out = new PrintStream(new FileOutputStream(outFile));

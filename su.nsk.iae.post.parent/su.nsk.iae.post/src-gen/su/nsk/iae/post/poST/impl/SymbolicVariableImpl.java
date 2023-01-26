@@ -11,6 +11,7 @@ import su.nsk.iae.post.vcgenerator.ComplexTerm;
 import su.nsk.iae.post.vcgenerator.DataType;
 import su.nsk.iae.post.vcgenerator.FunctionSymbol;
 import su.nsk.iae.post.vcgenerator.Term;
+import su.nsk.iae.post.vcgenerator.TermFactory;
 import su.nsk.iae.post.vcgenerator.Utils;
 import su.nsk.iae.post.vcgenerator.VCGeneratorState;
 
@@ -35,18 +36,18 @@ public class SymbolicVariableImpl extends VariableImpl implements SymbolicVariab
   
   @Override
   public Term generateVariable(Term currentState, VCGeneratorState globVars) {
-		String varType = globVars.getVarType(name);
 		su.nsk.iae.post.vcgenerator.Constant varNameCode = globVars.getVariable(name);
+		String varType = globVars.getVarType(varNameCode);
 		if (globVars.isConstant(varNameCode))
 			return globVars.getConstantValue(varNameCode);
 		if ("BOOL".equals(varType))
-			return new ComplexTerm(DataType.BOOL, FunctionSymbol.getVarBool, currentState, varNameCode);
+			return TermFactory.getVarBool(currentState, varNameCode);
 		else if (Utils.isIntegerTypeName(varType))
-			return new ComplexTerm(DataType.INT, FunctionSymbol.getVarInt, currentState, varNameCode);
+			return TermFactory.getVarInt(currentState, varNameCode);
 		else if (Utils.isRealTypeName(varType))
-			return new ComplexTerm(DataType.REAL, FunctionSymbol.getvarReal, currentState, varNameCode);
+			return TermFactory.getVarReal(currentState, varNameCode);
 		else // TIME 
-			return new ComplexTerm(DataType.INT, FunctionSymbol.getVarInt, currentState, varNameCode);
+			return TermFactory.getVarInt(currentState, varNameCode);
 	}
   
   /**

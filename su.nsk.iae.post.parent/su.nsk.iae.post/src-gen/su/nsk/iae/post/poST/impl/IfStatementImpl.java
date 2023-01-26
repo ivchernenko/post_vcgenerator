@@ -104,7 +104,7 @@ public class IfStatementImpl extends SelectionStatementImpl implements IfStateme
 		Path elseBranch = path.addCondition(new ComplexTerm(FunctionSymbol.NOT, mainCondition));
 		result.addAll(mainStatement.applyTo(thenBranch, globVars));
 		path = elseBranch;
-		if (elseIfStatements != null) {
+		if (elseIfCond != null) {
 			Iterator<StatementList> elsifStatements = elseIfStatements.iterator();
 			for (Expression cond: elseIfCond) {
 				Term elseIfCondition = cond.generateExpression(path.getCurrentState(), globVars);

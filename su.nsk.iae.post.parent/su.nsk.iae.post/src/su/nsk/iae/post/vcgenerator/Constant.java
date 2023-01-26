@@ -28,6 +28,30 @@ public class Constant extends Term  {
 			return value.toString();
 	}
 	
+	@Override
+	public boolean equals(Object o) {
+		if (o == this)
+			return true;
+		if (o == null || ! (o instanceof Constant))
+			return false;
+		Constant c = (Constant) o;
+		if (value == null)
+			return false;				
+		else return value.equals(c.value);
+	}
+	
+	@Override
+	public int hashCode() {
+		if (value != null)
+			return value.hashCode();
+		else return 0;
+	}
+	
+	@Override
+	public boolean equalsUpToMatching(Term term, VariableMatching matching) {
+		return equals(term);
+	}
+	
 	public static Constant emptyState = new Constant("emptyState", null);
 	public static Constant stop = new Constant("stop", 0);
 	public static Constant error = new Constant( "error", 1);

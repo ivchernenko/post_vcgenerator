@@ -74,8 +74,8 @@ public class ArrayVariableImpl extends MinimalEObjectImpl.Container implements A
 	@Override
 	public Term generateArrayVariable(Term currentState, VCGeneratorState globVars) {
 		Term index = this.index.generateExpression(currentState, globVars);
-		String varType = globVars.getVarType(variable.getName());
 		su.nsk.iae.post.vcgenerator.Constant varNameCode = globVars.getVariable(variable.getName());
+		String varType = globVars.getVarType(varNameCode);
 		IndexRange range = globVars.getIndexRange(varNameCode);
 		Term value = TermFactory.getVarArray(varType, currentState, varNameCode, index);
 		value.addCondition(index.getPrecondition());

@@ -1,8 +1,7 @@
 package su.nsk.iae.post.vcgenerator;
 
 import java.util.List;
-
-
+import java.util.Objects;
 import java.util.ArrayList;
 
 import su.nsk.iae.post.poST.*;
@@ -11,12 +10,12 @@ import su.nsk.iae.post.poST.impl.*;
 
 public class Path {
 
-	List<Term> precondition;
+	Term precondition;
 	Term currentState;
 	ExecutionStatus status;
 
-	public Path(List<Term> precondition, Term s0) {
-		this.precondition = new ArrayList<>(precondition);
+	public Path(Term precondition, Term s0) {
+		this.precondition = precondition;
 		currentState = s0;
 		status = ExecutionStatus.NORMAL;
 	}
@@ -25,8 +24,8 @@ public class Path {
 		if (status != ExecutionStatus.NORMAL)
 			return;
 		Term value = valueExpr.generateExpression(currentState, globVars);
-		String varType = globVars.getVarType(variable.getName());
 		Constant varNameCode = globVars.getVariable(variable.getName());
+		String varType = globVars.getVarType(varNameCode);
 		assertion(value.getPrecondition(), globVars);
 		if ("BOOL".equals(varType))
 			currentState = new ComplexTerm(FunctionSymbol.setVarBool, currentState, varNameCode, value);
@@ -59,15 +58,15 @@ public class Path {
 			SymbolicVariable variable = arrayVariable.getVariable();
 			Term index = arrayVariable.getIndex().generateExpression(currentState, globVars);
 			Term value = statement.getValue().generateExpression(currentState, globVars);
-			String varType = globVars.getVarType(variable.getName());
 			Constant varNameCode = globVars.getVariable(variable.getName());
+			String varType = globVars.getVarType(varNameCode);
 			IndexRange range = globVars.getIndexRange(varNameCode);
-			Term assertion = range.contains(index);
-			assertion(assertion, globVars);
+			Term assertion = range.contains(index);			
 			if (index.getPrecondition() != null)
 				assertion = TermFactory.and(index.getPrecondition(), assertion);
 			if (value.getPrecondition() != null)
 				assertion = TermFactory.and(assertion, value.getPrecondition());
+			assertion(assertion, globVars);
 			if ("BOOL".equals(varType))
 				currentState = new ComplexTerm(FunctionSymbol.setVarArrayBool, currentState, varNameCode,index,  value);
 			else if (Utils.isIntegerTypeName(varType))
@@ -144,9 +143,16 @@ public class Path {
 	}
 
 	public Path addCondition(Term condition) {
-		Path branch = new Path(precondition, currentState);
-		branch.precondition.add(condition);
-		return branch;
+		if (condition != null) {
+			Term newPrecondition;
+			if (precondition != null)
+				newPrecondition = TermFactory.and(precondition, condition);
+			else
+				newPrecondition = condition;
+			Path branch = new Path(newPrecondition, currentState);
+			return branch;
+		}
+		else return this;
 	}
 
 	public void doExit() {
@@ -160,12 +166,10 @@ public class Path {
 	}
 
 	public Term generateVerificationCondition(Term postcondition) {
-		Term preconditionConj = null;
-		for (Term cond: precondition)
-			if (preconditionConj == null) 
-				preconditionConj = cond;
-			else preconditionConj = new ComplexTerm(FunctionSymbol.AND, preconditionConj, cond);
-		return new ComplexTerm(FunctionSymbol.IMPL, preconditionConj, postcondition);
+		if (precondition != null) 
+			return new ComplexTerm(FunctionSymbol.IMPL, precondition, postcondition);
+		else
+			return postcondition;
 	}
 
 	public Term generateVerificationCondition(FunctionSymbol loopinv) {
@@ -179,7 +183,10 @@ public class Path {
 	public void assertion(Term assertion, VCGeneratorState globVars) {
 		if (status == ExecutionStatus.NORMAL && assertion != null) {
 			globVars.addVerificationCondition(generateVerificationCondition(assertion));
-			precondition.add(assertion);
+			if (precondition != null) 
+				precondition = TermFactory.and(precondition, assertion);
+			else
+				precondition = assertion;
 		}		
 	}
 
@@ -191,6 +198,35 @@ public class Path {
 		return currentState;
 	}
 
-
-
+	public Term getPrecondition() {
+		return precondition;
+	}
+	
+	@Override
+	public boolean equals(Object o) {
+		if (o == this) 
+			return true;
+		else if (o == null || ! (o instanceof Path))
+			return false;
+		Path another = (Path) o;
+		if (precondition == null)
+			return another.precondition == null;
+		if (currentState == null)
+			return another.currentState == null;
+		if (currentState instanceof Variable && another.currentState instanceof Variable)
+			return status == another.status && precondition.equals(another.precondition);
+		return status == another.status && precondition.equals(another.precondition) && currentState.equals(another.currentState);
+	}
+	
+	@Override
+	public int hashCode() {
+		if (currentState instanceof Variable)
+			return Objects.hash(precondition, status);
+		return Objects.hash(precondition, currentState, status);
+	}
+	
+	@Override
+	public String toString() {
+		return "{" + precondition.toString() + ", " + currentState.toString() + ", " + status.toString() + "}";
+	}
 }

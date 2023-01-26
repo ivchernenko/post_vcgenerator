@@ -43,51 +43,36 @@ import java.util.*;
  */
 public class CaseStatementImpl extends SelectionStatementImpl implements CaseStatement
 {
-  /**
-   * The cached value of the '{@link #getCond() <em>Cond</em>}' containment reference.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @see #getCond()
-   * @generated
-   * @ordered
-   */
-  protected Expression cond;
+	/**
+	 * The cached value of the '{@link #getCond() <em>Cond</em>}' containment reference.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @see #getCond()
+	 * @generated
+	 * @ordered
+	 */
+	protected Expression cond;
 
-  /**
-   * The cached value of the '{@link #getCaseElements() <em>Case Elements</em>}' containment reference list.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @see #getCaseElements()
-   * @generated
-   * @ordered
-   */
-  protected EList<CaseElement> caseElements;
+	/**
+	 * The cached value of the '{@link #getCaseElements() <em>Case Elements</em>}' containment reference list.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @see #getCaseElements()
+	 * @generated
+	 * @ordered
+	 */
+	protected EList<CaseElement> caseElements;
 
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  protected CaseStatementImpl()
-  {
-    super();
-  }
-  
-	Term generateCaseList(CaseList caseList, Term cond) {
-		Term transformedCaseList = null;
-		for (SignedInteger element: caseList.getCaseListElement()) {
-			long value = Long.parseLong(element.getValue());
-			if (element.isISig())
-				value = -value;
-			Term transformedElement = new ComplexTerm(FunctionSymbol.EQ, cond, new su.nsk.iae.post.vcgenerator.Constant(value));
-			if (transformedCaseList == null)
-				transformedCaseList = transformedElement;
-			else
-				transformedCaseList = new ComplexTerm(FunctionSymbol.OR, transformedCaseList, transformedElement);
-		}
-		return transformedCaseList;
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	protected CaseStatementImpl()
+	{
+		super();
 	}
-	
+
 	List<Path> applyTo(Path path, VCGeneratorState globVars) {
 		List<Path> result = new ArrayList<>();
 		if(path.getStatus() != ExecutionStatus.NORMAL) {
@@ -104,14 +89,14 @@ public class CaseStatementImpl extends SelectionStatementImpl implements CaseSta
 		}
 		Path defaultBranch = path;
 		for (Term caseElement: cases)
-			defaultBranch = defaultBranch.addCondition(caseElement);
+			defaultBranch = defaultBranch.addCondition(TermFactory.not(caseElement));
 		if (elseStatement == null)
 			result.add(defaultBranch);
 		else 
 			result.addAll(elseStatement.applyTo(defaultBranch, globVars));
 		return result;
 	}
-	
+
 	@Override
 	public List<Path> applyTo(List<Path> paths, VCGeneratorState globVars) {
 		List<Path> result = new ArrayList<>();
@@ -119,177 +104,192 @@ public class CaseStatementImpl extends SelectionStatementImpl implements CaseSta
 			result.addAll(applyTo(path, globVars));
 		return result;
 	}
+	
+	private Term generateCaseList(CaseList caseList, Term cond) {
+		Term transformedCaseList = null;
+		for (SignedInteger element: caseList.getCaseListElement()) {
+			int value = Integer.parseInt(element.getValue());
+			if (element.isISig())
+				value = -value;
+			Term transformedElement = new ComplexTerm(FunctionSymbol.EQ, cond, new su.nsk.iae.post.vcgenerator.Constant(value));
+			if (transformedCaseList == null)
+				transformedCaseList = transformedElement;
+			else
+				transformedCaseList = new ComplexTerm(FunctionSymbol.OR, transformedCaseList, transformedElement);
+		}
+		return transformedCaseList;
+	}
 
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  @Override
-  protected EClass eStaticClass()
-  {
-    return PoSTPackage.Literals.CASE_STATEMENT;
-  }
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	protected EClass eStaticClass()
+	{
+		return PoSTPackage.Literals.CASE_STATEMENT;
+	}
 
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  @Override
-  public Expression getCond()
-  {
-    return cond;
-  }
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public Expression getCond()
+	{
+		return cond;
+	}
 
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  public NotificationChain basicSetCond(Expression newCond, NotificationChain msgs)
-  {
-    Expression oldCond = cond;
-    cond = newCond;
-    if (eNotificationRequired())
-    {
-      ENotificationImpl notification = new ENotificationImpl(this, Notification.SET, PoSTPackage.CASE_STATEMENT__COND, oldCond, newCond);
-      if (msgs == null) msgs = notification; else msgs.add(notification);
-    }
-    return msgs;
-  }
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	public NotificationChain basicSetCond(Expression newCond, NotificationChain msgs)
+	{
+		Expression oldCond = cond;
+		cond = newCond;
+		if (eNotificationRequired())
+		{
+			ENotificationImpl notification = new ENotificationImpl(this, Notification.SET, PoSTPackage.CASE_STATEMENT__COND, oldCond, newCond);
+			if (msgs == null) msgs = notification; else msgs.add(notification);
+		}
+		return msgs;
+	}
 
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  @Override
-  public void setCond(Expression newCond)
-  {
-    if (newCond != cond)
-    {
-      NotificationChain msgs = null;
-      if (cond != null)
-        msgs = ((InternalEObject)cond).eInverseRemove(this, EOPPOSITE_FEATURE_BASE - PoSTPackage.CASE_STATEMENT__COND, null, msgs);
-      if (newCond != null)
-        msgs = ((InternalEObject)newCond).eInverseAdd(this, EOPPOSITE_FEATURE_BASE - PoSTPackage.CASE_STATEMENT__COND, null, msgs);
-      msgs = basicSetCond(newCond, msgs);
-      if (msgs != null) msgs.dispatch();
-    }
-    else if (eNotificationRequired())
-      eNotify(new ENotificationImpl(this, Notification.SET, PoSTPackage.CASE_STATEMENT__COND, newCond, newCond));
-  }
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public void setCond(Expression newCond)
+	{
+		if (newCond != cond)
+		{
+			NotificationChain msgs = null;
+			if (cond != null)
+				msgs = ((InternalEObject)cond).eInverseRemove(this, EOPPOSITE_FEATURE_BASE - PoSTPackage.CASE_STATEMENT__COND, null, msgs);
+			if (newCond != null)
+				msgs = ((InternalEObject)newCond).eInverseAdd(this, EOPPOSITE_FEATURE_BASE - PoSTPackage.CASE_STATEMENT__COND, null, msgs);
+			msgs = basicSetCond(newCond, msgs);
+			if (msgs != null) msgs.dispatch();
+		}
+		else if (eNotificationRequired())
+			eNotify(new ENotificationImpl(this, Notification.SET, PoSTPackage.CASE_STATEMENT__COND, newCond, newCond));
+	}
 
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  @Override
-  public EList<CaseElement> getCaseElements()
-  {
-    if (caseElements == null)
-    {
-      caseElements = new EObjectContainmentEList<CaseElement>(CaseElement.class, this, PoSTPackage.CASE_STATEMENT__CASE_ELEMENTS);
-    }
-    return caseElements;
-  }
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public EList<CaseElement> getCaseElements()
+	{
+		if (caseElements == null)
+		{
+			caseElements = new EObjectContainmentEList<CaseElement>(CaseElement.class, this, PoSTPackage.CASE_STATEMENT__CASE_ELEMENTS);
+		}
+		return caseElements;
+	}
 
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  @Override
-  public NotificationChain eInverseRemove(InternalEObject otherEnd, int featureID, NotificationChain msgs)
-  {
-    switch (featureID)
-    {
-      case PoSTPackage.CASE_STATEMENT__COND:
-        return basicSetCond(null, msgs);
-      case PoSTPackage.CASE_STATEMENT__CASE_ELEMENTS:
-        return ((InternalEList<?>)getCaseElements()).basicRemove(otherEnd, msgs);
-    }
-    return super.eInverseRemove(otherEnd, featureID, msgs);
-  }
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public NotificationChain eInverseRemove(InternalEObject otherEnd, int featureID, NotificationChain msgs)
+	{
+		switch (featureID)
+		{
+		case PoSTPackage.CASE_STATEMENT__COND:
+			return basicSetCond(null, msgs);
+		case PoSTPackage.CASE_STATEMENT__CASE_ELEMENTS:
+			return ((InternalEList<?>)getCaseElements()).basicRemove(otherEnd, msgs);
+		}
+		return super.eInverseRemove(otherEnd, featureID, msgs);
+	}
 
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  @Override
-  public Object eGet(int featureID, boolean resolve, boolean coreType)
-  {
-    switch (featureID)
-    {
-      case PoSTPackage.CASE_STATEMENT__COND:
-        return getCond();
-      case PoSTPackage.CASE_STATEMENT__CASE_ELEMENTS:
-        return getCaseElements();
-    }
-    return super.eGet(featureID, resolve, coreType);
-  }
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public Object eGet(int featureID, boolean resolve, boolean coreType)
+	{
+		switch (featureID)
+		{
+		case PoSTPackage.CASE_STATEMENT__COND:
+			return getCond();
+		case PoSTPackage.CASE_STATEMENT__CASE_ELEMENTS:
+			return getCaseElements();
+		}
+		return super.eGet(featureID, resolve, coreType);
+	}
 
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  @SuppressWarnings("unchecked")
-  @Override
-  public void eSet(int featureID, Object newValue)
-  {
-    switch (featureID)
-    {
-      case PoSTPackage.CASE_STATEMENT__COND:
-        setCond((Expression)newValue);
-        return;
-      case PoSTPackage.CASE_STATEMENT__CASE_ELEMENTS:
-        getCaseElements().clear();
-        getCaseElements().addAll((Collection<? extends CaseElement>)newValue);
-        return;
-    }
-    super.eSet(featureID, newValue);
-  }
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@SuppressWarnings("unchecked")
+	@Override
+	public void eSet(int featureID, Object newValue)
+	{
+		switch (featureID)
+		{
+		case PoSTPackage.CASE_STATEMENT__COND:
+			setCond((Expression)newValue);
+			return;
+		case PoSTPackage.CASE_STATEMENT__CASE_ELEMENTS:
+			getCaseElements().clear();
+			getCaseElements().addAll((Collection<? extends CaseElement>)newValue);
+			return;
+		}
+		super.eSet(featureID, newValue);
+	}
 
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  @Override
-  public void eUnset(int featureID)
-  {
-    switch (featureID)
-    {
-      case PoSTPackage.CASE_STATEMENT__COND:
-        setCond((Expression)null);
-        return;
-      case PoSTPackage.CASE_STATEMENT__CASE_ELEMENTS:
-        getCaseElements().clear();
-        return;
-    }
-    super.eUnset(featureID);
-  }
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public void eUnset(int featureID)
+	{
+		switch (featureID)
+		{
+		case PoSTPackage.CASE_STATEMENT__COND:
+			setCond((Expression)null);
+			return;
+		case PoSTPackage.CASE_STATEMENT__CASE_ELEMENTS:
+			getCaseElements().clear();
+			return;
+		}
+		super.eUnset(featureID);
+	}
 
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  @Override
-  public boolean eIsSet(int featureID)
-  {
-    switch (featureID)
-    {
-      case PoSTPackage.CASE_STATEMENT__COND:
-        return cond != null;
-      case PoSTPackage.CASE_STATEMENT__CASE_ELEMENTS:
-        return caseElements != null && !caseElements.isEmpty();
-    }
-    return super.eIsSet(featureID);
-  }
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public boolean eIsSet(int featureID)
+	{
+		switch (featureID)
+		{
+		case PoSTPackage.CASE_STATEMENT__COND:
+			return cond != null;
+		case PoSTPackage.CASE_STATEMENT__CASE_ELEMENTS:
+			return caseElements != null && !caseElements.isEmpty();
+		}
+		return super.eIsSet(featureID);
+	}
 
 } //CaseStatementImpl

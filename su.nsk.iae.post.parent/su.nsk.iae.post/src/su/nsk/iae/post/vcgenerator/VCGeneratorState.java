@@ -5,17 +5,22 @@ import java.util.*;
 import su.nsk.iae.post.poST.ArrayInterval;
 import su.nsk.iae.post.poST.ArraySpecificationInit;
 import su.nsk.iae.post.poST.Expression;
+import su.nsk.iae.post.poST.InputOutputVarDeclaration;
+import su.nsk.iae.post.poST.InputVarDeclaration;
+import su.nsk.iae.post.poST.OutputVarDeclaration;
 import su.nsk.iae.post.poST.SimpleSpecificationInit;
+import su.nsk.iae.post.poST.State;
 import su.nsk.iae.post.poST.SymbolicVariable;
+import su.nsk.iae.post.poST.VarDeclaration;
 import su.nsk.iae.post.poST.VarInitDeclaration;
 
 public class VCGeneratorState {
-	Map<String, String> varTypes = new HashMap<>();
+	Map<Constant, String> varTypes = new HashMap<>();
 	Map <String, Constant> variables = new HashMap<>();
 	List<Constant> constants = new ArrayList<>();
 	Map<Constant, Term> constantValues = new HashMap<>();
+	Map<Constant, Constant> timeoutConstantValues = new HashMap<>();
 	Map<String, Map<String, Constant>> localVars = new HashMap<>();
-	Map<String, Map<String, String>> localVarTypes = new HashMap<>();
 	List<Constant> envVars = new ArrayList<>();
 	Map<String, List<Constant>> initializedVars = new HashMap<>();
 	Map<Constant, SimpleSpecificationInit> varSpecifications = new HashMap<>();
@@ -38,16 +43,19 @@ public class VCGeneratorState {
 		this.period = period;
 		initializedVars.put(null, new ArrayList<>());
 	}
+	
+	public VCGeneratorState() {
+		this(0);
+	}
 
-	public String getVarType(String name) {
-		Map<String, String> localScope = localVarTypes.get(currentProcess.getValue());
-		if (localScope != null && localScope.get(name) != null)
-			return localScope.get(name);
-		return varTypes.get(name);
+	public String getVarType(Constant varCode) {
+		return varTypes.get(varCode);
 	}
 
 	public Constant getVariable(String name) {
-		Map<String, Constant> localScope = localVars.get(currentProcess.getValue());
+		if (currentProcess == null)
+			return variables.get(name);
+		Map<String, Constant> localScope = localVars.get(currentProcess.getName());
 		if (localScope != null && localScope.get(name) != null)
 			return localScope.get(name);
 		return variables.get(name);
@@ -59,6 +67,21 @@ public class VCGeneratorState {
 
 	public Term getConstantValue(Constant c) {
 		return constantValues.get(c);
+	}
+	
+	public Constant getTimeoutConstantValue(Constant c) {
+		if (timeoutConstantValues.containsKey(c))
+			return timeoutConstantValues.get(c);
+		else {
+			Integer timeInMilliseconds = (Integer) constantValues.get(c).getValue();
+			Constant timeoutConst = null;
+			if (timeInMilliseconds != null) {
+				timeoutConst = millisecondsToCycles(timeInMilliseconds);
+				timeoutConst.setName(c.getName() + "_TIMEOUT");
+			}
+			timeoutConstantValues.put(c, timeoutConst);
+			return timeoutConst;
+		}
 	}
 	
 	public Term getArrayConstantValue(Constant array, Term index) {
@@ -97,12 +120,12 @@ public class VCGeneratorState {
 	}
 
 	public void addVerificationCondition(Term vc) {
-		vcSet.add(vc);
+		getVcSet().add(vc);
 	}
 
 	public FunctionSymbol nextLoopInv() {
 		++loopNumber;
-		return new FunctionSymbol("loopinv"+loopNumber, false);
+		return new FunctionSymbol("loopinv"+loopNumber, true);
 	}
 
 	public void addState(String stateName, String prefix) {
@@ -145,7 +168,6 @@ public class VCGeneratorState {
 			}				
 			if (prefix == null) {
 				variables.put(symVar.getName(), varCode);
-				varTypes.put(symVar.getName(), varType);
 			}
 			else {
 				Map<String, Constant> varsInScope = localVars.get(prefix);
@@ -154,13 +176,8 @@ public class VCGeneratorState {
 					localVars.put(prefix, varsInScope);
 				}
 				varsInScope.put(symVar.getName(), varCode);
-				Map<String, String> varTypesInScope = localVarTypes.get(prefix);
-				if (varTypesInScope == null) {
-					varTypesInScope = new HashMap<>();
-					localVarTypes.put(prefix, varTypesInScope);
-				}
-				varTypesInScope.put(symVar.getName(), varType);
 			}
+			varTypes.put(varCode, varType);
 			if (modType == ModificationType.CONSTANT) {
 				constants.add(varCode);
 				if (value != null) {
@@ -188,6 +205,29 @@ public class VCGeneratorState {
 		processes.put(processName, processCode);
 		processStates.put(processName, new StateList());
 		initializedVars.put(processName, new ArrayList<>());
+		currentProcess = processCode;
+		//Encoding of input variables
+		for (InputVarDeclaration inVars: process.getProcInVars())
+			for (VarInitDeclaration varDecl: inVars.getVars())
+				addVars(varDecl, processName, ModificationType.ENV_VAR);
+		//Encoding of output variables
+		for (OutputVarDeclaration outVars: process.getProcOutVars())
+			for (VarInitDeclaration varDecl: outVars.getVars())
+				addVars(varDecl, processName, ModificationType.VAR);
+		//Encoding of input output variables
+		for (InputOutputVarDeclaration inOutVars: process.getProcInOutVars())
+			for (VarInitDeclaration varDecl: inOutVars.getVars())
+				addVars(varDecl, processName, ModificationType.ENV_VAR);
+		//Encoding of variables
+		for (VarDeclaration vars: process.getProcVars())
+			for (VarInitDeclaration varDecl: vars.getVars())
+				if (vars.isConst())
+					addVars(varDecl, processName, ModificationType.CONSTANT);
+				else
+					addVars(varDecl, processName, ModificationType.VAR);
+		//Encoding of states
+		for (State state: process.getStates())
+			addState(state.getName(), process.getName());
 		return processCode;
 	}
 	
@@ -240,6 +280,19 @@ public class VCGeneratorState {
 
 	private boolean isArray(Constant variable) {
 		return arraySpecifications.containsKey(variable);
+	}
+
+	public List<Term> getVcSet() {
+		return vcSet;
+	}
+
+	Constant millisecondsToCycles(int timeInMilliseconds) {
+		int timeInCycles;
+		if (timeInMilliseconds % period == 0)
+			timeInCycles = timeInMilliseconds / period;
+		else
+			timeInCycles = timeInMilliseconds / period + 1;
+		return new Constant(timeInCycles);
 	}
 }
 

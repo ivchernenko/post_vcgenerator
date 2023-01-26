@@ -70,7 +70,7 @@ public class UnaryExpressionImpl extends PowerExpressionImpl implements UnaryExp
 		if (op == UnaryOperator.NOT)
 			result = TermFactory.not(symComputedRight);
 		else // UMINUS
-			result = TermFactory.uminus(symComputedRight);
+			result = TermFactory.unminus(symComputedRight);
 		result.addCondition(symComputedRight.getPrecondition());
 		return result;
 	}

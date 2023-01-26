@@ -1,6 +1,6 @@
 package su.nsk.iae.post.vcgenerator;
 
-import java.util.List;
+import java.util.Objects;
 
 public class ComplexTerm extends Term {
 
@@ -13,6 +13,9 @@ public class ComplexTerm extends Term {
 		this.precondition = precondition;
 		this.function = f;
 		this.args = args;
+		for (int i = 0; i < args.length; ++i)
+			if (args[i] == null)
+				throw new NullPointerException("Null subterm at index " + i + ". Null subterms are not allowed");
 	}
 
 	public ComplexTerm(DataType type, Object value, FunctionSymbol f, Term... args) {
@@ -44,5 +47,38 @@ public class ComplexTerm extends Term {
 				sb.append(" " + arg.toString());
 			return sb.append(")").toString();
 		}
+	}
+	
+	@Override
+	public boolean equalsUpToMatching(Term term, VariableMatching matching) {
+		if (term == null || ! (term instanceof ComplexTerm))
+			return false;
+		ComplexTerm another = (ComplexTerm) term;
+		if (! function.isVariable()) {
+			if (! function.equals(another.function))
+				return false;
+		}
+		else
+			if (! another.function.isVariable()) // Variable and not variable
+				return false;
+			else
+				if (! matching.addMatching(function, another.function)) // Function variable conflict
+					return false;
+		if (args.length != another.args.length)
+			return false;
+		for (int i = 0; i < args.length; ++i)
+			if (! args[i].equalsUpToMatching(another.args[i], matching))
+				return false;
+		return true;
+	}
+	
+	@Override
+	public boolean equals(Object o) {
+		if (o == this)
+			return true;
+		if (o == null || ! (o instanceof Term))
+			return false;
+		Term term = (Term) o;
+		return equalsUpToMatching(term, new VariableMatching());
 	}
 }

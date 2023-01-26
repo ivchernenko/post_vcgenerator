@@ -4,7 +4,10 @@
 package su.nsk.iae.post.poST.impl;
 
 import org.eclipse.emf.common.notify.Notification;
+import static su.nsk.iae.post.vcgenerator.TermFactory.and;
 import su.nsk.iae.post.poST.AddExpression;
+import su.nsk.iae.post.poST.AddOperator;
+
 import org.eclipse.emf.common.notify.NotificationChain;
 
 import org.eclipse.emf.ecore.EClass;
@@ -14,7 +17,10 @@ import org.eclipse.emf.ecore.impl.ENotificationImpl;
 
 import su.nsk.iae.post.poST.ForList;
 import su.nsk.iae.post.poST.ForStatement;
+import su.nsk.iae.post.poST.IntegerLiteral;
 import su.nsk.iae.post.poST.PoSTPackage;
+import su.nsk.iae.post.poST.PrimaryExpression;
+import su.nsk.iae.post.poST.SignedInteger;
 import su.nsk.iae.post.poST.SymbolicVariable;
 import java.util.*;
 import su.nsk.iae.post.vcgenerator.*;
@@ -36,300 +42,317 @@ import su.nsk.iae.post.poST.Expression;
  */
 public class ForStatementImpl extends IterationStatementImpl implements ForStatement
 {
-  /**
-   * The cached value of the '{@link #getVariable() <em>Variable</em>}' reference.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @see #getVariable()
-   * @generated
-   * @ordered
-   */
-  protected SymbolicVariable variable;
+	/**
+	 * The cached value of the '{@link #getVariable() <em>Variable</em>}' reference.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @see #getVariable()
+	 * @generated
+	 * @ordered
+	 */
+	protected SymbolicVariable variable;
 
-  /**
-   * The cached value of the '{@link #getForList() <em>For List</em>}' containment reference.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @see #getForList()
-   * @generated
-   * @ordered
-   */
-  protected ForList forList;
+	/**
+	 * The cached value of the '{@link #getForList() <em>For List</em>}' containment reference.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @see #getForList()
+	 * @generated
+	 * @ordered
+	 */
+	protected ForList forList;
 
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  protected ForStatementImpl()
-  {
-    super();
-  }
-  
-  @Override
-  public List<Path> applyTo(List<Path> paths, VCGeneratorState globVars) {
-	  List<Path> result = new ArrayList<>();
-	  FunctionSymbol loopinv = globVars.nextLoopInv();
-	  Variable s0 = new Variable("s0");
-	  Term invs0 = new ComplexTerm(loopinv, s0);
-	  for (Path path: paths) {
-		  if (path.getStatus() != ExecutionStatus.NORMAL)
-			  result.add(path);
-		  else {
-			  path.doAssignment(variable, forList.getStart(), globVars);
-			  globVars.addVerificationCondition(path.generateVerificationCondition(loopinv));			  
-		  }
-	  }
-	  Term end = forList.getEnd().generateExpression(s0, globVars);
-	  Expression stepExpr = forList.getStep();
-	  Term step;
-	  if (stepExpr != null)
-		  step = stepExpr.generateExpression(s0, globVars);
-	  else
-		  step = new Constant(1);	  
-	  List<Term> loopBodyPrecondition = new ArrayList<>();
-	  loopBodyPrecondition.add(invs0);
-	  Path posStep = new Path(loopBodyPrecondition, s0);
-	  Term nonzeroStep = TermFactory.noteq(step, new Constant(0));
-	  if (step.getPrecondition() != null)
-		  nonzeroStep = TermFactory.and(step.getPrecondition(), nonzeroStep);
-	  Term assertion;
-	  if (end.getPrecondition() != null)
-		  assertion = TermFactory.and(end.getPrecondition(), nonzeroStep);
-	  else
-		  assertion = nonzeroStep;
-	  posStep.assertion(assertion, globVars);
-	  Term stepGt0 = new ComplexTerm(FunctionSymbol.GREATER, step, new Constant(0));
-	  posStep = posStep.addCondition(stepGt0);
-	  posStep = posStep.addCondition(new ComplexTerm(FunctionSymbol.LEQ, variable.generateVariable(s0, globVars), end));
-	  Path negStep = new Path(loopBodyPrecondition, s0);
-	  negStep = negStep.addCondition(assertion);
-	  Term stepLess0 = new ComplexTerm(FunctionSymbol.LESS, step, new Constant(0));
-	  negStep = negStep.addCondition(stepLess0);
-	  negStep = negStep.addCondition(new ComplexTerm(FunctionSymbol.GEQ, variable.generateVariable(s0, globVars), end));
-	  List<Path> loopBodyPosStep = statement.applyTo(posStep, globVars);
-	  List<Path> loopBodyNegStep = statement.applyTo(negStep, globVars);
-	  List<Path> loopBody = loopBodyPosStep;
-	  loopBody.addAll(loopBodyNegStep);
-	  boolean notAllReturn = false;
-	  for (Path path: loopBody)
-		  if (path.getStatus() == ExecutionStatus.RETURN)
-			  result.add(path);
-		  else {
-			  notAllReturn = true;
-			  path.increment(variable, (AddExpression) forList.getStep(), globVars);
-			  globVars.addVerificationCondition(path.generateVerificationCondition(loopinv));
-		  }
-	  if (notAllReturn) {
-		  posStep = new Path(loopBodyPrecondition, s0);
-		  posStep = posStep.addCondition(stepGt0);
-		  posStep = posStep.addCondition(new ComplexTerm(FunctionSymbol.GREATER, variable.generateVariable(s0, globVars), end));
-		  negStep = new Path(loopBodyPrecondition, s0);
-		  negStep = negStep.addCondition(stepLess0);
-		  negStep = negStep.addCondition(new ComplexTerm(FunctionSymbol.LESS, variable.generateVariable(s0, globVars), end));
-		  loopBodyPrecondition.add(assertion);
-		  result.add(new Path(loopBodyPrecondition, s0));
-	  }
-	  return result;
-  }
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	protected ForStatementImpl()
+	{
+		super();
+	}
 
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  @Override
-  protected EClass eStaticClass()
-  {
-    return PoSTPackage.Literals.FOR_STATEMENT;
-  }
+	@Override
+	public List<Path> applyTo(List<Path> paths, VCGeneratorState globVars) {
+		List<Path> result = new ArrayList<>();
+		FunctionSymbol loopinv = globVars.nextLoopInv();
+		Variable s0 = new Variable("s0");
+		Term invs0 = new ComplexTerm(loopinv, s0);
+		for (Path path: paths) {
+			if (path.getStatus() != ExecutionStatus.NORMAL)
+				result.add(path);
+			else {
+				path.doAssignment(variable, forList.getStart(), globVars);
+				globVars.addVerificationCondition(path.generateVerificationCondition(loopinv));	
+			}
+		}
+		Term end = forList.getEnd().generateExpression(s0, globVars);
+		AddExpression stepExpr = (AddExpression) forList.getStep();
+		if (stepExpr == null) {
+			SignedInteger stepValue = new SignedIntegerImpl();
+			stepValue.setValue("1");
+			IntegerLiteral stepLiteral = new IntegerLiteralImpl();
+			stepLiteral.setValue(stepValue);
+			su.nsk.iae.post.poST.Constant stepConst = new ConstantImpl();
+			stepConst.setNum(stepLiteral);
+			stepExpr = new PrimaryExpressionImpl();
+			((PrimaryExpression) stepExpr).setConst(stepConst);
+		}
+		Term step = stepExpr.generateExpression(s0, globVars);
+		Path posStep = new Path(invs0, s0);
+		Term nonzeroStep = TermFactory.noteq(step, new Constant(0));
+		Term assertion = null;
+		if (step.getPrecondition() != null)
+			assertion = step.getPrecondition();
+		if (end.getPrecondition() != null)
+			if (assertion != null)
+				assertion = TermFactory.and(end.getPrecondition(), assertion);
+			else
+				assertion = end.getPrecondition();
+		Term assertionVC;
+		if (assertion != null)
+			assertionVC = posStep.generateVerificationCondition(and(assertion, nonzeroStep));
+		else
+			assertionVC = posStep.generateVerificationCondition(nonzeroStep);
+		globVars.addVerificationCondition(assertionVC);
+		posStep = posStep.addCondition(assertion);
+		Term stepGt0 = new ComplexTerm(FunctionSymbol.GREATER, step, new Constant(0));
+		posStep = posStep.addCondition(stepGt0);
+		posStep = posStep.addCondition(new ComplexTerm(FunctionSymbol.LEQ, variable.generateVariable(s0, globVars), end));
+		Path negStep = new Path(invs0, s0);
+		negStep = negStep.addCondition(assertion);
+		Term stepLess0 = new ComplexTerm(FunctionSymbol.LESS, step, new Constant(0));
+		negStep = negStep.addCondition(stepLess0);
+		negStep = negStep.addCondition(new ComplexTerm(FunctionSymbol.GEQ, variable.generateVariable(s0, globVars), end));
+		List<Path> loopBodyPosStep = statement.applyTo(posStep, globVars);
+		List<Path> loopBodyNegStep = statement.applyTo(negStep, globVars);
+		List<Path> loopBody = loopBodyPosStep;
+		loopBody.addAll(loopBodyNegStep);
+		for (Path path: loopBody)
+			if (path.getStatus() == ExecutionStatus.RETURN)
+				result.add(path);
+			else {
+				PrimaryExpression variableExpr = new PrimaryExpressionImpl();
+				variableExpr.setVariable(variable);
+				AddExpression increment = new AddExpressionImpl();
+				increment.setLeft(variableExpr);
+				increment.setRight(stepExpr);;
+				increment.setAddOp(AddOperator.PLUS);
+				AssignmentStatement incrementStatement = new AssignmentStatementImpl();
+				incrementStatement.setVariable(variable);
+				incrementStatement.setValue(increment);
+				path.doAssignment(incrementStatement, globVars);
+				globVars.addVerificationCondition(path.generateVerificationCondition(loopinv));
+			}
+		posStep = new Path(invs0, s0);
+		posStep = posStep.addCondition(stepGt0);
+		posStep = posStep.addCondition(new ComplexTerm(FunctionSymbol.GREATER, variable.generateVariable(s0, globVars), end));
+		negStep = new Path(invs0, s0);
+		negStep = negStep.addCondition(stepLess0);
+		negStep = negStep.addCondition(new ComplexTerm(FunctionSymbol.LESS, variable.generateVariable(s0, globVars), end));
+		Path loopPostcondition = new Path(invs0, s0);
+		loopPostcondition = loopPostcondition.addCondition(assertion);
+		result.add(loopPostcondition);
+		return result;
+	}
 
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  @Override
-  public SymbolicVariable getVariable()
-  {
-    if (variable != null && variable.eIsProxy())
-    {
-      InternalEObject oldVariable = (InternalEObject)variable;
-      variable = (SymbolicVariable)eResolveProxy(oldVariable);
-      if (variable != oldVariable)
-      {
-        if (eNotificationRequired())
-          eNotify(new ENotificationImpl(this, Notification.RESOLVE, PoSTPackage.FOR_STATEMENT__VARIABLE, oldVariable, variable));
-      }
-    }
-    return variable;
-  }
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	protected EClass eStaticClass()
+	{
+		return PoSTPackage.Literals.FOR_STATEMENT;
+	}
 
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  public SymbolicVariable basicGetVariable()
-  {
-    return variable;
-  }
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public SymbolicVariable getVariable()
+	{
+		if (variable != null && variable.eIsProxy())
+		{
+			InternalEObject oldVariable = (InternalEObject)variable;
+			variable = (SymbolicVariable)eResolveProxy(oldVariable);
+			if (variable != oldVariable)
+			{
+				if (eNotificationRequired())
+					eNotify(new ENotificationImpl(this, Notification.RESOLVE, PoSTPackage.FOR_STATEMENT__VARIABLE, oldVariable, variable));
+			}
+		}
+		return variable;
+	}
 
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  @Override
-  public void setVariable(SymbolicVariable newVariable)
-  {
-    SymbolicVariable oldVariable = variable;
-    variable = newVariable;
-    if (eNotificationRequired())
-      eNotify(new ENotificationImpl(this, Notification.SET, PoSTPackage.FOR_STATEMENT__VARIABLE, oldVariable, variable));
-  }
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	public SymbolicVariable basicGetVariable()
+	{
+		return variable;
+	}
 
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  @Override
-  public ForList getForList()
-  {
-    return forList;
-  }
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public void setVariable(SymbolicVariable newVariable)
+	{
+		SymbolicVariable oldVariable = variable;
+		variable = newVariable;
+		if (eNotificationRequired())
+			eNotify(new ENotificationImpl(this, Notification.SET, PoSTPackage.FOR_STATEMENT__VARIABLE, oldVariable, variable));
+	}
 
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  public NotificationChain basicSetForList(ForList newForList, NotificationChain msgs)
-  {
-    ForList oldForList = forList;
-    forList = newForList;
-    if (eNotificationRequired())
-    {
-      ENotificationImpl notification = new ENotificationImpl(this, Notification.SET, PoSTPackage.FOR_STATEMENT__FOR_LIST, oldForList, newForList);
-      if (msgs == null) msgs = notification; else msgs.add(notification);
-    }
-    return msgs;
-  }
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public ForList getForList()
+	{
+		return forList;
+	}
 
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  @Override
-  public void setForList(ForList newForList)
-  {
-    if (newForList != forList)
-    {
-      NotificationChain msgs = null;
-      if (forList != null)
-        msgs = ((InternalEObject)forList).eInverseRemove(this, EOPPOSITE_FEATURE_BASE - PoSTPackage.FOR_STATEMENT__FOR_LIST, null, msgs);
-      if (newForList != null)
-        msgs = ((InternalEObject)newForList).eInverseAdd(this, EOPPOSITE_FEATURE_BASE - PoSTPackage.FOR_STATEMENT__FOR_LIST, null, msgs);
-      msgs = basicSetForList(newForList, msgs);
-      if (msgs != null) msgs.dispatch();
-    }
-    else if (eNotificationRequired())
-      eNotify(new ENotificationImpl(this, Notification.SET, PoSTPackage.FOR_STATEMENT__FOR_LIST, newForList, newForList));
-  }
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	public NotificationChain basicSetForList(ForList newForList, NotificationChain msgs)
+	{
+		ForList oldForList = forList;
+		forList = newForList;
+		if (eNotificationRequired())
+		{
+			ENotificationImpl notification = new ENotificationImpl(this, Notification.SET, PoSTPackage.FOR_STATEMENT__FOR_LIST, oldForList, newForList);
+			if (msgs == null) msgs = notification; else msgs.add(notification);
+		}
+		return msgs;
+	}
 
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  @Override
-  public NotificationChain eInverseRemove(InternalEObject otherEnd, int featureID, NotificationChain msgs)
-  {
-    switch (featureID)
-    {
-      case PoSTPackage.FOR_STATEMENT__FOR_LIST:
-        return basicSetForList(null, msgs);
-    }
-    return super.eInverseRemove(otherEnd, featureID, msgs);
-  }
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public void setForList(ForList newForList)
+	{
+		if (newForList != forList)
+		{
+			NotificationChain msgs = null;
+			if (forList != null)
+				msgs = ((InternalEObject)forList).eInverseRemove(this, EOPPOSITE_FEATURE_BASE - PoSTPackage.FOR_STATEMENT__FOR_LIST, null, msgs);
+			if (newForList != null)
+				msgs = ((InternalEObject)newForList).eInverseAdd(this, EOPPOSITE_FEATURE_BASE - PoSTPackage.FOR_STATEMENT__FOR_LIST, null, msgs);
+			msgs = basicSetForList(newForList, msgs);
+			if (msgs != null) msgs.dispatch();
+		}
+		else if (eNotificationRequired())
+			eNotify(new ENotificationImpl(this, Notification.SET, PoSTPackage.FOR_STATEMENT__FOR_LIST, newForList, newForList));
+	}
 
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  @Override
-  public Object eGet(int featureID, boolean resolve, boolean coreType)
-  {
-    switch (featureID)
-    {
-      case PoSTPackage.FOR_STATEMENT__VARIABLE:
-        if (resolve) return getVariable();
-        return basicGetVariable();
-      case PoSTPackage.FOR_STATEMENT__FOR_LIST:
-        return getForList();
-    }
-    return super.eGet(featureID, resolve, coreType);
-  }
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public NotificationChain eInverseRemove(InternalEObject otherEnd, int featureID, NotificationChain msgs)
+	{
+		switch (featureID)
+		{
+		case PoSTPackage.FOR_STATEMENT__FOR_LIST:
+			return basicSetForList(null, msgs);
+		}
+		return super.eInverseRemove(otherEnd, featureID, msgs);
+	}
 
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  @Override
-  public void eSet(int featureID, Object newValue)
-  {
-    switch (featureID)
-    {
-      case PoSTPackage.FOR_STATEMENT__VARIABLE:
-        setVariable((SymbolicVariable)newValue);
-        return;
-      case PoSTPackage.FOR_STATEMENT__FOR_LIST:
-        setForList((ForList)newValue);
-        return;
-    }
-    super.eSet(featureID, newValue);
-  }
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public Object eGet(int featureID, boolean resolve, boolean coreType)
+	{
+		switch (featureID)
+		{
+		case PoSTPackage.FOR_STATEMENT__VARIABLE:
+			if (resolve) return getVariable();
+			return basicGetVariable();
+		case PoSTPackage.FOR_STATEMENT__FOR_LIST:
+			return getForList();
+		}
+		return super.eGet(featureID, resolve, coreType);
+	}
 
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  @Override
-  public void eUnset(int featureID)
-  {
-    switch (featureID)
-    {
-      case PoSTPackage.FOR_STATEMENT__VARIABLE:
-        setVariable((SymbolicVariable)null);
-        return;
-      case PoSTPackage.FOR_STATEMENT__FOR_LIST:
-        setForList((ForList)null);
-        return;
-    }
-    super.eUnset(featureID);
-  }
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public void eSet(int featureID, Object newValue)
+	{
+		switch (featureID)
+		{
+		case PoSTPackage.FOR_STATEMENT__VARIABLE:
+			setVariable((SymbolicVariable)newValue);
+			return;
+		case PoSTPackage.FOR_STATEMENT__FOR_LIST:
+			setForList((ForList)newValue);
+			return;
+		}
+		super.eSet(featureID, newValue);
+	}
 
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  @Override
-  public boolean eIsSet(int featureID)
-  {
-    switch (featureID)
-    {
-      case PoSTPackage.FOR_STATEMENT__VARIABLE:
-        return variable != null;
-      case PoSTPackage.FOR_STATEMENT__FOR_LIST:
-        return forList != null;
-    }
-    return super.eIsSet(featureID);
-  }
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public void eUnset(int featureID)
+	{
+		switch (featureID)
+		{
+		case PoSTPackage.FOR_STATEMENT__VARIABLE:
+			setVariable((SymbolicVariable)null);
+			return;
+		case PoSTPackage.FOR_STATEMENT__FOR_LIST:
+			setForList((ForList)null);
+			return;
+		}
+		super.eUnset(featureID);
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public boolean eIsSet(int featureID)
+	{
+		switch (featureID)
+		{
+		case PoSTPackage.FOR_STATEMENT__VARIABLE:
+			return variable != null;
+		case PoSTPackage.FOR_STATEMENT__FOR_LIST:
+			return forList != null;
+		}
+		return super.eIsSet(featureID);
+	}
 
 } //ForStatementImpl

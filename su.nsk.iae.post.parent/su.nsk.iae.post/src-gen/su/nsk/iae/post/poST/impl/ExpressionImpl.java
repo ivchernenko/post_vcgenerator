@@ -73,7 +73,7 @@ public class ExpressionImpl extends MinimalEObjectImpl.Container implements Expr
 		Term result = TermFactory.or(symComputedLeft, symComputedRight);
 		result.addCondition(symComputedLeft.getPrecondition());
 		if (symComputedRight.getPrecondition() != null)
-			result.addCondition(TermFactory.impl(TermFactory.not(symComputedRight), symComputedRight.getPrecondition()));
+			result.addCondition(TermFactory.impl(TermFactory.not(symComputedLeft), symComputedRight.getPrecondition()));
 		return result;
 	}
 

@@ -21,7 +21,7 @@ public class TermFactory {
 		return new ComplexTerm(resultType, FunctionSymbol.MINUS, left, right);
 	}
 	
-	public static Term uminus(Term right) {
+	public static Term unminus(Term right) {
 		 return new ComplexTerm(right.getType(), FunctionSymbol.UNMINUS, right);
 	}
 	
@@ -76,6 +76,16 @@ public class TermFactory {
 	
 	public static Term  and(Term left, Term right) {
 		return new ComplexTerm(DataType.BOOL, FunctionSymbol.AND, left, right);
+	}
+	
+	public static Term  and(Term ... args) {
+		Term conj = null;
+		for (Term arg: args)
+			if (conj == null)
+				conj = arg;
+			else
+				conj = and(conj, arg);
+		return conj;
 	}
 	
 	public static Term  or(Term left, Term right) {
@@ -135,27 +145,27 @@ public class TermFactory {
 	}
 	
 	public static Term  getVarBool(Term state, Constant variable) {
-		return new ComplexTerm(FunctionSymbol.getVarBool, state, variable);
+		return new ComplexTerm(DataType.BOOL, FunctionSymbol.getVarBool, state, variable);
 	}
 	
 	public static Term  getVarInt(Term state, Constant variable) {
-		return new ComplexTerm(FunctionSymbol.getVarInt, state, variable);
+		return new ComplexTerm(DataType.INT, FunctionSymbol.getVarInt, state, variable);
 	}
 	
 	public static Term  getVarReal(Term state, Constant variable) {
-		return new ComplexTerm(FunctionSymbol.getvarReal, state, variable);
+		return new ComplexTerm(DataType.REAL, FunctionSymbol.getvarReal, state, variable);
 	}
 	
 	public static Term  getVarArrayBool(Term state, Constant variable, Term index) {
-		return new ComplexTerm(FunctionSymbol.getVarArrayBool, state, variable, index);
+		return new ComplexTerm(DataType.BOOL, FunctionSymbol.getVarArrayBool, state, variable, index);
 	}
 	
 	public static Term  getVarArrayInt(Term state, Constant variable, Term index) {
-		return new ComplexTerm(FunctionSymbol.getVarArrayInt, state, variable, index);
+		return new ComplexTerm(DataType.INT, FunctionSymbol.getVarArrayInt, state, variable, index);
 	}
 	
 	public static Term  getVarArrayReal(Term state, Constant variable, Term index) {
-		return new ComplexTerm(FunctionSymbol.getVarArrayReal, state, variable, index);
+		return new ComplexTerm(DataType.REAL, FunctionSymbol.getVarArrayReal, state, variable, index);
 	}
 	
 	public static Term  getPstate(Term state, Constant process) {
