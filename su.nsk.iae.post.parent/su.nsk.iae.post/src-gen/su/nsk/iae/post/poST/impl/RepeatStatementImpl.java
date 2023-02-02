@@ -58,16 +58,25 @@ public class RepeatStatementImpl extends IterationStatementImpl implements Repea
 	@Override
 	public List<Path> applyTo(List<Path> paths, VCGeneratorState globVars) {
 		FunctionSymbol loopinv = globVars.nextLoopInv();
-		Variable s0 = new Variable("s0");
+		Variable s0 = new Variable("s0'");
+		globVars.addVcFunctionParam(loopinv);
+		globVars.addVcVariableParam(s0);
 		List<Path> result = new ArrayList<>();
 		for (Path path:paths)
 			if (path.getStatus() == ExecutionStatus.NORMAL) {
 				List<Path> afterOneIteration = statement.applyTo(path,  globVars);
 				for (Path p: afterOneIteration) 
-					if (p.getStatus() == ExecutionStatus.RETURN)
-						result.add(p);
-					else
+					switch (p.getStatus()) {
+					case NORMAL:
 						globVars.addVerificationCondition(p.generateVerificationCondition(loopinv));
+						break;
+					case EXIT:
+						p.resetStatus();
+						result.add(p);
+						break;
+					case RETURN:
+						result.add(p);
+					}
 			}  
 			else
 				result.add(path);
@@ -78,159 +87,165 @@ public class RepeatStatementImpl extends IterationStatementImpl implements Repea
 		loopBody = loopBody.addCondition(cond);
 		List<Path> loopBodyPaths = statement.applyTo(loopBody, globVars);
 		for (Path path: loopBodyPaths)
-			if (path.getStatus() == ExecutionStatus.RETURN)
-				result.add(path);
-			else {
+			switch (path.getStatus()) {
+			case NORMAL:
 				globVars.addVerificationCondition(path.generateVerificationCondition(loopinv));
+				break;
+			case EXIT:
+				path.resetStatus();
+				result.add(path);
+				break;
+			case RETURN:
+				result.add(path);
 			}
-		Path loopPostcondition = new Path(inv, s0);
-		loopPostcondition = loopPostcondition.addCondition(cond.getPrecondition());
-		loopPostcondition = loopPostcondition.addCondition(new ComplexTerm(FunctionSymbol.NOT, cond));
-		result.add(loopPostcondition);
-		return result;
-	}
+	Path loopPostcondition = new Path(inv, s0);
+	loopPostcondition = loopPostcondition.addCondition(cond.getPrecondition());
+	loopPostcondition = loopPostcondition.addCondition(new ComplexTerm(FunctionSymbol.NOT, cond));
+	result.add(loopPostcondition);
+	return result;
+}
 
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
-	protected EClass eStaticClass()
-	{
-		return PoSTPackage.Literals.REPEAT_STATEMENT;
-	}
+/**
+ * <!-- begin-user-doc -->
+ * <!-- end-user-doc -->
+ * @generated
+ */
+@Override
+protected EClass eStaticClass()
+{
+	return PoSTPackage.Literals.REPEAT_STATEMENT;
+}
 
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
-	public Expression getCond()
-	{
-		return cond;
-	}
+/**
+ * <!-- begin-user-doc -->
+ * <!-- end-user-doc -->
+ * @generated
+ */
+@Override
+public Expression getCond()
+{
+	return cond;
+}
 
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	public NotificationChain basicSetCond(Expression newCond, NotificationChain msgs)
+/**
+ * <!-- begin-user-doc -->
+ * <!-- end-user-doc -->
+ * @generated
+ */
+public NotificationChain basicSetCond(Expression newCond, NotificationChain msgs)
+{
+	Expression oldCond = cond;
+	cond = newCond;
+	if (eNotificationRequired())
 	{
-		Expression oldCond = cond;
-		cond = newCond;
-		if (eNotificationRequired())
-		{
-			ENotificationImpl notification = new ENotificationImpl(this, Notification.SET, PoSTPackage.REPEAT_STATEMENT__COND, oldCond, newCond);
-			if (msgs == null) msgs = notification; else msgs.add(notification);
-		}
-		return msgs;
+		ENotificationImpl notification = new ENotificationImpl(this, Notification.SET, PoSTPackage.REPEAT_STATEMENT__COND, oldCond, newCond);
+		if (msgs == null) msgs = notification; else msgs.add(notification);
 	}
+	return msgs;
+}
 
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
-	public void setCond(Expression newCond)
+/**
+ * <!-- begin-user-doc -->
+ * <!-- end-user-doc -->
+ * @generated
+ */
+@Override
+public void setCond(Expression newCond)
+{
+	if (newCond != cond)
 	{
-		if (newCond != cond)
-		{
-			NotificationChain msgs = null;
-			if (cond != null)
-				msgs = ((InternalEObject)cond).eInverseRemove(this, EOPPOSITE_FEATURE_BASE - PoSTPackage.REPEAT_STATEMENT__COND, null, msgs);
-			if (newCond != null)
-				msgs = ((InternalEObject)newCond).eInverseAdd(this, EOPPOSITE_FEATURE_BASE - PoSTPackage.REPEAT_STATEMENT__COND, null, msgs);
-			msgs = basicSetCond(newCond, msgs);
-			if (msgs != null) msgs.dispatch();
-		}
-		else if (eNotificationRequired())
-			eNotify(new ENotificationImpl(this, Notification.SET, PoSTPackage.REPEAT_STATEMENT__COND, newCond, newCond));
+		NotificationChain msgs = null;
+		if (cond != null)
+			msgs = ((InternalEObject)cond).eInverseRemove(this, EOPPOSITE_FEATURE_BASE - PoSTPackage.REPEAT_STATEMENT__COND, null, msgs);
+		if (newCond != null)
+			msgs = ((InternalEObject)newCond).eInverseAdd(this, EOPPOSITE_FEATURE_BASE - PoSTPackage.REPEAT_STATEMENT__COND, null, msgs);
+		msgs = basicSetCond(newCond, msgs);
+		if (msgs != null) msgs.dispatch();
 	}
+	else if (eNotificationRequired())
+		eNotify(new ENotificationImpl(this, Notification.SET, PoSTPackage.REPEAT_STATEMENT__COND, newCond, newCond));
+}
 
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
-	public NotificationChain eInverseRemove(InternalEObject otherEnd, int featureID, NotificationChain msgs)
+/**
+ * <!-- begin-user-doc -->
+ * <!-- end-user-doc -->
+ * @generated
+ */
+@Override
+public NotificationChain eInverseRemove(InternalEObject otherEnd, int featureID, NotificationChain msgs)
+{
+	switch (featureID)
 	{
-		switch (featureID)
-		{
-		case PoSTPackage.REPEAT_STATEMENT__COND:
-			return basicSetCond(null, msgs);
-		}
-		return super.eInverseRemove(otherEnd, featureID, msgs);
+	case PoSTPackage.REPEAT_STATEMENT__COND:
+		return basicSetCond(null, msgs);
 	}
+	return super.eInverseRemove(otherEnd, featureID, msgs);
+}
 
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
-	public Object eGet(int featureID, boolean resolve, boolean coreType)
+/**
+ * <!-- begin-user-doc -->
+ * <!-- end-user-doc -->
+ * @generated
+ */
+@Override
+public Object eGet(int featureID, boolean resolve, boolean coreType)
+{
+	switch (featureID)
 	{
-		switch (featureID)
-		{
-		case PoSTPackage.REPEAT_STATEMENT__COND:
-			return getCond();
-		}
-		return super.eGet(featureID, resolve, coreType);
+	case PoSTPackage.REPEAT_STATEMENT__COND:
+		return getCond();
 	}
+	return super.eGet(featureID, resolve, coreType);
+}
 
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
-	public void eSet(int featureID, Object newValue)
+/**
+ * <!-- begin-user-doc -->
+ * <!-- end-user-doc -->
+ * @generated
+ */
+@Override
+public void eSet(int featureID, Object newValue)
+{
+	switch (featureID)
 	{
-		switch (featureID)
-		{
-		case PoSTPackage.REPEAT_STATEMENT__COND:
-			setCond((Expression)newValue);
-			return;
-		}
-		super.eSet(featureID, newValue);
+	case PoSTPackage.REPEAT_STATEMENT__COND:
+		setCond((Expression)newValue);
+		return;
 	}
+	super.eSet(featureID, newValue);
+}
 
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
-	public void eUnset(int featureID)
+/**
+ * <!-- begin-user-doc -->
+ * <!-- end-user-doc -->
+ * @generated
+ */
+@Override
+public void eUnset(int featureID)
+{
+	switch (featureID)
 	{
-		switch (featureID)
-		{
-		case PoSTPackage.REPEAT_STATEMENT__COND:
-			setCond((Expression)null);
-			return;
-		}
-		super.eUnset(featureID);
+	case PoSTPackage.REPEAT_STATEMENT__COND:
+		setCond((Expression)null);
+		return;
 	}
+	super.eUnset(featureID);
+}
 
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
-	public boolean eIsSet(int featureID)
+/**
+ * <!-- begin-user-doc -->
+ * <!-- end-user-doc -->
+ * @generated
+ */
+@Override
+public boolean eIsSet(int featureID)
+{
+	switch (featureID)
 	{
-		switch (featureID)
-		{
-		case PoSTPackage.REPEAT_STATEMENT__COND:
-			return cond != null;
-		}
-		return super.eIsSet(featureID);
+	case PoSTPackage.REPEAT_STATEMENT__COND:
+		return cond != null;
 	}
+	return super.eIsSet(featureID);
+}
 
 } //RepeatStatementImpl

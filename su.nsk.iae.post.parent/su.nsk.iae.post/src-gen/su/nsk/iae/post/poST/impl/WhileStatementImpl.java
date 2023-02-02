@@ -56,7 +56,9 @@ public class WhileStatementImpl extends IterationStatementImpl implements WhileS
 	@Override
 	public List<Path> applyTo(List<Path> paths, VCGeneratorState globVars) {
 		FunctionSymbol loopinv = globVars.nextLoopInv();
-		Variable s0 = new Variable("s0");
+		Variable s0 = new Variable("s0'");
+		globVars.addVcFunctionParam(loopinv);
+		globVars.addVcVariableParam(s0);
 		List<Path> result = new ArrayList<>();
 		for (Path path : paths)
 			if (path.getStatus() == ExecutionStatus.NORMAL)
@@ -70,11 +72,17 @@ public class WhileStatementImpl extends IterationStatementImpl implements WhileS
 		loopBody = loopBody.addCondition(cond);
 		List<Path> loopBodyPaths = statement.applyTo(loopBody, globVars);
 		for (Path path: loopBodyPaths)
-			if (path.getStatus() == ExecutionStatus.RETURN)
-				result.add(path);
-			else {
+			switch (path.getStatus()) {
+			case NORMAL:
 				globVars.addVerificationCondition(path.generateVerificationCondition(loopinv));
-			}	  
+				break;
+			case EXIT:
+				path.resetStatus();
+				result.add(path);
+				break;
+			case RETURN:
+				result.add(path);
+		}
 		Path loopPostcondition = new Path(inv, s0);
 		if (cond.getPrecondition() != null)
 			loopPostcondition = loopPostcondition.addCondition(cond.getPrecondition());

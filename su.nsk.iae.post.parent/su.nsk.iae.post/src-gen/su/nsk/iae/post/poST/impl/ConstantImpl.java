@@ -20,6 +20,7 @@ import su.nsk.iae.post.poST.RealLiteral;
 import su.nsk.iae.post.poST.SignedInteger;
 import su.nsk.iae.post.poST.TimeLiteral;
 import su.nsk.iae.post.vcgenerator.DataType;
+import su.nsk.iae.post.vcgenerator.Utils;
 
 /**
  * <!-- begin-user-doc -->
@@ -109,7 +110,7 @@ public class ConstantImpl extends MinimalEObjectImpl.Container implements Consta
 		}
 		else if (time != null) {
 			TimeLiteral timeLiteral = time;
-			int time = parseTime(timeLiteral.getInterval());
+			int time = Utils.parseTime(timeLiteral.getInterval());
 			return new su.nsk.iae.post.vcgenerator.Constant(DataType.INT, time);
 		}
 		else {
@@ -129,38 +130,6 @@ public class ConstantImpl extends MinimalEObjectImpl.Container implements Consta
 		}
 	}
 	
-	private int parseTime(String time) {
-		int d = 0, h = 0, m = 0, s = 0, ms = 0;
-		int index;
-		if ((index = time.indexOf('d')) > 0) {
-			d = Integer.parseInt(time.substring(0, index));
-			time = time.substring(index + 1, time.length());
-		}
-		if ((index = time.indexOf('h')) > 0) {
-			h = Integer.parseInt(time.substring(0, index));
-			time = time.substring(index + 1, time.length());
-		}
-		if ((index = time.indexOf('h')) > 0) {
-			h = Integer.parseInt(time.substring(0, index));
-			time = time.substring(index + 1, time.length());
-		}
-		if ((index = time.indexOf('m')) > 0)
-			if (index == time.length() - 1 || time.charAt(index + 1) != 's') {
-				m = Integer.parseInt(time.substring(0, index));
-				time = time.substring(index + 1, time.length());
-			}
-		if ((index = time.indexOf('s')) > 0)
-			if (time.charAt(index - 1) != 'm') {
-				s = Integer.parseInt(time.substring(0, index));
-				time = time.substring(index + 1, time.length());
-			}
-		if ((index = time.indexOf("ms")) > 0) {
-			ms = Integer.parseInt(time.substring(0, index));
-			time = time.substring(index + 1, time.length());
-		}
-		return ms + 1000 * s + 1000 * 60 * m + 1000 * 60 * 60 * h + 1000 * 60 * 60 * 24 * d;
-	}
-
 	/**
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->

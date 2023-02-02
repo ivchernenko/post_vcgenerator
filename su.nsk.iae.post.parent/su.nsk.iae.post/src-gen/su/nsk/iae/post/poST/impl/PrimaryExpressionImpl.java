@@ -130,7 +130,7 @@ public class PrimaryExpressionImpl extends UnaryExpressionImpl implements Primar
 			return array.generateArrayVariable(currentState, globVars);
 		else if (getNestExpr() != null)
 			return getNestExpr().generateExpression(currentState, globVars);
-		return null;
+		else throw new UnsupportedOperationException("Functions are not supported");
   }
   
   private Term generateProcessStatus(ProcessStatusExpression procStatus, Term currentState, VCGeneratorState globVars) {

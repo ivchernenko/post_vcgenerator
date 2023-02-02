@@ -74,10 +74,12 @@ public class ForStatementImpl extends IterationStatementImpl implements ForState
 
 	@Override
 	public List<Path> applyTo(List<Path> paths, VCGeneratorState globVars) {
-		List<Path> result = new ArrayList<>();
 		FunctionSymbol loopinv = globVars.nextLoopInv();
-		Variable s0 = new Variable("s0");
+		Variable s0 = new Variable("s0'");
+		globVars.addVcFunctionParam(loopinv);
+		globVars.addVcVariableParam(s0);
 		Term invs0 = new ComplexTerm(loopinv, s0);
+		List<Path> result = new ArrayList<>();
 		for (Path path: paths) {
 			if (path.getStatus() != ExecutionStatus.NORMAL)
 				result.add(path);
@@ -129,9 +131,8 @@ public class ForStatementImpl extends IterationStatementImpl implements ForState
 		List<Path> loopBody = loopBodyPosStep;
 		loopBody.addAll(loopBodyNegStep);
 		for (Path path: loopBody)
-			if (path.getStatus() == ExecutionStatus.RETURN)
-				result.add(path);
-			else {
+			switch (path.getStatus()) {
+			case NORMAL:
 				PrimaryExpression variableExpr = new PrimaryExpressionImpl();
 				variableExpr.setVariable(variable);
 				AddExpression increment = new AddExpressionImpl();
@@ -143,6 +144,13 @@ public class ForStatementImpl extends IterationStatementImpl implements ForState
 				incrementStatement.setValue(increment);
 				path.doAssignment(incrementStatement, globVars);
 				globVars.addVerificationCondition(path.generateVerificationCondition(loopinv));
+				break;
+			case EXIT:
+				path.resetStatus();
+				result.add(path);
+				break;
+			case RETURN:
+				result.add(path);
 			}
 		posStep = new Path(invs0, s0);
 		posStep = posStep.addCondition(stepGt0);
