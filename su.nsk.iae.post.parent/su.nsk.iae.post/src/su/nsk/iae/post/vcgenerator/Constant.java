@@ -1,5 +1,10 @@
 package su.nsk.iae.post.vcgenerator;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 public class Constant extends Term  {
 	
 	public Constant(DataType type, String name, Object value) {
@@ -52,9 +57,19 @@ public class Constant extends Term  {
 		return equals(term);
 	}
 	
+	@Override
+	boolean containsVariable(Variable v) {
+		return false;
+	}
+	
+	@Override
+	public boolean containsFunctionVariable(FunctionSymbol f) {
+		return false;
+	}
+	
 	public static Constant emptyState = new Constant("emptyState", null);
-	public static Constant stop = new Constant("stop", 0);
-	public static Constant error = new Constant( "error", 1);
+	public static Constant stop = new Constant("STOP", 0);
+	public static Constant error = new Constant( "ERROR", 1);
 	public static Constant True = new Constant(DataType.BOOL, "True", true);
 	public static Constant False = new Constant(DataType.BOOL, "False", false);
 }

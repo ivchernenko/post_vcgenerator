@@ -370,7 +370,7 @@ public class PathTest {
 		Constant processCode = vcGenVars.addProcess(process);
 		Constant stateCode = vcGenVars.getState(state2Name);
 		vcGenVars.setCurrentProcess(processName);
-		vcGenVars.currentProcessState = 0;
+		vcGenVars.setCurrentProcessState(0);
 		Term expected = setPstate(currentState, processCode, stateCode);
 		path.setState(statement, vcGenVars);
 		Assert.assertEquals(expected, path.getCurrentState());

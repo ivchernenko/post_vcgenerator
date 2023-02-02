@@ -16,6 +16,10 @@ public class FunctionSymbol {
 		this(name, variable, false);
 	}
 	
+	public boolean getInfix() {
+		return infix;
+	}
+	
 	@Override
 	public String toString() {
 		return name;
@@ -39,8 +43,8 @@ public class FunctionSymbol {
 	public static final FunctionSymbol GEQ = new FunctionSymbol(">=", false, true);
 	public static final FunctionSymbol EQ = new FunctionSymbol("=", false, true);
 	public static final FunctionSymbol NOTEQ = new FunctionSymbol("\\<noteq>", false, true);
-	public static final FunctionSymbol AND = new FunctionSymbol("/\\", false, true);
-	public static final FunctionSymbol OR = new FunctionSymbol("\\/", false, true);
+	public static final FunctionSymbol AND = new FunctionSymbol("\\<and>", false, true);
+	public static final FunctionSymbol OR = new FunctionSymbol("\\<or>", false, true);
 	public static final FunctionSymbol NOT = new FunctionSymbol("\\<not>", false, false);
 	public static final FunctionSymbol IMPL = new FunctionSymbol("-->", false, true);
 	

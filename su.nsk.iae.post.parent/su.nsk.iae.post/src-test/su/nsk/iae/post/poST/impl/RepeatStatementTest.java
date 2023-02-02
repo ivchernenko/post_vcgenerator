@@ -136,6 +136,64 @@ public class RepeatStatementTest {
 		Assert.assertEquals(expected, result);
 		Assert.assertEquals(expectedVC, vcGenVars.getVcSet());		
 	}
-
-
+	
+	@Test
+	public void testApplyToSomePathsInLoopBodyContainExit() {
+		/*whileCond, ifCond: BOOL;
+		 * loop precondition^ [{inv1(s0), s0, NORMAL}, {inv2(s0), s0, RETURN}]
+		 * statement: {loopin} REPEAT IF ifCond THEN EXIT; END_IF UNTIL cond END_REPEAT
+		 * expected result:
+		 *  [{inv1(s0) /\ getVarBool(s0, repeatCond) /\ getVarBool(s0, ifCond), s0, NORMAL},
+		 *  {inv2(s0), s0, RETURN}, 
+		 * {loopinv(s0) /\ getVarBool(s0, repeatCond) /\ getVarBool(s0, ifCond), s0, NORMAL},
+		 * {loopinv(s0) /\ not(getVarBool(s0, repeatCond)), s0, NORMAL}]
+		 * vcs = [{inv1(s0) /\ getVarBool(s0, repeatCond) /\ not(getVarBool(s0, ifCond)) --> loopinv(s0),
+		 *  loopinv(s0) /\ getVarBool(s0, repeatCond) /\ not(getVarBool(s0, ifCond)) --> loopinv(s0)]
+		 */
+		String whileCondName = "whileCond";
+		String ifCondName = "ifCond";
+		String type = "BOOL";
+		Term s0 = new Variable("s0");
+		SymbolicVariable whileCondVar = ExpressionFactory.createSymbolicVariable(whileCondName);
+		SymbolicVariable ifCondVar = ExpressionFactory.createSymbolicVariable(ifCondName);
+		Expression repeatCond = ExpressionFactory.createVariableExpression(whileCondVar);
+		Expression ifCond = ExpressionFactory.createVariableExpression(ifCondVar);
+		Statement mainStatement = StatementFactory.createExitStatement();
+		List<Statement> mainStatements = new ArrayList<>();
+		mainStatements.add(mainStatement);
+		Statement ifStatement = StatementFactory.createIfStatement(ifCond, mainStatements, null, null, null);
+		List<Statement> loopBody = new ArrayList<>();
+		loopBody.add(ifStatement);
+		Statement repeatStatement = StatementFactory.createRepeatStatement(loopBody, repeatCond);
+		FunctionSymbol inv1 = new FunctionSymbol("inv1", true);
+		FunctionSymbol inv2 = new FunctionSymbol("inv2", true);
+		FunctionSymbol loopinv = new FunctionSymbol("loopinv", true);
+		Term inv1s0 = new ComplexTerm(inv1, s0);
+		Term inv2s0 = new ComplexTerm(inv2, s0);
+		Term loopinvs0 = new ComplexTerm(loopinv, s0);
+		List<Path> loopPrecondition = new ArrayList<>();
+		loopPrecondition.add(new Path(inv1s0, s0));
+		Path path2 = new Path(inv2s0, s0);
+		path2.doReturn();
+		loopPrecondition.add(path2);
+		VCGeneratorState vcGenVars = new VCGeneratorState();
+		VarInitDeclaration varDecl = ProgramFactory.createSimpleVarDeclaration(type, null, whileCondVar, ifCondVar);
+		vcGenVars.addVars(varDecl, null, ModificationType.VAR);
+		su.nsk.iae.post.vcgenerator.Constant repeatCondCode = vcGenVars.getVariable(whileCondName);
+		su.nsk.iae.post.vcgenerator.Constant ifCondCode = vcGenVars.getVariable(ifCondName);
+		List<Path> expected = new ArrayList<>();
+		Path mainBranchFirstIter = new Path(and(inv1s0, getVarBool(s0, ifCondCode)), s0);
+		expected.add(mainBranchFirstIter);
+		expected.add(path2);
+		Path mainBranch = new Path(and(loopinvs0, getVarBool(s0, repeatCondCode), getVarBool(s0, ifCondCode)), s0);
+		expected.add(mainBranch);
+		Path loopPostcondition = new Path(and(new ComplexTerm(loopinv, s0), not(getVarBool(s0, repeatCondCode))), s0);
+		expected.add(loopPostcondition);
+		List<Term> expectedVC = new ArrayList<>();
+		expectedVC.add(impl(and(inv1s0, not(getVarBool(s0, ifCondCode))), loopinvs0));
+		expectedVC.add(impl(and(loopinvs0, getVarBool(s0, repeatCondCode), not(getVarBool(s0, ifCondCode))), loopinvs0));
+		List<Path> result = repeatStatement.applyTo(loopPrecondition, vcGenVars);
+		Assert.assertEquals(expected, result);
+		Assert.assertEquals(expectedVC, vcGenVars.getVcSet());		
+	}
 }

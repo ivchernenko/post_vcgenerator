@@ -1,6 +1,10 @@
 package su.nsk.iae.post.vcgenerator;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 public class ComplexTerm extends Term {
 
@@ -28,6 +32,14 @@ public class ComplexTerm extends Term {
 
 	public ComplexTerm(FunctionSymbol f, Term... args) {
 		this(null, f, args);
+	}
+	
+	public FunctionSymbol getFunction() {
+		return function;
+	}
+	
+	public Term[] getArgs() {
+		return args;
 	}
 
 	@Override
@@ -80,5 +92,23 @@ public class ComplexTerm extends Term {
 			return false;
 		Term term = (Term) o;
 		return equalsUpToMatching(term, new VariableMatching());
+	}
+	
+	@Override
+	boolean containsVariable(Variable v) {
+		for (Term arg: args)
+			if (arg.containsVariable(v))
+				return true;
+		return false;
+	}
+	
+	@Override
+	boolean containsFunctionVariable(FunctionSymbol f) {
+		if (function.equals(f))
+			return true;
+		for (Term arg: args)
+			if (arg.containsFunctionVariable(f))
+				return true;
+		return false;
 	}
 }

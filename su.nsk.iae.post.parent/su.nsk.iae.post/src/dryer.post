@@ -1,0 +1,29 @@
+PROGRAM Controller
+	VAR_INPUT
+		hands : BOOL;
+	END_VAR
+
+	VAR_OUTPUT
+		dryer : BOOL;
+	END_VAR
+
+	PROCESS Ctrl
+		STATE waiting
+			IF hands  THEN
+				dryer := TRUE;
+				SET NEXT;
+			ELSE
+				dryer := FALSE;
+			END_IF
+		END_STATE
+
+		STATE drying
+			IF hands  THEN
+				RESET TIMER;
+			END_IF
+			TIMEOUT T#1s THEN
+				SET STATE waiting;
+			END_TIMEOUT
+		END_STATE
+	END_PROCESS
+END_PROGRAM

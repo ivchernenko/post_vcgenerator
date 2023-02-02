@@ -123,6 +123,10 @@ public class StatementFactory {
 		return new ResetTimerStatementImpl();
 	}
 	
+	public static ExitStatement createExitStatement() {
+		return new ExitStatementImpl();
+	}
+	
 	public static SubprogramControlStatement createReturnStatement() {
 		return new SubprogramControlStatementImpl();
 	}

@@ -94,7 +94,7 @@ public class VCGenerator {
 		globVars.setCurrentProcess(process.getName());
 		for (State state: process.getStates())  {
 			result.addAll(generateState(path, state));
-			++globVars.currentProcessState;
+			globVars.setCurrentProcessState(globVars.getCurrentProcessState() + 1);
 		}			
 		Term processInStopState = new ComplexTerm(
 				FunctionSymbol.EQ,
@@ -138,14 +138,18 @@ public class VCGenerator {
 		//Encoding of processes
 		for (su.nsk.iae.post.poST.Process process: program.getProcesses())
 			globVars.addProcess(process);
-		FunctionSymbol env = new FunctionSymbol("env", true);
-		FunctionSymbol inv = new FunctionSymbol("inv", true);
-		Variable s0 = new Variable("s0");
+		FunctionSymbol env = new FunctionSymbol("env'", true);
+		FunctionSymbol inv = new FunctionSymbol("inv'", true);
+		Variable s0 = new Variable("s0'");
+		globVars.addVcVariableParam(s0);
+		globVars.addVcFunctionParam(inv);
+		globVars.addVcFunctionParam(env);
 		Term invs0 = new ComplexTerm(inv, s0);
 		List<Term> setVarAnyArgs = new ArrayList<>();
 		setVarAnyArgs.add(s0);
 		for (Constant envVar: globVars.envVars) {
-			Variable var_value = new Variable(envVar.getName()+"_value");
+			Variable var_value = new Variable(envVar.getName()+ VCGeneratorState.NAME_SEPARATOR + "value");
+			globVars.addVcVariableParam(var_value);
 			setVarAnyArgs.add(var_value);
 		}
 		Term s1 = new ComplexTerm(FunctionSymbol.setVarAny, (Term[]) setVarAnyArgs.toArray(new Term[0]));

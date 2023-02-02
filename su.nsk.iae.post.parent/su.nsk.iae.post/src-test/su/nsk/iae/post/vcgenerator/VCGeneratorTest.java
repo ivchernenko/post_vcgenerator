@@ -264,7 +264,7 @@ public class VCGeneratorTest {
 		su.nsk.iae.post.vcgenerator.Constant stateCode = vcGenVars.getState(stateName);
 		VCGenerator vcGen = new VCGenerator();
 		vcGen.globVars = vcGenVars;
-		vcGenVars.currentProcessState= states.indexOf(state);
+		vcGenVars.setCurrentProcessState(states.indexOf(state));
 		List<Path> expected = new ArrayList<>();
 		int timeInCycles = timeInMilliseconds % period == 0 ? timeInMilliseconds / period : timeInMilliseconds / period + 1;
 		su.nsk.iae.post.vcgenerator.Constant time = new su.nsk.iae.post.vcgenerator.Constant(timeInCycles);
@@ -311,7 +311,7 @@ public class VCGeneratorTest {
 		su.nsk.iae.post.vcgenerator.Constant state2Code = vcGenVars.getState(state2Name);
 		VCGenerator vcGen = new VCGenerator();
 		vcGen.globVars = vcGenVars;
-		vcGenVars.currentProcessState= states.indexOf(state2);
+		vcGenVars.setCurrentProcessState(states.indexOf(state2));
 		List<Path> expected = new ArrayList<>();
 		expected.add(new Path(eq(getPstate(s0, procCode), state2Code), setPstate(s0, procCode, state1Code)));
 		List<Path> result = vcGen.generateState(path, state2);
@@ -360,7 +360,7 @@ public class VCGeneratorTest {
 		su.nsk.iae.post.vcgenerator.Constant state2Code = vcGenVars.getState(state2Name);
 		VCGenerator vcGen = new VCGenerator();
 		vcGen.globVars = vcGenVars;
-		vcGenVars.currentProcessState= states.indexOf(state2);
+		vcGenVars.setCurrentProcessState(states.indexOf(state2));
 		Term stateAfterStateBody = setPstate(s0, procCode, state1Code);
 		int timeInCycles = timeInMilliseconds % period == 0 ? timeInMilliseconds / period : timeInMilliseconds / period + 1;
 		su.nsk.iae.post.vcgenerator.Constant time = new su.nsk.iae.post.vcgenerator.Constant(timeInCycles);
@@ -400,7 +400,7 @@ public class VCGeneratorTest {
 		vcGenVars.setCurrentProcess(processName);
 		VCGenerator vcGen = new VCGenerator();
 		vcGen.globVars = vcGenVars;
-		vcGenVars.currentProcessState= states.indexOf(state);
+		vcGenVars.setCurrentProcessState(states.indexOf(state));
 		List<Path> expected = new ArrayList<>();
 		expected.add(path);
 		List<Path> result = vcGen.generateState(path, state);

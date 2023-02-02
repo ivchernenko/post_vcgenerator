@@ -1,6 +1,7 @@
 package su.nsk.iae.post.vcgenerator;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import su.nsk.iae.post.poST.ArrayInterval;
 import su.nsk.iae.post.poST.ArraySpecificationInit;
@@ -27,23 +28,27 @@ public class VCGeneratorState {
 	Map<Constant, ArraySpecificationInit> arraySpecifications = new HashMap<>();
 	Map<Constant, IndexRange> indexRanges = new HashMap<>();
 	Map<Constant, List<Term>> arrayConstantValues = new HashMap<>();
-	int currentProcessState;
+	private int currentProcessState;
 	Map<String, StateList> processStates = new HashMap<>();
 	Constant currentProcess;
 	Map<String, Constant> processes = new HashMap<>();
 	Map<String, Constant> initialStates = new HashMap<>();
+	List<Variable> vcVariableParams = new ArrayList<>();
+	List<FunctionSymbol> vcFunctionParams = new ArrayList<>();
 	int period;
 	List<Term> vcSet = new ArrayList<>();
 	int loopNumber = 0;
 	int pstateNumber = 1;
 	int varNumber = 0;
 	int processNumber = 0;
+	
+	public static final String NAME_SEPARATOR = "'";
 
 	public VCGeneratorState(int period) {
 		this.period = period;
 		initializedVars.put(null, new ArrayList<>());
 	}
-	
+
 	public VCGeneratorState() {
 		this(0);
 	}
@@ -68,7 +73,7 @@ public class VCGeneratorState {
 	public Term getConstantValue(Constant c) {
 		return constantValues.get(c);
 	}
-	
+
 	public Constant getTimeoutConstantValue(Constant c) {
 		if (timeoutConstantValues.containsKey(c))
 			return timeoutConstantValues.get(c);
@@ -77,13 +82,13 @@ public class VCGeneratorState {
 			Constant timeoutConst = null;
 			if (timeInMilliseconds != null) {
 				timeoutConst = millisecondsToCycles(timeInMilliseconds);
-				timeoutConst.setName(c.getName() + "_TIMEOUT");
+				timeoutConst.setName(c.getName() + NAME_SEPARATOR + "TIMEOUT");
 			}
 			timeoutConstantValues.put(c, timeoutConst);
 			return timeoutConst;
 		}
 	}
-	
+
 	public Term getArrayConstantValue(Constant array, Term index) {
 		if (index.getValue() == null)
 			return null;
@@ -100,11 +105,11 @@ public class VCGeneratorState {
 	}
 
 	public Constant getCurrentState() {
-		return processStates.get(currentProcess.getName()).getState(currentProcessState);
+		return processStates.get(currentProcess.getName()).getState(getCurrentProcessState());
 	}
 
 	public Constant getNextState() {
-		return processStates.get(currentProcess.getName()).getState(currentProcessState + 1);
+		return processStates.get(currentProcess.getName()).getState(getCurrentProcessState() + 1);
 	}
 
 	public Constant getProcess(String name) {
@@ -125,7 +130,7 @@ public class VCGeneratorState {
 
 	public FunctionSymbol nextLoopInv() {
 		++loopNumber;
-		return new FunctionSymbol("loopinv"+loopNumber, true);
+		return new FunctionSymbol(getCurrentState().getName() + NAME_SEPARATOR + "loopinv" + loopNumber, true);
 	}
 
 	public void addState(String stateName, String prefix) {
@@ -135,7 +140,7 @@ public class VCGeneratorState {
 
 	public void setCurrentProcess(String processName) {
 		currentProcess = processes.get(processName);
-		currentProcessState = 0;
+		setCurrentProcessState(0);
 	}
 
 	public void addVars(VarInitDeclaration varDecl, String prefix, ModificationType modType) {
@@ -157,7 +162,7 @@ public class VCGeneratorState {
 			if (prefix == null)
 				fullVarName = symVar.getName();
 			else
-				fullVarName = prefix + "_" + symVar.getName();
+				fullVarName = prefix + NAME_SEPARATOR + symVar.getName();
 			Constant varCode = new Constant(fullVarName, varNumber);
 			if (value != null && modType != ModificationType.CONSTANT || arraySpec != null) {
 				initializedVars.add(varCode);
@@ -193,7 +198,7 @@ public class VCGeneratorState {
 				envVars.add(varCode);
 		}
 	}
-	
+
 	public List<Constant> getInitializedVars(String prefix) {
 		return initializedVars.get(prefix);
 	}
@@ -230,16 +235,104 @@ public class VCGeneratorState {
 			addState(state.getName(), process.getName());
 		return processCode;
 	}
-	
+
 	public Term initializeVar(Constant variable, Term state) {
 		if (isArray(variable))
 			return initializeArray(variable, state);
 		else
 			return initializeSimpleVar(variable, state);
 	}
-	
+
 	public IndexRange getIndexRange(Constant varCode) {
 		return indexRanges.get(varCode);
+	}
+
+	public List<Term> getVcSet() {
+		return vcSet;
+	}
+
+	public List<Constant> getEnvVars() {
+		return envVars;
+	}
+
+	public List<String> getEnvVarTypes() {
+		return envVars.stream()
+				.map(x -> varTypes.get(x))
+				.collect(Collectors.toList());
+	}
+
+	public List<Constant> getBoolEnvVars() {
+		return envVars.stream()
+				.filter(x -> varTypes.get(x).equals("BOOL"))
+				.collect(Collectors.toList());
+	}
+
+	public List<Constant> getIntEnvVars() {
+		return envVars.stream()
+				.filter(x -> Utils.isIntegerTypeName(varTypes.get(x)))
+				.collect(Collectors.toList());
+	}
+
+	public List<Constant> getRealEnvVars() {
+		return envVars.stream()
+				.filter(x -> Utils.isRealTypeName(varTypes.get(x)))
+				.collect(Collectors.toList());
+	}
+
+	public Set<Constant> getVariables() {
+		return varTypes.keySet();
+	}
+
+	public Collection<Constant> getProcesses() {
+		return processes.values();
+	}
+
+	public List<Constant> getProcessStates() {
+		List<Constant> states = new ArrayList<>();
+		for (StateList stateList: processStates.values())
+			states.addAll(stateList.getStates());
+		return states;
+	}
+
+	public Map<Constant, Term> getConstants() {
+		return constantValues;
+	}
+
+	public Map<Constant, Constant> getTimeoutConstants() {
+		return timeoutConstantValues;
+	}
+
+	public List<Variable> getVcVariableParams() {
+		return vcVariableParams;
+	}
+
+	public void addVcVariableParam(Variable v) {
+		vcVariableParams.add(v);
+	}
+
+	public void addVcFunctionParam(FunctionSymbol f) {
+		vcFunctionParams.add(f);
+	}
+
+	public List<FunctionSymbol> getVcFunctionParams() {
+		return vcFunctionParams;
+	}	
+
+	public int getCurrentProcessState() {
+		return currentProcessState;
+	}
+	
+	public void setCurrentProcessState(int currentProcessState) {
+		this.currentProcessState = currentProcessState;
+		loopNumber = 0;
+	}
+	
+	public String generateAvailableName(String name) {
+		String availableName = name;
+		 while (! isAvailableName(availableName)) {
+			 availableName = availableName + "'";
+		 }
+		 return availableName;
 	}
 
 	private Term initializeSimpleVar(Constant variable, Term state) {
@@ -280,11 +373,7 @@ public class VCGeneratorState {
 
 	private boolean isArray(Constant variable) {
 		return arraySpecifications.containsKey(variable);
-	}
-
-	public List<Term> getVcSet() {
-		return vcSet;
-	}
+	}	
 
 	Constant millisecondsToCycles(int timeInMilliseconds) {
 		int timeInCycles;
@@ -293,6 +382,16 @@ public class VCGeneratorState {
 		else
 			timeInCycles = timeInMilliseconds / period + 1;
 		return new Constant(timeInCycles);
+	}
+	
+	private boolean isAvailableName(String name) {
+		for (Constant varCode: getVariables()) 
+			if (varCode.getName().equals(name))
+				return false;
+		for (Constant processCode: getProcesses())
+			if (processCode.getName().equals(name))
+				return false;
+		return true;		
 	}
 }
 
@@ -313,8 +412,12 @@ class StateList {
 		return getState(stateNames.get(index));
 	}
 
+	Collection<Constant> getStates() {
+		return pstates.values();
+	}
+
 	void addState(String stateName, String prefix, int stateCode) {
 		stateNames.add(stateName);
-		pstates.put(stateName, new Constant(prefix + "_" + stateName, stateCode));
+		pstates.put(stateName, new Constant(prefix + VCGeneratorState.NAME_SEPARATOR + stateName, stateCode));
 	}
 }

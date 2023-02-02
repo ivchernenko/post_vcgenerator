@@ -193,6 +193,10 @@ public class Path {
 	public ExecutionStatus getStatus() {
 		return status;
 	}
+	
+	public void resetStatus() {
+		status = ExecutionStatus.NORMAL;
+	}
 
 	public Term getCurrentState() {
 		return currentState;

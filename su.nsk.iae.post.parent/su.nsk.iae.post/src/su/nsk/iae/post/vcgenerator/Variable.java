@@ -1,5 +1,11 @@
 package su.nsk.iae.post.vcgenerator;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 public class Variable extends Term {
 	
 	private String name;
@@ -19,5 +25,15 @@ public class Variable extends Term {
 			return false;
 		Variable v = (Variable) term;			
 		return matching.addMatching(this, v);
+	}
+	
+	@Override
+	boolean containsVariable(Variable v) {
+		return this.equals(v);
+	}
+	
+	@Override
+	boolean containsFunctionVariable(FunctionSymbol f) {
+		return false;
 	}
 }
