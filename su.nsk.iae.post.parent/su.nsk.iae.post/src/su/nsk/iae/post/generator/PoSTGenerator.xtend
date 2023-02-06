@@ -47,9 +47,9 @@ class PoSTGenerator implements AbstractGenerator {
 			«FOR p : vcGenVars.getProcesses()»
 				«generateProcessCode(p)»
 			 «ENDFOR»
-			 
-			 abbreviation STOP:: pstate where "STOP \<equiv> 0"
-			 abbreviation ERROR:: pstate where "ERROR \<equiv> 1"
+			
+			abbreviation STOP:: pstate where "STOP \<equiv> 0"
+			abbreviation ERROR:: pstate where "ERROR \<equiv> 1"
 			
 			«FOR s : vcGenVars.getProcessStates()»
 				«generateProcessStateCode(s)»

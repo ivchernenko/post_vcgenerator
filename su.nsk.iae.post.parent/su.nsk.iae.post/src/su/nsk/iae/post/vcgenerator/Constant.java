@@ -29,8 +29,11 @@ public class Constant extends Term  {
 	public String toString() {
 		if (name != null) 
 			return name;
-		else
-			return value.toString();
+		else if (value.equals(true))
+			return "True";
+		else if (value.equals(false))
+			return "False";
+		else return value.toString();
 	}
 	
 	@Override

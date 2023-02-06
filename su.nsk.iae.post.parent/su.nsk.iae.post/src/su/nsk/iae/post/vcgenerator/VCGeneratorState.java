@@ -189,8 +189,9 @@ public class VCGeneratorState {
 					Term constantValue = value.generateExpression(Constant.emptyState, this);
 					if (constantValue.equals(Constant.True))
 						constantValue = new Constant(DataType.BOOL, varCode.getName(), true);
-					if (constantValue.equals(Constant.False))
+					else if (constantValue.equals(Constant.False))
 						constantValue = new Constant(DataType.BOOL, varCode.getName(), false);
+					else constantValue.setName(varCode.getName());
 					constantValues.put(varCode, constantValue);
 				}				
 			}				
@@ -279,8 +280,10 @@ public class VCGeneratorState {
 				.collect(Collectors.toList());
 	}
 
-	public Set<Constant> getVariables() {
-		return varTypes.keySet();
+	public List<Constant> getVariables() {
+		return varTypes.keySet().stream()
+				.filter(x -> ! isConstant(x))
+				.collect(Collectors.toList());
 	}
 
 	public Collection<Constant> getProcesses() {
