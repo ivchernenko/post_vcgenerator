@@ -368,6 +368,7 @@ public class VCGeneratorState {
 				newState.addCondition(state.getPrecondition());
 				newState.addCondition(value.getPrecondition());
 				state = newState;
+				++i;
 			}
 			arrayConstantValues.put(variable, arrayValues);
 		}
