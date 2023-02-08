@@ -673,6 +673,65 @@ public class VCGeneratorTest {
 	}
 	
 	@Test
+	public void testGenerateProgramWithInitializedArray() throws Exception {
+		String programText = 
+				"PROGRAM Prg\r\n"
+				+ "VAR_INPUT\r\n"
+				+ "in: BOOL;\r\n"
+				+ "END_VAR\r\n"
+				+ "VAR_OUTPUT\r\n"
+				+ "out: BOOL;\r\n"
+				+ "END_VAR\r\n"
+				+ "VAR_IN_OUT\r\n"
+				+ "inOut: BOOL;\r\n"
+				+ "END_VAR\r\n"
+				+ "VAR\r\n"
+				+ "arr: ARRAY [1 .. 3] OF INT := [1, 2, 3];\r\n"
+				+ "END_VAR\r\n"
+				+ "PROCESS process1\r\n"
+				+ "STATE state1\r\n"
+				+ "out := TRUE\r\n"
+				+ "END_STATE\r\n"
+				+ "END_PROCESS\r\n"
+				+ "END_PROGRAM";
+		su.nsk.iae.post.vcgenerator.Constant _1 = new su.nsk.iae.post.vcgenerator.Constant(1);
+		su.nsk.iae.post.vcgenerator.Constant _2 = new su.nsk.iae.post.vcgenerator.Constant(2);
+		su.nsk.iae.post.vcgenerator.Constant _3 = new su.nsk.iae.post.vcgenerator.Constant(3);
+		su.nsk.iae.post.vcgenerator.Constant _0 = new su.nsk.iae.post.vcgenerator.Constant(0);
+		Term s0 = new Variable("s0");
+		Variable inValue = new Variable("in_value");
+		Variable inOutValue = new Variable("inOut_value");
+		FunctionSymbol inv = new FunctionSymbol("inv", true);
+		FunctionSymbol env = new FunctionSymbol("env", true);
+		Term invs0 = new ComplexTerm(inv, s0);
+		Term s1 = setVarAny(s0, inValue, inOutValue);
+		Term envs1 = new ComplexTerm(env, s1);
+		VCGeneratorState vcGenVars = new VCGeneratorState();
+		VCGenerator vcGen = new VCGenerator();
+		vcGen.globVars = vcGenVars;
+		Model model = parser.parse(programText);
+		Program program = model.getPrograms().get(0);
+		vcGen.generateProgram(program);
+		su.nsk.iae.post.vcgenerator.Constant out = vcGenVars.getVariable("out");
+		su.nsk.iae.post.vcgenerator.Constant arr = vcGenVars.getVariable("arr");
+		su.nsk.iae.post.vcgenerator.Constant process1 = vcGenVars.getProcess("process1");
+		vcGenVars.setCurrentProcess("process1");
+		su.nsk.iae.post.vcgenerator.Constant state1 = vcGenVars.getState("state1");
+		Term stateAfterArr1Initialization = setVarArrayInt(emptyState, arr, plus(_1, _0), _1);
+		Term stateAfterArr12Initialization = setVarArrayInt(stateAfterArr1Initialization, arr, plus(_1, _1), _2);
+		Term stateAfterArr123Initialization = setVarArrayInt(stateAfterArr12Initialization, arr, plus(_1, _2), _3);
+		List<Term> expected = new ArrayList<>();
+		expected.add(impl(eq(s0, toEnv(setPstate(stateAfterArr123Initialization, process1, state1))), invs0));
+		expected.add(impl(and(invs0, envs1, eq(getPstate(s1, process1), state1)),
+				new ComplexTerm(inv, toEnv(setVarBool(s1, out, True)))));
+		expected.add(impl(and(invs0, envs1, eq(getPstate(s1, process1), stop)),
+				new ComplexTerm(inv, toEnv(s1))));
+		expected.add(impl(and(invs0, envs1, eq(getPstate(s1, process1), error)),
+				new ComplexTerm(inv, toEnv(s1))));
+		Assert.assertEquals(expected, vcGenVars.vcSet);
+	}
+	
+	@Test
 	public void testGenerateVCsForConfiguredProgramConfigurationForAnotherProgram() throws Exception {
 		String programText =
 				"PROGRAM Prg1\r\n"

@@ -145,7 +145,7 @@ class PoSTGenerator implements AbstractGenerator {
 			  setVarArrayBool state variable int bool |
 			  setVarArrayInt state variable int int |
 			  setVarArrayReal state variable int real |
-			  setVarAny state «FOR t : envVarTypes» «getIsabelleType(t)» «ENDFOR» |
+			  setVarAny state«FOR t : envVarTypes» «getIsabelleType(t)»«ENDFOR» |
 			  setPstate state process pstate |
 			  reset state process
 		'''
@@ -416,9 +416,9 @@ class PoSTGenerator implements AbstractGenerator {
 			ComplexTerm: {
 				return '''
 					(«IF term.function.infix»
-							 «generateTerm(term.args.get(0))»
+						  «generateTerm(term.args.get(0))»
 						«term.function»
-						 «generateTerm(term.args.get(1))»
+						  «generateTerm(term.args.get(1))»
 					«ELSE»	
 						«term.function»
 						  «generateSubterms(term.args)»
@@ -475,6 +475,10 @@ class PoSTGenerator implements AbstractGenerator {
 
 	def void setModel(Model model) {
 		this.model = model
+	}
+	
+	def void setTheoryName(String theoryName) {
+		this.theoryName = theoryName
 	}
 
 	override afterGenerate(Resource input, IFileSystemAccess2 fsa, IGeneratorContext context) {}
