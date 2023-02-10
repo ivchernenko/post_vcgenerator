@@ -1,0 +1,475 @@
+theory Proof_2_9
+  imports Requirements VCTheoryLemmas
+begin
+
+theorem proof_2_9: "VC9 inv2 s0 requestButtonValue"
+  apply(simp only: VC9_def inv2_def  R2_def extraInv_def)
+proof
+  print_state
+  assume "  ((toEnvP s0 \<and>
+      (\<forall>s1 s2 s3.
+          substate s1 s2 \<and>
+          substate s2 s3 \<and>
+          substate s3 s0 \<and>
+          toEnvP s1 \<and>
+          toEnvP s2 \<and>
+          toEnvP s3 \<and>
+          toEnvNum s1 s2 = Ctrl \<and> toEnvNum s2 s3 < T2 \<and> getVarBool s1 minimalRed \<noteq> PRESSED \<and> getVarBool s2 minimalRed = PRESSED \<longrightarrow>
+          getVarBool s3 minimalRed = PRESSED)) \<and>
+     toEnvP s0 \<and>
+     (\<forall>s1. toEnvP s1 \<and> substate s1 s0 \<and> getPstate s1 Ctrl = minimalRed \<longrightarrow> 0 < ltimeEnv s1 Ctrl \<and> ltimeEnv s1 Ctrl \<le> MINIMAL_RED_TIME_LIMIT) \<and>
+     (\<forall>s1. toEnvP s1 \<and> substate s1 s0 \<and> getPstate s1 Ctrl = minimalRed \<longrightarrow>
+           (\<exists>s2. toEnvP s2 \<and> substate s2 s1 \<and> toEnvNum s2 s1 = ltimeEnv s1 Ctrl \<and> getPstate s2 Ctrl = green \<and> ltimeEnv s2 Ctrl = T2) \<or>
+           (\<forall>s2. toEnvP s2 \<and> substate s2 s1 \<longrightarrow> getPstate s2 Ctrl = minimalRed)) \<and>
+     (\<forall>s1 s2.
+         toEnvP s1 \<and> toEnvP s2 \<and> substate s1 s2 \<and> substate s2 s0 \<and> getPstate s2 Ctrl = minimalRed \<and> toEnvNum s1 s2 < ltimeEnv s2 Ctrl \<longrightarrow>
+         getPstate s1 Ctrl = minimalRed) \<and>
+     (\<forall>s1 s2.
+         toEnvP s1 \<and>
+         toEnvP s2 \<and>
+         substate s1 s2 \<and> substate s2 s0 \<and> (\<forall>s3. toEnvP s3 \<and> substate s1 s3 \<and> substate s3 s2 \<longrightarrow> getPstate s3 Ctrl = minimalRed) \<longrightarrow>
+         toEnvNum s1 s2 = ltimeEnv s2 Ctrl - ltimeEnv s1 Ctrl) \<and>
+     (\<forall>s1. toEnvP s1 \<and> substate s1 s0 \<and> getPstate s1 Ctrl = redAfterMinimalRed \<and> getVarBool s1 redAfterMinimalRed = NOT_PRESSED \<longrightarrow>
+           (\<exists>s2. toEnvP s2 \<and>
+                 substate s2 s1 \<and>
+                 getPstate s2 Ctrl = minimalRed \<and>
+                 ltimeEnv s2 Ctrl = MINIMAL_RED_TIME_LIMIT \<and>
+                 getVarBool s2 redAfterMinimalRed = NOT_PRESSED \<and>
+                 (\<forall>s3. toEnvP s3 \<and> substate s2 s3 \<and> substate s3 s1 \<and> s2 \<noteq> s3 \<longrightarrow>
+                       getPstate s3 Ctrl = redAfterMinimalRed \<and>
+                       getVarBool s3 redAfterMinimalRed = NOT_PRESSED \<and> getVarBool s3 Ctrl = NOT_PRESSED))) \<and>
+     (\<forall>s1. toEnvP s1 \<and> substate s1 s0 \<and> getPstate s1 Ctrl = redToGreen \<longrightarrow>
+           0 < ltimeEnv s1 Ctrl \<and> ltimeEnv s1 Ctrl \<le> RED_TO_GREEN_TIME_LIMIT) \<and>
+     (\<forall>s1. toEnvP s1 \<and> substate s1 s0 \<and> getPstate s1 Ctrl = redToGreen \<longrightarrow>
+           (\<exists>s2. toEnvP s2 \<and>
+                 substate s2 s1 \<and>
+                 toEnvNum s2 s1 = ltimeEnv s1 Ctrl \<and>
+                 getPstate s2 Ctrl = redAfterMinimalRed \<and> (getVarBool s2 redAfterMinimalRed = PRESSED \<or> getVarBool s2 Ctrl = PRESSED))) \<and>
+     (\<forall>s1 s2.
+         toEnvP s1 \<and> toEnvP s2 \<and> substate s1 s2 \<and> substate s2 s0 \<and> toEnvNum s1 s2 < ltimeEnv s2 Ctrl \<and> getPstate s2 Ctrl = redToGreen \<longrightarrow>
+         getPstate s1 Ctrl = redToGreen) \<and>
+     (\<forall>s1 s2.
+         toEnvP s1 \<and>
+         toEnvP s2 \<and>
+         substate s1 s2 \<and> substate s2 s0 \<and> (\<forall>s3. toEnvP s3 \<and> substate s1 s3 \<and> substate s3 s2 \<longrightarrow> getPstate s3 Ctrl = redToGreen) \<longrightarrow>
+         toEnvNum s1 s2 = ltimeEnv s2 Ctrl - ltimeEnv s1 Ctrl) \<and>
+     (\<forall>s1. toEnvP s1 \<and> substate s1 s0 \<and> getPstate s1 Ctrl = green \<longrightarrow> 0 < ltimeEnv s1 Ctrl \<and> ltimeEnv s1 Ctrl \<le> T2) \<and>
+     (\<forall>s1. toEnvP s1 \<and> substate s1 s0 \<and> getPstate s1 Ctrl = green \<longrightarrow>
+           (\<exists>s2. toEnvP s2 \<and>
+                 substate s2 s1 \<and>
+                 toEnvNum s2 s1 = ltimeEnv s1 Ctrl \<and> getPstate s2 Ctrl = redToGreen \<and> ltimeEnv s2 Ctrl = RED_TO_GREEN_TIME_LIMIT)) \<and>
+     (\<forall>s1 s2.
+         toEnvP s1 \<and> toEnvP s2 \<and> substate s1 s2 \<and> substate s2 s0 \<and> getPstate s2 Ctrl = green \<and> toEnvNum s1 s2 < ltimeEnv s2 Ctrl \<longrightarrow>
+         getPstate s1 Ctrl = green) \<and>
+     (\<forall>s1 s2.
+         toEnvP s1 \<and>
+         toEnvP s2 \<and> substate s1 s2 \<and> substate s2 s0 \<and> (\<forall>s3. toEnvP s3 \<and> substate s1 s3 \<and> substate s3 s2 \<longrightarrow> getPstate s3 Ctrl = green) \<longrightarrow>
+         toEnvNum s1 s2 = ltimeEnv s2 Ctrl - ltimeEnv s1 Ctrl) \<and>
+     (\<forall>s1. toEnvP s1 \<and> substate s1 s0 \<and> getPstate s1 Ctrl = green \<longrightarrow> getVarBool s1 minimalRed = PRESSED) \<and>
+     (\<forall>s1. toEnvP s1 \<and> substate s1 s0 \<and> getPstate s1 Ctrl \<noteq> green \<longrightarrow> getVarBool s1 minimalRed = NOT_PRESSED) \<and>
+     (\<forall>s1. toEnvP s1 \<and> substate s1 s0 \<longrightarrow>
+           getPstate s1 Ctrl = minimalRed \<or>
+           getPstate s1 Ctrl = redAfterMinimalRed \<or> getPstate s1 Ctrl = redToGreen \<or> getPstate s1 Ctrl = green) \<and>
+     (\<forall>s1 s2.
+         toEnvP s1 \<and>
+         toEnvP s2 \<and>
+         substate s1 s2 \<and>
+         substate s2 s0 \<and>
+         toEnvNum s1 s2 < ltimeEnv s2 Ctrl - Ctrl \<and> getPstate s2 Ctrl = minimalRed \<and> getVarBool s2 redAfterMinimalRed = NOT_PRESSED \<longrightarrow>
+         getVarBool s1 Ctrl = NOT_PRESSED) \<and>
+     (\<forall>s2. toEnvP s2 \<and> substate s2 s0 \<and> getPstate s2 Ctrl = minimalRed \<and> getVarBool s2 redAfterMinimalRed = PRESSED \<longrightarrow>
+           (\<exists>s1. toEnvP s1 \<and> substate s1 s2 \<and> toEnvNum s1 s2 < ltimeEnv s2 Ctrl - Ctrl \<and> getVarBool s1 Ctrl = PRESSED)) \<and>
+     (\<forall>s1. toEnvP s1 \<and> substate s1 s0 \<and> getPstate s1 Ctrl = redAfterMinimalRed \<and> getVarBool s1 redAfterMinimalRed \<longrightarrow>
+           (\<exists>s2. toEnvP s2 \<and>
+                 substate s2 s1 \<and>
+                 toEnvNum s2 s1 = Ctrl \<and>
+                 getPstate s2 Ctrl = minimalRed \<and>
+                 ltimeEnv s2 Ctrl = MINIMAL_RED_TIME_LIMIT \<and> (getVarBool s2 redAfterMinimalRed \<or> getVarBool s1 Ctrl = PRESSED))) \<and>
+     (\<forall>s1. toEnvP s1 \<and> substate s1 s0 \<and> getPstate s1 Ctrl = green \<longrightarrow> getVarBool s1 redAfterMinimalRed = NOT_PRESSED)) \<and>
+    env (setVarAny s0 requestButtonValue) requestButtonValue \<and>
+    getPstate (setVarAny s0 requestButtonValue) Ctrl = redToGreen \<and>
+    \<not> RED_TO_GREEN_TIME_LIMIT \<le> ltimeEnv (setVarAny s0 requestButtonValue) Ctrl"
+  then obtain reqs0: "(toEnvP s0 \<and>
+      (\<forall>s1 s2 s3.
+          substate s1 s2 \<and>
+          substate s2 s3 \<and>
+          substate s3 s0 \<and>
+          toEnvP s1 \<and>
+          toEnvP s2 \<and>
+          toEnvP s3 \<and>
+          toEnvNum s1 s2 = Ctrl \<and>
+          toEnvNum s2 s3 < T2 \<and> getVarBool s1 minimalRed \<noteq> PRESSED \<and> getVarBool s2 minimalRed = PRESSED \<longrightarrow>
+          getVarBool s3 minimalRed = PRESSED))" 
+and ei0: "toEnvP s0"
+and ei1: "(\<forall> s1. toEnvP s1 \<and> substate s1 s0 \<and> getPstate s1 Ctrl = minimalRed \<longrightarrow>
+ 0<ltimeEnv s1 Ctrl \<and>  ltimeEnv s1 Ctrl \<le> MINIMAL_RED_TIME_LIMIT) " 
+and ei2: "(\<forall> s1. toEnvP s1 \<and> substate s1 s0 \<and> getPstate s1 Ctrl = minimalRed \<longrightarrow>
+ ((\<exists> s2. toEnvP s2 \<and> substate s2 s1 \<and> toEnvNum s2 s1 = ltimeEnv s1 Ctrl  \<and>
+ getPstate s2 Ctrl = green \<and> ltimeEnv s2 Ctrl = GREEN_TIME_LIMIT) \<or>
+ (\<forall> s2. toEnvP s2 \<and> substate s2 s1 \<longrightarrow> getPstate s2 Ctrl = minimalRed))) "
+and ei3: "(\<forall> s1 s2. toEnvP s1 \<and> toEnvP s2 \<and> substate s1 s2 \<and> substate s2 s0 \<and> getPstate s2 Ctrl = minimalRed \<and>
+ toEnvNum s1 s2 < ltimeEnv s2 Ctrl \<longrightarrow> getPstate s1 Ctrl = minimalRed) "
+and ei4: "\<forall> s1 s2. toEnvP s1 \<and> toEnvP s2 \<and> substate s1 s2 \<and> substate s2 s0 \<and>
+(\<forall> s3. toEnvP s3 \<and> substate s1 s3 \<and> substate s3 s2 \<longrightarrow> getPstate s3 Ctrl = minimalRed ) \<longrightarrow>
+toEnvNum s1 s2 = ltimeEnv s2 Ctrl - ltimeEnv s1 Ctrl" 
+and ei5: "\<forall> s1 . toEnvP s1 \<and> substate s1 s0 \<and> getPstate s1 Ctrl = redAfterMinimalRed \<and>
+ getVarBool s1 requestButtonPressed = False \<longrightarrow>
+(\<exists> s2. toEnvP s2 \<and> substate s2 s1 \<and> getPstate s2 Ctrl = minimalRed \<and> ltimeEnv s2 Ctrl = MINIMAL_RED_TIME_LIMIT \<and>
+getVarBool s2 requestButtonPressed = False \<and> (\<forall> s3. toEnvP s3 \<and> substate s2 s3 \<and> substate s3 s1 \<and> s2 \<noteq> s3 \<longrightarrow>
+ getPstate s3 Ctrl = redAfterMinimalRed \<and> 
+getVarBool s3 requestButtonPressed = False \<and> getVarBool s3  requestButton = NOT_PRESSED))"
+and ei6: "(\<forall> s1. toEnvP s1 \<and> substate s1 s0 \<and> getPstate s1 Ctrl = redToGreen \<longrightarrow>
+0< ltimeEnv s1 Ctrl \<and> ltimeEnv s1 Ctrl \<le> RED_TO_GREEN_TIME_LIMIT) "
+and ei7: "(\<forall> s1. toEnvP s1 \<and> substate s1 s0 \<and> getPstate s1 Ctrl = redToGreen \<longrightarrow>
+(\<exists> s2. toEnvP s2  \<and> substate s2 s1 \<and>
+ toEnvNum s2 s1 = ltimeEnv s1 Ctrl  \<and> getPstate s2 Ctrl = redAfterMinimalRed \<and> 
+(getVarBool s2 requestButtonPressed = True \<or> getVarBool s2 requestButton = PRESSED)))"
+and ei8: "(\<forall> s1 s2. toEnvP s1 \<and> toEnvP s2 \<and> substate s1 s2 \<and> substate s2 s0 \<and> toEnvNum s1 s2 < ltimeEnv s2 Ctrl \<and>
+ getPstate s2 Ctrl = redToGreen \<longrightarrow> getPstate s1 Ctrl = redToGreen) "
+and ei9: "(\<forall> s1 s2. toEnvP s1 \<and> toEnvP s2 \<and> substate s1 s2 \<and> substate s2 s0 \<and>
+(\<forall> s3. toEnvP s3 \<and> substate s1 s3 \<and> substate s3 s2 \<longrightarrow> getPstate s3 Ctrl = redToGreen) \<longrightarrow>
+toEnvNum s1 s2 = ltimeEnv s2 Ctrl - ltimeEnv s1 Ctrl) "
+and ei10: "(\<forall> s1. toEnvP s1 \<and> substate s1 s0 \<and> getPstate s1 Ctrl = green \<longrightarrow>
+0 < ltimeEnv s1 Ctrl \<and> ltimeEnv s1 Ctrl \<le> GREEN_TIME_LIMIT)"
+and ei11: "(\<forall> s1. toEnvP s1 \<and> substate s1 s0 \<and> getPstate s1 Ctrl = green \<longrightarrow>
+(\<exists> s2. toEnvP s2 \<and> substate s2 s1 \<and> toEnvNum s2 s1 = ltimeEnv s1 Ctrl \<and>
+getPstate s2 Ctrl = redToGreen \<and> ltimeEnv s2 Ctrl = RED_TO_GREEN_TIME_LIMIT)) "
+and ei12: "(\<forall> s1 s2. toEnvP s1 \<and> toEnvP s2 \<and> substate s1 s2 \<and> substate s2 s0 \<and> getPstate s2 Ctrl = green \<and>
+toEnvNum s1 s2 < ltimeEnv s2 Ctrl \<longrightarrow> getPstate s1 Ctrl = green)"
+and ei13: "(\<forall> s1 s2. toEnvP s1 \<and> toEnvP s2 \<and> substate s1 s2 \<and> substate s2 s0 \<and> 
+(\<forall> s3. toEnvP s3 \<and> substate s1 s3 \<and> substate s3 s2 \<longrightarrow> getPstate s3 Ctrl = green) \<longrightarrow>
+toEnvNum s1 s2 = ltimeEnv s2 Ctrl - ltimeEnv s1 Ctrl) "
+and ei14: "(\<forall> s1. toEnvP s1 \<and> substate s1 s0 \<and> getPstate s1 Ctrl = green \<longrightarrow> getVarBool s1 trafficLight = GREEN) "
+and ei15: "(\<forall> s1. toEnvP s1 \<and> substate s1 s0 \<and> getPstate s1 Ctrl \<noteq> green \<longrightarrow> getVarBool s1 trafficLight = RED) "
+and ei16: "(\<forall> s1. toEnvP s1 \<and> substate s1 s0 \<longrightarrow>
+ getPstate s1 Ctrl = minimalRed \<or> getPstate s1 Ctrl = redAfterMinimalRed \<or>
+ getPstate s1 Ctrl = redToGreen \<or> getPstate s1 Ctrl = green)"
+and ei17: "(\<forall> s1 s2. toEnvP s1 \<and> toEnvP s2 \<and> substate s1 s2 \<and> substate s2 s0 \<and>
+ toEnvNum s1 s2 < ltimeEnv s2 Ctrl - 1 \<and>  getPstate s2 Ctrl = minimalRed \<and>
+ getVarBool s2 requestButtonPressed = False \<longrightarrow> getVarBool s1 requestButton = NOT_PRESSED)"
+and ei18: "(\<forall> s2. toEnvP s2  \<and> substate s2 s0  \<and>
+ getPstate s2 Ctrl = minimalRed \<and> getVarBool s2 requestButtonPressed = True \<longrightarrow>
+(\<exists> s1. toEnvP s1 \<and> substate s1 s2 \<and> toEnvNum s1 s2 < ltimeEnv s2 Ctrl - 1 \<and> getVarBool s1 requestButton = PRESSED))"
+and ei19: "(\<forall> s1. toEnvP s1 \<and> substate s1 s0 \<and> getPstate s1 Ctrl = redAfterMinimalRed \<and> getVarBool s1 requestButtonPressed \<longrightarrow>
+(\<exists> s2. toEnvP s2 \<and> substate s2 s1 \<and> toEnvNum s2 s1 = 1 \<and> getPstate s2 Ctrl = minimalRed \<and>
+ ltimeEnv s2 Ctrl = MINIMAL_RED_TIME_LIMIT \<and>
+ (getVarBool s2 requestButtonPressed \<or> getVarBool s1 requestButton = PRESSED)))"
+and ei20: "(\<forall> s1. toEnvP s1 \<and> substate s1 s0 \<and> getPstate s1 Ctrl = green \<longrightarrow> getVarBool s1 requestButtonPressed = False)"
+and vc: " env (setVarAny s0 requestButtonValue) requestButtonValue \<and>
+    getPstate (setVarAny s0 requestButtonValue) Ctrl = redToGreen \<and>
+    \<not> RED_TO_GREEN_TIME_LIMIT \<le> ltimeEnv (setVarAny s0 requestButtonValue) Ctrl"
+    by fast
+  show "  (toEnvP (toEnv (setVarAny s0 requestButtonValue)) \<and>
+     (\<forall>s1 s2 s3.
+         substate s1 s2 \<and>
+         substate s2 s3 \<and>
+         substate s3 (toEnv (setVarAny s0 requestButtonValue)) \<and>
+         toEnvP s1 \<and>
+         toEnvP s2 \<and>
+         toEnvP s3 \<and> toEnvNum s1 s2 = Ctrl \<and> toEnvNum s2 s3 < T2 \<and> getVarBool s1 minimalRed \<noteq> PRESSED \<and> getVarBool s2 minimalRed = PRESSED \<longrightarrow>
+         getVarBool s3 minimalRed = PRESSED)) \<and>
+    toEnvP (toEnv (setVarAny s0 requestButtonValue)) \<and>
+    (\<forall>s1. toEnvP s1 \<and> substate s1 (toEnv (setVarAny s0 requestButtonValue)) \<and> getPstate s1 Ctrl = minimalRed \<longrightarrow>
+          0 < ltimeEnv s1 Ctrl \<and> ltimeEnv s1 Ctrl \<le> MINIMAL_RED_TIME_LIMIT) \<and>
+    (\<forall>s1. toEnvP s1 \<and> substate s1 (toEnv (setVarAny s0 requestButtonValue)) \<and> getPstate s1 Ctrl = minimalRed \<longrightarrow>
+          (\<exists>s2. toEnvP s2 \<and> substate s2 s1 \<and> toEnvNum s2 s1 = ltimeEnv s1 Ctrl \<and> getPstate s2 Ctrl = green \<and> ltimeEnv s2 Ctrl = T2) \<or>
+          (\<forall>s2. toEnvP s2 \<and> substate s2 s1 \<longrightarrow> getPstate s2 Ctrl = minimalRed)) \<and>
+    (\<forall>s1 s2.
+        toEnvP s1 \<and>
+        toEnvP s2 \<and>
+        substate s1 s2 \<and>
+        substate s2 (toEnv (setVarAny s0 requestButtonValue)) \<and> getPstate s2 Ctrl = minimalRed \<and> toEnvNum s1 s2 < ltimeEnv s2 Ctrl \<longrightarrow>
+        getPstate s1 Ctrl = minimalRed) \<and>
+    (\<forall>s1 s2.
+        toEnvP s1 \<and>
+        toEnvP s2 \<and>
+        substate s1 s2 \<and>
+        substate s2 (toEnv (setVarAny s0 requestButtonValue)) \<and>
+        (\<forall>s3. toEnvP s3 \<and> substate s1 s3 \<and> substate s3 s2 \<longrightarrow> getPstate s3 Ctrl = minimalRed) \<longrightarrow>
+        toEnvNum s1 s2 = ltimeEnv s2 Ctrl - ltimeEnv s1 Ctrl) \<and>
+    (\<forall>s1. toEnvP s1 \<and>
+          substate s1 (toEnv (setVarAny s0 requestButtonValue)) \<and>
+          getPstate s1 Ctrl = redAfterMinimalRed \<and> getVarBool s1 redAfterMinimalRed = NOT_PRESSED \<longrightarrow>
+          (\<exists>s2. toEnvP s2 \<and>
+                substate s2 s1 \<and>
+                getPstate s2 Ctrl = minimalRed \<and>
+                ltimeEnv s2 Ctrl = MINIMAL_RED_TIME_LIMIT \<and>
+                getVarBool s2 redAfterMinimalRed = NOT_PRESSED \<and>
+                (\<forall>s3. toEnvP s3 \<and> substate s2 s3 \<and> substate s3 s1 \<and> s2 \<noteq> s3 \<longrightarrow>
+                      getPstate s3 Ctrl = redAfterMinimalRed \<and>
+                      getVarBool s3 redAfterMinimalRed = NOT_PRESSED \<and> getVarBool s3 Ctrl = NOT_PRESSED))) \<and>
+    (\<forall>s1. toEnvP s1 \<and> substate s1 (toEnv (setVarAny s0 requestButtonValue)) \<and> getPstate s1 Ctrl = redToGreen \<longrightarrow>
+          0 < ltimeEnv s1 Ctrl \<and> ltimeEnv s1 Ctrl \<le> RED_TO_GREEN_TIME_LIMIT) \<and>
+    (\<forall>s1. toEnvP s1 \<and> substate s1 (toEnv (setVarAny s0 requestButtonValue)) \<and> getPstate s1 Ctrl = redToGreen \<longrightarrow>
+          (\<exists>s2. toEnvP s2 \<and>
+                substate s2 s1 \<and>
+                toEnvNum s2 s1 = ltimeEnv s1 Ctrl \<and>
+                getPstate s2 Ctrl = redAfterMinimalRed \<and> (getVarBool s2 redAfterMinimalRed = PRESSED \<or> getVarBool s2 Ctrl = PRESSED))) \<and>
+    (\<forall>s1 s2.
+        toEnvP s1 \<and>
+        toEnvP s2 \<and>
+        substate s1 s2 \<and>
+        substate s2 (toEnv (setVarAny s0 requestButtonValue)) \<and> toEnvNum s1 s2 < ltimeEnv s2 Ctrl \<and> getPstate s2 Ctrl = redToGreen \<longrightarrow>
+        getPstate s1 Ctrl = redToGreen) \<and>
+    (\<forall>s1 s2.
+        toEnvP s1 \<and>
+        toEnvP s2 \<and>
+        substate s1 s2 \<and>
+        substate s2 (toEnv (setVarAny s0 requestButtonValue)) \<and>
+        (\<forall>s3. toEnvP s3 \<and> substate s1 s3 \<and> substate s3 s2 \<longrightarrow> getPstate s3 Ctrl = redToGreen) \<longrightarrow>
+        toEnvNum s1 s2 = ltimeEnv s2 Ctrl - ltimeEnv s1 Ctrl) \<and>
+    (\<forall>s1. toEnvP s1 \<and> substate s1 (toEnv (setVarAny s0 requestButtonValue)) \<and> getPstate s1 Ctrl = green \<longrightarrow>
+          0 < ltimeEnv s1 Ctrl \<and> ltimeEnv s1 Ctrl \<le> T2) \<and>
+    (\<forall>s1. toEnvP s1 \<and> substate s1 (toEnv (setVarAny s0 requestButtonValue)) \<and> getPstate s1 Ctrl = green \<longrightarrow>
+          (\<exists>s2. toEnvP s2 \<and>
+                substate s2 s1 \<and>
+                toEnvNum s2 s1 = ltimeEnv s1 Ctrl \<and> getPstate s2 Ctrl = redToGreen \<and> ltimeEnv s2 Ctrl = RED_TO_GREEN_TIME_LIMIT)) \<and>
+    (\<forall>s1 s2.
+        toEnvP s1 \<and>
+        toEnvP s2 \<and>
+        substate s1 s2 \<and>
+        substate s2 (toEnv (setVarAny s0 requestButtonValue)) \<and> getPstate s2 Ctrl = green \<and> toEnvNum s1 s2 < ltimeEnv s2 Ctrl \<longrightarrow>
+        getPstate s1 Ctrl = green) \<and>
+    (\<forall>s1 s2.
+        toEnvP s1 \<and>
+        toEnvP s2 \<and>
+        substate s1 s2 \<and>
+        substate s2 (toEnv (setVarAny s0 requestButtonValue)) \<and>
+        (\<forall>s3. toEnvP s3 \<and> substate s1 s3 \<and> substate s3 s2 \<longrightarrow> getPstate s3 Ctrl = green) \<longrightarrow>
+        toEnvNum s1 s2 = ltimeEnv s2 Ctrl - ltimeEnv s1 Ctrl) \<and>
+    (\<forall>s1. toEnvP s1 \<and> substate s1 (toEnv (setVarAny s0 requestButtonValue)) \<and> getPstate s1 Ctrl = green \<longrightarrow>
+          getVarBool s1 minimalRed = PRESSED) \<and>
+    (\<forall>s1. toEnvP s1 \<and> substate s1 (toEnv (setVarAny s0 requestButtonValue)) \<and> getPstate s1 Ctrl \<noteq> green \<longrightarrow>
+          getVarBool s1 minimalRed = NOT_PRESSED) \<and>
+    (\<forall>s1. toEnvP s1 \<and> substate s1 (toEnv (setVarAny s0 requestButtonValue)) \<longrightarrow>
+          getPstate s1 Ctrl = minimalRed \<or>
+          getPstate s1 Ctrl = redAfterMinimalRed \<or> getPstate s1 Ctrl = redToGreen \<or> getPstate s1 Ctrl = green) \<and>
+    (\<forall>s1 s2.
+        toEnvP s1 \<and>
+        toEnvP s2 \<and>
+        substate s1 s2 \<and>
+        substate s2 (toEnv (setVarAny s0 requestButtonValue)) \<and>
+        toEnvNum s1 s2 < ltimeEnv s2 Ctrl - Ctrl \<and> getPstate s2 Ctrl = minimalRed \<and> getVarBool s2 redAfterMinimalRed = NOT_PRESSED \<longrightarrow>
+        getVarBool s1 Ctrl = NOT_PRESSED) \<and>
+    (\<forall>s2. toEnvP s2 \<and>
+          substate s2 (toEnv (setVarAny s0 requestButtonValue)) \<and>
+          getPstate s2 Ctrl = minimalRed \<and> getVarBool s2 redAfterMinimalRed = PRESSED \<longrightarrow>
+          (\<exists>s1. toEnvP s1 \<and> substate s1 s2 \<and> toEnvNum s1 s2 < ltimeEnv s2 Ctrl - Ctrl \<and> getVarBool s1 Ctrl = PRESSED)) \<and>
+    (\<forall>s1. toEnvP s1 \<and>
+          substate s1 (toEnv (setVarAny s0 requestButtonValue)) \<and> getPstate s1 Ctrl = redAfterMinimalRed \<and> getVarBool s1 redAfterMinimalRed \<longrightarrow>
+          (\<exists>s2. toEnvP s2 \<and>
+                substate s2 s1 \<and>
+                toEnvNum s2 s1 = Ctrl \<and>
+                getPstate s2 Ctrl = minimalRed \<and>
+                ltimeEnv s2 Ctrl = MINIMAL_RED_TIME_LIMIT \<and> (getVarBool s2 redAfterMinimalRed \<or> getVarBool s1 Ctrl = PRESSED))) \<and>
+    (\<forall>s1. toEnvP s1 \<and> substate s1 (toEnv (setVarAny s0 requestButtonValue)) \<and> getPstate s1 Ctrl = green \<longrightarrow>
+          getVarBool s1 redAfterMinimalRed = NOT_PRESSED)"
+    apply(rule conjI)
+     apply(rule conjI)
+    apply(simp)
+  proof(rule allI; rule allI; rule allI)
+    fix s1 s2 s3
+    show "substate s1 s2 \<and>
+         substate s2 s3 \<and>
+         substate s3 (toEnv (setVarAny s0 requestButtonValue)) \<and>
+         toEnvP s1 \<and>
+         toEnvP s2 \<and>
+         toEnvP s3 \<and>
+         toEnvNum s1 s2 = Ctrl \<and>
+         toEnvNum s2 s3 < T2 \<and> getVarBool s1 minimalRed \<noteq> PRESSED \<and> getVarBool s2 minimalRed = PRESSED \<longrightarrow>
+         getVarBool s3 minimalRed = PRESSED"
+    proof cases
+      assume 1: "s3 = (toEnv (setVarAny s0 requestButtonValue))"
+      show ?thesis
+      proof
+        assume req_prems: "substate s1 s2 \<and>
+    substate s2 s3 \<and>
+    substate s3 (toEnv (setVarAny s0 requestButtonValue)) \<and>
+    toEnvP s1 \<and>
+    toEnvP s2 \<and>
+    toEnvP s3 \<and> toEnvNum s1 s2 = Ctrl \<and> toEnvNum s2 s3 < T2 \<and> getVarBool s1 minimalRed \<noteq> PRESSED \<and> getVarBool s2 minimalRed = PRESSED"
+        from ei0  substate_refl vc ei7  have "\<exists> s2. toEnvP s2  \<and> substate s2 s0 \<and>
+ toEnvNum s2 s0 = ltimeEnv s0 Ctrl  \<and> getPstate s2 Ctrl = redAfterMinimalRed \<and> 
+(getVarBool s2 requestButtonPressed = True \<or> getVarBool s2 requestButton = PRESSED)" by auto
+        then obtain ramr where 2: "toEnvP ramr  \<and> substate ramr s0 \<and>
+ toEnvNum ramr s0 = ltimeEnv s0 Ctrl  \<and> getPstate ramr Ctrl = redAfterMinimalRed \<and> 
+(getVarBool ramr requestButtonPressed = True \<or> getVarBool ramr requestButton = PRESSED)" ..
+        show "getVarBool s3 trafficLight = GREEN"
+        proof cases
+          assume 3: "substate s2 ramr"
+          show ?thesis
+          proof cases
+            assume 4: "getVarBool ramr requestButtonPressed"
+            with 2  ei19
+        have " (\<exists>s2. toEnvP s2 \<and>
+           substate s2 ramr \<and>
+           toEnvNum s2 ramr = 1 \<and>
+           getPstate s2 Ctrl = minimalRed \<and>
+           ltimeEnv s2 Ctrl = MINIMAL_RED_TIME_LIMIT \<and> (getVarBool s2 requestButtonPressed \<or> getVarBool ramr requestButton = PRESSED))"
+          by auto
+        then obtain mr where 5: "toEnvP mr \<and> substate mr ramr \<and>
+           toEnvNum mr ramr = 1 \<and>
+           getPstate mr Ctrl = minimalRed \<and>
+           ltimeEnv mr Ctrl = MINIMAL_RED_TIME_LIMIT \<and> (getVarBool mr requestButtonPressed \<or> getVarBool ramr requestButton = PRESSED)" ..
+        show ?thesis
+        proof cases
+          assume 6: "substate s2 mr" 
+          from 2 5 substate_trans have "substate mr s0" by blast
+          with 5 ei2 have "((\<exists> s2. toEnvP s2 \<and> substate s2 mr \<and> toEnvNum s2 mr = MINIMAL_RED_TIME_LIMIT  \<and>
+ getPstate s2 Ctrl = green \<and> ltimeEnv s2 Ctrl = GREEN_TIME_LIMIT) \<or>
+ (\<forall> s2. toEnvP s2 \<and> substate s2 mr \<longrightarrow> getPstate s2 Ctrl = minimalRed))" by auto
+          then show ?thesis
+          proof
+            assume " \<exists>s2. toEnvP s2 \<and> substate s2 mr \<and> toEnvNum s2 mr = MINIMAL_RED_TIME_LIMIT \<and> getPstate s2 Ctrl = green \<and>
+ ltimeEnv s2 Ctrl = T2"
+            then obtain g where 7: "toEnvP g \<and> substate g mr \<and> toEnvNum g mr = MINIMAL_RED_TIME_LIMIT \<and> getPstate g Ctrl = green \<and>
+ ltimeEnv g Ctrl = T2" ..
+            show ?thesis
+            proof cases
+              assume 8: "substate s2 g"
+              with 7 toEnvNum3[of s2 g mr] req_prems have 9: "toEnvNum s2 mr \<ge> MINIMAL_RED_TIME_LIMIT" by auto
+              from 8 7 substate_trans have "substate s2 mr" by blast
+              with 5 9 toEnvNum3 req_prems have 10: "toEnvNum s2 ramr > MINIMAL_RED_TIME_LIMIT" by auto
+              from 2 vc have "ramr \<noteq> s0" by auto
+              with 2 ei0 gtimeE_inj have "toEnvNum emptyState ramr \<noteq> toEnvNum emptyState s0" by auto
+              with emptyState_substate 2 toEnvNum3 have "toEnvNum ramr s0 > 0" by auto
+              with 10 2 toEnvNum3 have "toEnvNum s2 s0 > MINIMAL_RED_TIME_LIMIT"
+                using "5" "6" "9" \<open>substate mr s0\<close> by force
+              with 1 req_prems show ?thesis by ((simp split: if_splits); auto)
+            next
+              assume 8: "\<not> substate s2 g"
+              with 8 6 7  substate_total substate_asym have 9:  "substate g s2 \<and> g \<noteq> s2" by auto
+              with req_prems 7 gtimeE_inj have "toEnvNum emptyState g \<noteq> toEnvNum  emptyState s2" by blast
+              with 9 toEnvNum3[of emptyState g s2] emptyState_substate  have "toEnvNum g s2 > 0" by auto
+              with 6 7 9  toEnvNum3 have "toEnvNum s2 mr < MINIMAL_RED_TIME_LIMIT" by auto
+              with 6 5 req_prems ei3 have "getPstate s2 Ctrl = minimalRed"
+                by (metis \<open>substate mr s0\<close>)
+                with  ei15 req_prems show ?thesis
+                by (metis "1" numeral_eq_iff substate.simps(2) substate.simps(6) toEnvP.simps(6) verit_eq_simplify(14))
+            qed
+          next
+            assume 7: "\<forall>s2. toEnvP s2 \<and> substate s2 mr \<longrightarrow> getPstate s2 Ctrl = minimalRed"
+            with 6 req_prems show ?thesis
+              by (metis "1" ei15 numeral_eq_iff substate.simps(2) substate.simps(6) toEnvP.simps(6) verit_eq_simplify(14))
+          qed
+        next
+          assume 6: "\<not> substate s2 mr"
+          show ?thesis
+          proof cases
+            assume "s2 =  (toEnv (setVarAny s0 requestButtonValue))"
+            with 1 req_prems show ?thesis by auto
+          next
+            assume "s2 \<noteq> (toEnv (setVarAny s0 requestButtonValue))"
+            with req_prems 1 have 7: "substate s2 s0"  by (simp  split: if_splits)
+            with 5 6 substate_total substate_asym have 8: "substate mr s2 \<and> mr \<noteq> s2"
+              using "3" by blast
+            from 7 emptyState_substate toEnvNum3  have 9: "toEnvNum emptyState s2 \<le> toEnvNum emptyState s0" by auto
+            from 5 8 req_prems gtimeE_inj have "toEnvNum emptyState mr \<noteq> toEnvNum emptyState s2" by blast
+            with 8 emptyState_substate toEnvNum3 have 8: "toEnvNum emptyState mr < toEnvNum emptyState s2" by auto
+            from 5 emptyState_substate toEnvNum3 have "toEnvNum emptyState ramr = toEnvNum emptyState mr + 1" by auto
+            with 8 have 11: "toEnvNum emptyState s2 \<ge> toEnvNum emptyState ramr" by auto
+            from 3 emptyState_substate toEnvNum3 have "toEnvNum emptyState s2 \<le> toEnvNum emptyState ramr" by auto
+            with 11 have "toEnvNum emptyState s2 = toEnvNum emptyState ramr" by auto
+            with 2 3 req_prems gtimeE_inj have "s2 = ramr" by blast
+            with 2 req_prems ei15 show ?thesis by auto
+          qed
+        qed
+      next
+        assume 4: "\<not>getVarBool ramr requestButtonPressed"
+            with 2  ei5
+        have " \<exists>s2. toEnvP s2 \<and>
+           substate s2 ramr \<and>
+           getPstate s2 Ctrl = minimalRed \<and>
+           ltimeEnv s2 Ctrl = MINIMAL_RED_TIME_LIMIT \<and>
+           getVarBool s2 redAfterMinimalRed = NOT_PRESSED \<and>
+           (\<forall>s3. toEnvP s3 \<and> substate s2 s3 \<and> substate s3 ramr \<and> s2 \<noteq> s3 \<longrightarrow>
+                 getPstate s3 Ctrl = redAfterMinimalRed \<and> getVarBool s3 redAfterMinimalRed = NOT_PRESSED \<and> getVarBool s3 Ctrl = NOT_PRESSED)"
+          by auto
+        then obtain mr where 5: "toEnvP mr \<and>
+           substate mr ramr \<and>
+           getPstate mr Ctrl = minimalRed \<and>
+           ltimeEnv mr Ctrl = MINIMAL_RED_TIME_LIMIT \<and>
+           getVarBool mr redAfterMinimalRed = NOT_PRESSED \<and>
+           (\<forall>s3. toEnvP s3 \<and> substate mr s3 \<and> substate s3 ramr \<and> mr \<noteq> s3 \<longrightarrow>
+                 getPstate s3 Ctrl = redAfterMinimalRed \<and> getVarBool s3 redAfterMinimalRed = NOT_PRESSED \<and> getVarBool s3 Ctrl = NOT_PRESSED)"
+          ..
+        show ?thesis
+        proof cases
+          assume 6: "substate s2 mr" 
+          from 2 5 substate_trans have "substate mr s0" by blast
+          with 5 ei2 have "((\<exists> s2. toEnvP s2 \<and> substate s2 mr \<and> toEnvNum s2 mr = MINIMAL_RED_TIME_LIMIT  \<and>
+ getPstate s2 Ctrl = green \<and> ltimeEnv s2 Ctrl = GREEN_TIME_LIMIT) \<or>
+ (\<forall> s2. toEnvP s2 \<and> substate s2 mr \<longrightarrow> getPstate s2 Ctrl = minimalRed))" by auto
+          then show ?thesis
+          proof
+            assume " \<exists>s2. toEnvP s2 \<and> substate s2 mr \<and> toEnvNum s2 mr = MINIMAL_RED_TIME_LIMIT \<and> getPstate s2 Ctrl = green \<and>
+ ltimeEnv s2 Ctrl = T2"
+            then obtain g where 7: "toEnvP g \<and> substate g mr \<and> toEnvNum g mr = MINIMAL_RED_TIME_LIMIT \<and> getPstate g Ctrl = green \<and>
+ ltimeEnv g Ctrl = T2" ..
+            show ?thesis
+            proof cases
+              assume 8: "substate s2 g"
+              with 7 toEnvNum3[of s2 g mr] req_prems have 9: "toEnvNum s2 mr \<ge> MINIMAL_RED_TIME_LIMIT" by auto
+              from 8 7 substate_trans have "substate s2 mr" by blast
+              with 5 9 toEnvNum3 req_prems have 10: "toEnvNum s2 ramr \<ge> MINIMAL_RED_TIME_LIMIT" by auto
+              from 2 vc have "ramr \<noteq> s0" by auto
+              with 2 ei0 gtimeE_inj have "toEnvNum emptyState ramr \<noteq> toEnvNum emptyState s0" by auto
+              with emptyState_substate 2 toEnvNum3 have "toEnvNum ramr s0 > 0" by auto
+              with 10 2 toEnvNum3 have "toEnvNum s2 s0 > MINIMAL_RED_TIME_LIMIT"
+                using "5" "6" "9" \<open>substate mr s0\<close> by force
+              with 1 req_prems show ?thesis by ((simp split: if_splits); auto)
+            next
+              assume 8: "\<not> substate s2 g"
+              with 8 6 7  substate_total substate_asym have 9:  "substate g s2 \<and> g \<noteq> s2" by auto
+              with req_prems 7 gtimeE_inj have "toEnvNum emptyState g \<noteq> toEnvNum  emptyState s2" by blast
+              with 9 toEnvNum3[of emptyState g s2] emptyState_substate  have "toEnvNum g s2 > 0" by auto
+              with 6 7 9  toEnvNum3 have "toEnvNum s2 mr < MINIMAL_RED_TIME_LIMIT" by auto
+              with 6 5 req_prems ei3 have "getPstate s2 Ctrl = minimalRed"
+                by (metis \<open>substate mr s0\<close>)
+                with  ei15 req_prems show ?thesis
+                by (metis "1" numeral_eq_iff substate.simps(2) substate.simps(6) toEnvP.simps(6) verit_eq_simplify(14))
+            qed
+          next
+            assume 7: "\<forall>s2. toEnvP s2 \<and> substate s2 mr \<longrightarrow> getPstate s2 Ctrl = minimalRed"
+            with 6 req_prems show ?thesis
+              by (metis "1" ei15 numeral_eq_iff substate.simps(2) substate.simps(6) toEnvP.simps(6) verit_eq_simplify(14))
+          qed
+        next
+          assume 6: "\<not> substate s2 mr"
+          show ?thesis
+          proof cases
+            assume "s2 =  (toEnv (setVarAny s0 requestButtonValue))"
+            with 1 req_prems show ?thesis by auto
+          next
+            assume "s2 \<noteq> (toEnv (setVarAny s0 requestButtonValue))"
+            with req_prems 1 have 7: "substate s2 s0"  by (simp  split: if_splits)
+            with 5 6 substate_total substate_asym have 8: "substate mr s2 \<and> mr \<noteq> s2"
+              using "3" by blast
+            from req_prems 3 5 8 have "getPstate s2 Ctrl = redAfterMinimalRed" by auto
+            with req_prems ei15 show ?thesis
+              using "7" by force
+          qed
+        qed
+      qed
+    next
+      assume 3: "\<not> substate s2 ramr"
+      show ?thesis
+        proof cases
+            assume "s2 =  (toEnv (setVarAny s0 requestButtonValue))"
+            with 1 req_prems show ?thesis by auto
+          next
+            assume "s2 \<noteq> (toEnv (setVarAny s0 requestButtonValue))"
+            with req_prems 1 have 7: "substate s2 s0"  by (simp  split: if_splits)
+            with 2 3 substate_total substate_asym have 4: "substate ramr s2 \<and> ramr \<noteq> s2" by auto
+            with emptyState_substate toEnvNum3 have 5: "toEnvNum emptyState ramr \<le> toEnvNum emptyState s2" by auto
+            from 4 req_prems 2 gtimeE_inj have "toEnvNum emptyState ramr \<noteq> toEnvNum emptyState s2" by blast
+            with 5 have "toEnvNum emptyState ramr < toEnvNum emptyState s2" by auto
+            with emptyState_substate 7 2 have "toEnvNum s2 s0 < toEnvNum ramr s0"
+              by (metis "3" ei0 leI req_prems shift_toEnvNum substate_shift)
+            with 2 ei8 have "getPstate s2 Ctrl = redToGreen"
+              by (metis "7" ei0 getPstate.simps(6) req_prems substate_refl vc)
+            with ei15 req_prems 7 show ?thesis by auto
+          qed
+        qed
+      qed
+    next

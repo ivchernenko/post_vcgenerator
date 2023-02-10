@@ -1,0 +1,150 @@
+theory HandDryer
+imports VCTheory
+begin
+
+abbreviation ON :: "bool" where "ON \<equiv> True"
+abbreviation OFF :: "bool" where "OFF \<equiv> False"
+
+
+
+definition dryer :: "nat" where "dryer \<equiv> Suc (Suc 0)"
+definition Ctrl :: "nat" where "Ctrl \<equiv> Suc (Suc (Suc 0))"
+definition waiting :: "nat" where "waiting \<equiv> Suc (Suc (Suc (Suc 0)))"
+definition drying :: "nat" where "drying \<equiv> Suc (Suc (Suc (Suc (Suc 0))))"
+
+(*
+abbreviation inv :: 
+"state \<Rightarrow> (state \<Rightarrow> variable \<Rightarrow> vvalue) \<Rightarrow> (variable \<Rightarrow> vvalue) \<Rightarrow> bool" 
+where
+"
+inv s env defaultValue \<equiv>
+(\<forall> s1 s2 s3.
+  between s1 s2 s \<and>
+  distance s1 s2 = 1 \<and>
+  boolValue (val s1 hands env defaultValue) = OFF \<and>
+  boolValue (val s1 dryer env defaultValue) = OFF \<and>
+  boolValue (val s2 hands env defaultValue) = ON \<and>
+  between s2 s3 s \<and>
+  0 < distance s2 s3 \<and>
+  distance s2 s3 \<le> 1 \<longrightarrow>
+  boolValue (val s3 hands env defaultValue) = OFF \<or>
+    boolValue (val s3 dryer env defaultValue) = ON
+)
+"*)
+
+
+definition env:: "state \<Rightarrow> bool \<Rightarrow> bool" where
+"env s hands_value = True"
+
+context
+  fixes inv:: "state \<Rightarrow> bool" and
+   inv0:: "state \<Rightarrow> nat \<Rightarrow> bool" and
+s0:: state and
+hands_value:: bool
+and k:: nat
+begin
+
+definition VC1  where 
+" VC1 \<equiv>
+s0 = toEnv (setPstate emptyState Ctrl waiting) \<longrightarrow>
+inv s0
+"
+
+definition VC2 where
+"
+VC2 \<equiv>
+inv0 s0 k \<and>
+env (setVarAny s0 hands_value) hands_value \<and>
+getPstate (setVarAny s0 hands_value) Ctrl = waiting
+ \<and> getVarBool (setVarAny s0 hands_value) hands = ON
+\<longrightarrow> inv0
+(toEnv 
+(setPstate 
+(setVarBool (setVarAny s0 hands_value) dryer ON) 
+Ctrl
+drying)
+) k
+"
+
+definition VC3 where
+"
+VC3 \<equiv>
+inv s0 \<and>
+env (setVarAny s0 hands_value) hands_value \<and>
+getPstate (setVarAny s0 hands_value) Ctrl = waiting
+ \<and> getVarBool (setVarAny s0 hands_value) hands \<noteq> ON
+\<longrightarrow> inv
+(toEnv 
+(setVarBool (setVarAny s0 hands_value) dryer OFF) 
+)
+"
+
+definition VC4 where
+"VC4 \<equiv>
+inv s0 \<and>
+env (setVarAny s0 hands_value) hands_value \<and>
+getPstate (setVarAny s0 hands_value) Ctrl = drying
+\<and> getVarBool (setVarAny s0 hands_value) hands = ON
+\<and>
+ 10 \<le>
+ ltimeEnv
+ (reset (setVarAny s0 hands_value) Ctrl)
+Ctrl 
+\<longrightarrow>
+inv
+ (toEnv 
+(setPstate 
+(reset (setVarAny s0 hands_value) Ctrl)
+Ctrl
+waiting))"
+
+definition VC5 where
+"VC5 \<equiv>
+inv s0 \<and>
+env (setVarAny s0 hands_value) hands_value \<and>
+getPstate (setVarAny s0 hands_value) Ctrl = drying
+\<and> getVarBool (setVarAny s0 hands_value) hands = ON
+\<and>
+\<not> (10 \<le>
+ ltimeEnv
+ (reset (setVarAny s0 hands_value) Ctrl)
+Ctrl) 
+\<longrightarrow>
+inv
+ (toEnv (reset (setVarAny s0 hands_value) Ctrl))"
+
+
+definition VC6 where
+"VC6 \<equiv>
+inv s0 \<and>
+env (setVarAny s0 hands_value) hands_value \<and>
+getPstate (setVarAny s0 hands_value) Ctrl = drying
+\<and> getVarBool (setVarAny s0 hands_value) hands \<noteq> ON
+\<and>
+ 10 \<le>
+ ltimeEnv
+  (setVarAny s0 hands_value)
+Ctrl 
+\<longrightarrow>
+inv
+ (toEnv 
+(setPstate (setVarAny s0 hands_value) Ctrl waiting)
+)"
+
+definition VC7 where
+"VC7 \<equiv>
+inv s0 \<and>
+env (setVarAny s0 hands_value) hands_value \<and>
+getPstate (setVarAny s0 hands_value) Ctrl = drying
+\<and> getVarBool (setVarAny s0 hands_value) hands \<noteq> ON
+\<and>
+\<not> (10 \<le>
+ ltimeEnv
+ (setVarAny s0 hands_value)
+Ctrl) 
+\<longrightarrow>
+inv  (toEnv (setVarAny s0 hands_value))"
+
+
+end
+end
