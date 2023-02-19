@@ -34,7 +34,7 @@ public class StartProcessStatementImpl extends ProcessStatementsImpl implements 
 	@Override
 	public List<Path> applyTo(List<Path> paths, VCGeneratorState globVars) {
 		for (Path path: paths)
-			  path.startProcess(this, null);
+			  path.startProcess(this, globVars);
 		return paths;
 	}
 

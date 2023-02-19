@@ -33,7 +33,7 @@ public class ErrorProcessStatementImpl extends ProcessStatementsImpl implements 
 	@Override
 	public List<Path> applyTo(List<Path> paths, VCGeneratorState globVars) {
 		for (Path path: paths)
-			  path.errorProcess(this, null);
+			  path.errorProcess(this, globVars);
 		return paths;
 	}
 

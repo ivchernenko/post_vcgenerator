@@ -33,7 +33,7 @@ public class StopProcessStatementImpl extends ProcessStatementsImpl implements S
 	@Override
 	public List<Path> applyTo(List<Path> paths, VCGeneratorState globVars) {
 		for (Path path: paths)
-			  path.stopProcess(this, null);
+			  path.stopProcess(this, globVars);
 		return paths;
 	}
 

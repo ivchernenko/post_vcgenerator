@@ -1,5 +1,5 @@
 theory Extra
-  imports HandDryer VCTheoryLemmas Requirements
+  imports HandDryer VCTheoryLemmas
 begin
 
 theorem extra2: "VC2 extraInv s0 hands_value"
