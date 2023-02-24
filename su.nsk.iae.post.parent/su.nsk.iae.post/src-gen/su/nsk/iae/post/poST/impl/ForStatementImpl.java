@@ -75,7 +75,7 @@ public class ForStatementImpl extends IterationStatementImpl implements ForState
 	@Override
 	public List<Path> applyTo(List<Path> paths, VCGeneratorState globVars) {
 		FunctionSymbol loopinv = globVars.nextLoopInv();
-		Variable s0 = new Variable("s0'");
+		Variable s0 = new Variable("s0");
 		globVars.addVcFunctionParam(loopinv);
 		globVars.addVcVariableParam(s0);
 		Term invs0 = new ComplexTerm(loopinv, s0);

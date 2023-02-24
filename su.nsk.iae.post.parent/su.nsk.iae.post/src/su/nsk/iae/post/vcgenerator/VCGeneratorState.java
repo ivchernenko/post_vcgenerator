@@ -31,6 +31,7 @@ public class VCGeneratorState {
 	private int currentProcessState;
 	Map<String, StateList> processStates = new HashMap<>();
 	Constant currentProcess;
+	String currentProcessName;
 	Map<String, Constant> processes = new HashMap<>();
 	Map<String, Constant> initialStates = new HashMap<>();
 	List<Variable> vcVariableParams = new ArrayList<>();
@@ -60,7 +61,7 @@ public class VCGeneratorState {
 	public Constant getVariable(String name) {
 		if (currentProcess == null)
 			return variables.get(name);
-		Map<String, Constant> localScope = localVars.get(currentProcess.getName());
+		Map<String, Constant> localScope = localVars.get(currentProcessName);
 		if (localScope != null && localScope.get(name) != null)
 			return localScope.get(name);
 		return variables.get(name);
@@ -82,7 +83,12 @@ public class VCGeneratorState {
 			Constant timeoutConst = null;
 			if (timeInMilliseconds != null) {
 				timeoutConst = millisecondsToCycles(timeInMilliseconds);
-				timeoutConst.setName(c.getName() + NAME_SEPARATOR + "TIMEOUT");
+				String timeoutConstName;
+				if (c.getName().endsWith(NAME_SEPARATOR))
+					timeoutConstName = c.getName() + "TIMEOUT";
+					else
+						timeoutConstName = c.getName() + NAME_SEPARATOR + "TIMEOUT";
+				timeoutConst.setName(timeoutConstName);
 			}
 			timeoutConstantValues.put(c, timeoutConst);
 			return timeoutConst;
@@ -101,15 +107,15 @@ public class VCGeneratorState {
 	}
 
 	public Constant getState(String name) {
-		return processStates.get(currentProcess.getName()).getState(name);
+		return processStates.get(currentProcessName).getState(name);
 	}
 
 	public Constant getCurrentState() {
-		return processStates.get(currentProcess.getName()).getState(getCurrentProcessState());
+		return processStates.get(currentProcessName).getState(getCurrentProcessState());
 	}
 
 	public Constant getNextState() {
-		return processStates.get(currentProcess.getName()).getState(getCurrentProcessState() + 1);
+		return processStates.get(currentProcessName).getState(getCurrentProcessState() + 1);
 	}
 
 	public Constant getProcess(String name) {
@@ -117,7 +123,7 @@ public class VCGeneratorState {
 	}
 
 	public Constant getInitialState() {
-		return getInitialState(currentProcess.getName());
+		return getInitialState(currentProcessName);
 	}
 
 	public Constant getInitialState(String processName) {
@@ -139,6 +145,7 @@ public class VCGeneratorState {
 	}
 
 	public void setCurrentProcess(String processName) {
+		currentProcessName = processName;
 		currentProcess = processes.get(processName);
 		setCurrentProcessState(0);
 	}
@@ -160,7 +167,7 @@ public class VCGeneratorState {
 			++varNumber;
 			String fullVarName;
 			if (prefix == null)
-				fullVarName = symVar.getName();
+				fullVarName = symVar.getName() + "'";
 			else
 				fullVarName = prefix + NAME_SEPARATOR + symVar.getName();
 			Constant varCode = new Constant(fullVarName, varNumber);
@@ -207,11 +214,12 @@ public class VCGeneratorState {
 	public Constant addProcess(su.nsk.iae.post.poST.Process process) {
 		++processNumber;
 		String processName = process.getName();
-		Constant processCode = new Constant(processName, processNumber);
+		Constant processCode = new Constant(processName + "'", processNumber);
 		processes.put(processName, processCode);
 		processStates.put(processName, new StateList());
 		initializedVars.put(processName, new ArrayList<>());
 		currentProcess = processCode;
+		currentProcessName = processName;
 		//Encoding of input variables
 		for (InputVarDeclaration inVars: process.getProcInVars())
 			for (VarInitDeclaration varDecl: inVars.getVars())

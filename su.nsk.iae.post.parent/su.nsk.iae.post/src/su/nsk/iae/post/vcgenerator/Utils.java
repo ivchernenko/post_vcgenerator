@@ -6,15 +6,27 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 public class Utils {
-	public static boolean isIntegerTypeName(String typeName) {
+	public static boolean isSignedIntegerTypeName(String typeName) {
 		return "SINT".equals(typeName) 
 				|| "INT".equals(typeName) 
 				|| "DINT".equals(typeName) 
-				|| "LINT".equals(typeName)
-				|| "USINT".equals(typeName)
+				|| "LINT".equals(typeName);
+	}
+	
+	public static boolean isUnsignedIntegerTypeName(String typeName) {
+		return "USINT".equals(typeName)
 				|| "UINT".equals(typeName)
 				|| "UDINT".equals(typeName)
-				|| "ULINT".equals(typeName);
+				|| "ULINT".equals(typeName)
+				|| "TIME".equals(typeName)
+				|| "BYTE".equals(typeName)
+				|| "WORD".equals(typeName)
+				|| "DWORD".equals(typeName)
+				|| "LWORD".equals(typeName);
+	}
+	
+	public static boolean isIntegerTypeName(String typeName) {
+		return isSignedIntegerTypeName(typeName) || isUnsignedIntegerTypeName(typeName);
 	}
 
 	public static boolean isRealTypeName(String typeName) {

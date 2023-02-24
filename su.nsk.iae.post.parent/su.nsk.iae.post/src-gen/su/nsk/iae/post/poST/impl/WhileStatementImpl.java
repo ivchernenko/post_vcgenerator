@@ -56,7 +56,7 @@ public class WhileStatementImpl extends IterationStatementImpl implements WhileS
 	@Override
 	public List<Path> applyTo(List<Path> paths, VCGeneratorState globVars) {
 		FunctionSymbol loopinv = globVars.nextLoopInv();
-		Variable s0 = new Variable("s0'");
+		Variable s0 = new Variable("s0");
 		globVars.addVcFunctionParam(loopinv);
 		globVars.addVcVariableParam(s0);
 		List<Path> result = new ArrayList<>();

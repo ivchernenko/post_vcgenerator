@@ -138,7 +138,6 @@ import static su.nsk.iae.post.vcgenerator.TermFactory.*;
 		Term expected = globVars.getConstantValue(varCode);
 		Term result = variable.generateVariable(currentState, globVars);
 		Assert.assertEquals(expected, result);
-		Assert.assertEquals(variableName, result.getName());
 		Assert.assertNull(result.getPrecondition());
 		Assert.assertEquals(expectedType, result.getType());
 	}

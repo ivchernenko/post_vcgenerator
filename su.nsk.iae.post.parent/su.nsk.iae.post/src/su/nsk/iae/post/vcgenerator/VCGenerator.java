@@ -138,9 +138,9 @@ public class VCGenerator {
 		//Encoding of processes
 		for (su.nsk.iae.post.poST.Process process: program.getProcesses())
 			globVars.addProcess(process);
-		FunctionSymbol env = new FunctionSymbol("env'", true);
-		FunctionSymbol inv = new FunctionSymbol("inv'", true);
-		Variable s0 = new Variable("s0'");
+		FunctionSymbol env = new FunctionSymbol("env", true);
+		FunctionSymbol inv = new FunctionSymbol("inv0", true);
+		Variable s0 = new Variable("s0");
 		globVars.addVcVariableParam(s0);
 		globVars.addVcFunctionParam(inv);
 		globVars.addVcFunctionParam(env);
@@ -148,7 +148,12 @@ public class VCGenerator {
 		List<Term> setVarAnyArgs = new ArrayList<>();
 		setVarAnyArgs.add(s0);
 		for (Constant envVar: globVars.envVars) {
-			Variable var_value = new Variable(envVar.getName()+ VCGeneratorState.NAME_SEPARATOR + "value");
+			String varValueName;
+			if (envVar.getName().endsWith(VCGeneratorState.NAME_SEPARATOR))
+				varValueName = envVar.getName() + "value";
+			else
+				varValueName = envVar.getName()+ VCGeneratorState.NAME_SEPARATOR + "value";
+			Variable var_value = new Variable(varValueName);
 			globVars.addVcVariableParam(var_value);
 			setVarAnyArgs.add(var_value);
 		}
@@ -167,7 +172,7 @@ public class VCGenerator {
 				setInitialPstate.addCondition(state.getPrecondition());
 				state = setInitialPstate;
 			}
-			for (Constant initializedVar: globVars.getInitializedVars(processCode.getName()))
+			for (Constant initializedVar: globVars.getInitializedVars(process.getName()))
 				state = globVars.initializeVar(initializedVar, state);
 			initialProcess = false;	
 		}

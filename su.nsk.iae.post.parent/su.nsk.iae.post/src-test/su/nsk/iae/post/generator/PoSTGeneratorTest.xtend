@@ -129,7 +129,7 @@ class PoSTGeneratorTest {
 	
 	@Test def void testGenerateTheoryConstantsInTimeout() {
 		val theoryName = "TestTheory"
-		val envVars = newArrayList(new Constant("a", 1))
+		val envVars = newArrayList(new Constant("a'", 1))
 		val programText = '''
 		PROGRAM Program
 		VAR_INPUT
@@ -166,19 +166,19 @@ class PoSTGeneratorTest {
 		type_synonym process = nat
 		type_synonym pstate = nat
 		
-		abbreviation a :: variable where "a \<equiv> (Suc 0)"
-		abbreviation b :: variable where "b \<equiv> (Suc (Suc 0))"
+		abbreviation a' :: variable where "a' \<equiv> (Suc 0)"
+		abbreviation b' :: variable where "b' \<equiv> (Suc (Suc 0))"
 		
-		abbreviation process1 :: process where "process1 \<equiv> 1"
+		abbreviation process1' :: process where "process1' \<equiv> 1"
 		
 		abbreviation STOP:: pstate where "STOP \<equiv> 0"
 		abbreviation ERROR:: pstate where "ERROR \<equiv> 1"
 		
 		abbreviation process1'state1 :: pstate where "process1'state1 \<equiv> 2"
 		
-		abbreviation t :: int where "t \<equiv> 1000"
+		abbreviation t' :: nat where "t' \<equiv> 1000"
 		
-		abbreviation t'TIMEOUT :: int where "t'TIMEOUT \<equiv> 10"
+		abbreviation t'TIMEOUT :: nat where "t'TIMEOUT \<equiv> 10"
 		
 		«generator.generateStateDataType(newArrayList("BOOL"))»
 		
@@ -212,39 +212,39 @@ class PoSTGeneratorTest {
 		
 		
 		definition VC1 where
-		  "VC1 inv' s0' \<equiv>
+		  "VC1 inv0 s0 \<equiv>
 		  (
 		    (
-		      s0'
+		      s0
 		    =
 		      (toEnv
 		        (setPstate
 		          emptyState
-		          process1
+		          process1'
 		          process1'state1
 		        )
 		      )
 		    )
 		  -->
-		    (inv'
-		      s0'
+		    (inv0
+		      s0
 		    )
 		  )
 		  "
 		
 		definition VC2 where
-		  "VC2 inv' env' s0' a'value \<equiv>
+		  "VC2 inv0 env s0 a'value \<equiv>
 		  (
 		    (
 		      (
 		        (
-		          (inv'
-		            s0'
+		          (inv0
+		            s0
 		          )
 		        \<and>
-		          (env'
+		          (env
 		            (setVarAny
-		              s0'
+		              s0
 		              a'value
 		            )
 		          )
@@ -253,10 +253,10 @@ class PoSTGeneratorTest {
 		        (
 		          (getPstate
 		            (setVarAny
-		              s0'
+		              s0
 		              a'value
 		            )
-		            process1
+		            process1'
 		          )
 		        =
 		          process1'state1
@@ -268,18 +268,18 @@ class PoSTGeneratorTest {
 		      <=
 		        (ltime
 		          (setVarAny
-		            s0'
+		            s0
 		            a'value
 		          )
-		          process1
+		          process1'
 		        )
 		      )
 		    )
 		  -->
-		    (inv'
+		    (inv0
 		      (toEnv
 		        (setVarAny
-		          s0'
+		          s0
 		          a'value
 		        )
 		      )
@@ -288,18 +288,18 @@ class PoSTGeneratorTest {
 		  "
 		
 		definition VC3 where
-		  "VC3 inv' env' s0' a'value \<equiv>
+		  "VC3 inv0 env s0 a'value \<equiv>
 		  (
 		    (
 		      (
 		        (
-		          (inv'
-		            s0'
+		          (inv0
+		            s0
 		          )
 		        \<and>
-		          (env'
+		          (env
 		            (setVarAny
-		              s0'
+		              s0
 		              a'value
 		            )
 		          )
@@ -308,10 +308,10 @@ class PoSTGeneratorTest {
 		        (
 		          (getPstate
 		            (setVarAny
-		              s0'
+		              s0
 		              a'value
 		            )
-		            process1
+		            process1'
 		          )
 		        =
 		          process1'state1
@@ -324,19 +324,19 @@ class PoSTGeneratorTest {
 		        <=
 		          (ltime
 		            (setVarAny
-		              s0'
+		              s0
 		              a'value
 		            )
-		            process1
+		            process1'
 		          )
 		        )
 		      )
 		    )
 		  -->
-		    (inv'
+		    (inv0
 		      (toEnv
 		        (setVarAny
-		          s0'
+		          s0
 		          a'value
 		        )
 		      )
@@ -345,17 +345,17 @@ class PoSTGeneratorTest {
 		  "
 		
 		definition VC4 where
-		  "VC4 inv' env' s0' a'value \<equiv>
+		  "VC4 inv0 env s0 a'value \<equiv>
 		  (
 		    (
 		      (
-		        (inv'
-		          s0'
+		        (inv0
+		          s0
 		        )
 		      \<and>
-		        (env'
+		        (env
 		          (setVarAny
-		            s0'
+		            s0
 		            a'value
 		          )
 		        )
@@ -364,20 +364,20 @@ class PoSTGeneratorTest {
 		      (
 		        (getPstate
 		          (setVarAny
-		            s0'
+		            s0
 		            a'value
 		          )
-		          process1
+		          process1'
 		        )
 		      =
 		        STOP
 		      )
 		    )
 		  -->
-		    (inv'
+		    (inv0
 		      (toEnv
 		        (setVarAny
-		          s0'
+		          s0
 		          a'value
 		        )
 		      )
@@ -386,17 +386,17 @@ class PoSTGeneratorTest {
 		  "
 		
 		definition VC5 where
-		  "VC5 inv' env' s0' a'value \<equiv>
+		  "VC5 inv0 env s0 a'value \<equiv>
 		  (
 		    (
 		      (
-		        (inv'
-		          s0'
+		        (inv0
+		          s0
 		        )
 		      \<and>
-		        (env'
+		        (env
 		          (setVarAny
-		            s0'
+		            s0
 		            a'value
 		          )
 		        )
@@ -405,20 +405,20 @@ class PoSTGeneratorTest {
 		      (
 		        (getPstate
 		          (setVarAny
-		            s0'
+		            s0
 		            a'value
 		          )
-		          process1
+		          process1'
 		        )
 		      =
 		        ERROR
 		      )
 		    )
 		  -->
-		    (inv'
+		    (inv0
 		      (toEnv
 		        (setVarAny
-		          s0'
+		          s0
 		          a'value
 		        )
 		      )

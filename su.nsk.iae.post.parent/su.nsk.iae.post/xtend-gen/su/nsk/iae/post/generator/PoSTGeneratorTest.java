@@ -225,7 +225,7 @@ public class PoSTGeneratorTest {
   public void testGenerateTheoryConstantsInTimeout() {
     try {
       final String theoryName = "TestTheory";
-      Constant _constant = new Constant("a", Integer.valueOf(1));
+      Constant _constant = new Constant("a\'", Integer.valueOf(1));
       final ArrayList<Constant> envVars = CollectionLiterals.<Constant>newArrayList(_constant);
       StringConcatenation _builder = new StringConcatenation();
       _builder.append("PROGRAM Program");
@@ -293,12 +293,12 @@ public class PoSTGeneratorTest {
       _builder_1.append("type_synonym pstate = nat");
       _builder_1.newLine();
       _builder_1.newLine();
-      _builder_1.append("abbreviation a :: variable where \"a \\<equiv> (Suc 0)\"");
+      _builder_1.append("abbreviation a\' :: variable where \"a\' \\<equiv> (Suc 0)\"");
       _builder_1.newLine();
-      _builder_1.append("abbreviation b :: variable where \"b \\<equiv> (Suc (Suc 0))\"");
+      _builder_1.append("abbreviation b\' :: variable where \"b\' \\<equiv> (Suc (Suc 0))\"");
       _builder_1.newLine();
       _builder_1.newLine();
-      _builder_1.append("abbreviation process1 :: process where \"process1 \\<equiv> 1\"");
+      _builder_1.append("abbreviation process1\' :: process where \"process1\' \\<equiv> 1\"");
       _builder_1.newLine();
       _builder_1.newLine();
       _builder_1.append("abbreviation STOP:: pstate where \"STOP \\<equiv> 0\"");
@@ -309,10 +309,10 @@ public class PoSTGeneratorTest {
       _builder_1.append("abbreviation process1\'state1 :: pstate where \"process1\'state1 \\<equiv> 2\"");
       _builder_1.newLine();
       _builder_1.newLine();
-      _builder_1.append("abbreviation t :: int where \"t \\<equiv> 1000\"");
+      _builder_1.append("abbreviation t\' :: nat where \"t\' \\<equiv> 1000\"");
       _builder_1.newLine();
       _builder_1.newLine();
-      _builder_1.append("abbreviation t\'TIMEOUT :: int where \"t\'TIMEOUT \\<equiv> 10\"");
+      _builder_1.append("abbreviation t\'TIMEOUT :: nat where \"t\'TIMEOUT \\<equiv> 10\"");
       _builder_1.newLine();
       _builder_1.newLine();
       String _generateStateDataType = this.generator.generateStateDataType(CollectionLiterals.<String>newArrayList("BOOL"));
@@ -378,7 +378,7 @@ public class PoSTGeneratorTest {
       _builder_1.append("definition VC1 where");
       _builder_1.newLine();
       _builder_1.append("  ");
-      _builder_1.append("\"VC1 inv\' s0\' \\<equiv>");
+      _builder_1.append("\"VC1 inv0 s0 \\<equiv>");
       _builder_1.newLine();
       _builder_1.append("  ");
       _builder_1.append("(");
@@ -387,7 +387,7 @@ public class PoSTGeneratorTest {
       _builder_1.append("(");
       _builder_1.newLine();
       _builder_1.append("      ");
-      _builder_1.append("s0\'");
+      _builder_1.append("s0");
       _builder_1.newLine();
       _builder_1.append("    ");
       _builder_1.append("=");
@@ -402,7 +402,7 @@ public class PoSTGeneratorTest {
       _builder_1.append("emptyState");
       _builder_1.newLine();
       _builder_1.append("          ");
-      _builder_1.append("process1");
+      _builder_1.append("process1\'");
       _builder_1.newLine();
       _builder_1.append("          ");
       _builder_1.append("process1\'state1");
@@ -420,10 +420,10 @@ public class PoSTGeneratorTest {
       _builder_1.append("-->");
       _builder_1.newLine();
       _builder_1.append("    ");
-      _builder_1.append("(inv\'");
+      _builder_1.append("(inv0");
       _builder_1.newLine();
       _builder_1.append("      ");
-      _builder_1.append("s0\'");
+      _builder_1.append("s0");
       _builder_1.newLine();
       _builder_1.append("    ");
       _builder_1.append(")");
@@ -438,7 +438,7 @@ public class PoSTGeneratorTest {
       _builder_1.append("definition VC2 where");
       _builder_1.newLine();
       _builder_1.append("  ");
-      _builder_1.append("\"VC2 inv\' env\' s0\' a\'value \\<equiv>");
+      _builder_1.append("\"VC2 inv0 env s0 a\'value \\<equiv>");
       _builder_1.newLine();
       _builder_1.append("  ");
       _builder_1.append("(");
@@ -453,10 +453,10 @@ public class PoSTGeneratorTest {
       _builder_1.append("(");
       _builder_1.newLine();
       _builder_1.append("          ");
-      _builder_1.append("(inv\'");
+      _builder_1.append("(inv0");
       _builder_1.newLine();
       _builder_1.append("            ");
-      _builder_1.append("s0\'");
+      _builder_1.append("s0");
       _builder_1.newLine();
       _builder_1.append("          ");
       _builder_1.append(")");
@@ -465,13 +465,13 @@ public class PoSTGeneratorTest {
       _builder_1.append("\\<and>");
       _builder_1.newLine();
       _builder_1.append("          ");
-      _builder_1.append("(env\'");
+      _builder_1.append("(env");
       _builder_1.newLine();
       _builder_1.append("            ");
       _builder_1.append("(setVarAny");
       _builder_1.newLine();
       _builder_1.append("              ");
-      _builder_1.append("s0\'");
+      _builder_1.append("s0");
       _builder_1.newLine();
       _builder_1.append("              ");
       _builder_1.append("a\'value");
@@ -498,7 +498,7 @@ public class PoSTGeneratorTest {
       _builder_1.append("(setVarAny");
       _builder_1.newLine();
       _builder_1.append("              ");
-      _builder_1.append("s0\'");
+      _builder_1.append("s0");
       _builder_1.newLine();
       _builder_1.append("              ");
       _builder_1.append("a\'value");
@@ -507,7 +507,7 @@ public class PoSTGeneratorTest {
       _builder_1.append(")");
       _builder_1.newLine();
       _builder_1.append("            ");
-      _builder_1.append("process1");
+      _builder_1.append("process1\'");
       _builder_1.newLine();
       _builder_1.append("          ");
       _builder_1.append(")");
@@ -543,7 +543,7 @@ public class PoSTGeneratorTest {
       _builder_1.append("(setVarAny");
       _builder_1.newLine();
       _builder_1.append("            ");
-      _builder_1.append("s0\'");
+      _builder_1.append("s0");
       _builder_1.newLine();
       _builder_1.append("            ");
       _builder_1.append("a\'value");
@@ -552,7 +552,7 @@ public class PoSTGeneratorTest {
       _builder_1.append(")");
       _builder_1.newLine();
       _builder_1.append("          ");
-      _builder_1.append("process1");
+      _builder_1.append("process1\'");
       _builder_1.newLine();
       _builder_1.append("        ");
       _builder_1.append(")");
@@ -567,7 +567,7 @@ public class PoSTGeneratorTest {
       _builder_1.append("-->");
       _builder_1.newLine();
       _builder_1.append("    ");
-      _builder_1.append("(inv\'");
+      _builder_1.append("(inv0");
       _builder_1.newLine();
       _builder_1.append("      ");
       _builder_1.append("(toEnv");
@@ -576,7 +576,7 @@ public class PoSTGeneratorTest {
       _builder_1.append("(setVarAny");
       _builder_1.newLine();
       _builder_1.append("          ");
-      _builder_1.append("s0\'");
+      _builder_1.append("s0");
       _builder_1.newLine();
       _builder_1.append("          ");
       _builder_1.append("a\'value");
@@ -600,7 +600,7 @@ public class PoSTGeneratorTest {
       _builder_1.append("definition VC3 where");
       _builder_1.newLine();
       _builder_1.append("  ");
-      _builder_1.append("\"VC3 inv\' env\' s0\' a\'value \\<equiv>");
+      _builder_1.append("\"VC3 inv0 env s0 a\'value \\<equiv>");
       _builder_1.newLine();
       _builder_1.append("  ");
       _builder_1.append("(");
@@ -615,10 +615,10 @@ public class PoSTGeneratorTest {
       _builder_1.append("(");
       _builder_1.newLine();
       _builder_1.append("          ");
-      _builder_1.append("(inv\'");
+      _builder_1.append("(inv0");
       _builder_1.newLine();
       _builder_1.append("            ");
-      _builder_1.append("s0\'");
+      _builder_1.append("s0");
       _builder_1.newLine();
       _builder_1.append("          ");
       _builder_1.append(")");
@@ -627,13 +627,13 @@ public class PoSTGeneratorTest {
       _builder_1.append("\\<and>");
       _builder_1.newLine();
       _builder_1.append("          ");
-      _builder_1.append("(env\'");
+      _builder_1.append("(env");
       _builder_1.newLine();
       _builder_1.append("            ");
       _builder_1.append("(setVarAny");
       _builder_1.newLine();
       _builder_1.append("              ");
-      _builder_1.append("s0\'");
+      _builder_1.append("s0");
       _builder_1.newLine();
       _builder_1.append("              ");
       _builder_1.append("a\'value");
@@ -660,7 +660,7 @@ public class PoSTGeneratorTest {
       _builder_1.append("(setVarAny");
       _builder_1.newLine();
       _builder_1.append("              ");
-      _builder_1.append("s0\'");
+      _builder_1.append("s0");
       _builder_1.newLine();
       _builder_1.append("              ");
       _builder_1.append("a\'value");
@@ -669,7 +669,7 @@ public class PoSTGeneratorTest {
       _builder_1.append(")");
       _builder_1.newLine();
       _builder_1.append("            ");
-      _builder_1.append("process1");
+      _builder_1.append("process1\'");
       _builder_1.newLine();
       _builder_1.append("          ");
       _builder_1.append(")");
@@ -708,7 +708,7 @@ public class PoSTGeneratorTest {
       _builder_1.append("(setVarAny");
       _builder_1.newLine();
       _builder_1.append("              ");
-      _builder_1.append("s0\'");
+      _builder_1.append("s0");
       _builder_1.newLine();
       _builder_1.append("              ");
       _builder_1.append("a\'value");
@@ -717,7 +717,7 @@ public class PoSTGeneratorTest {
       _builder_1.append(")");
       _builder_1.newLine();
       _builder_1.append("            ");
-      _builder_1.append("process1");
+      _builder_1.append("process1\'");
       _builder_1.newLine();
       _builder_1.append("          ");
       _builder_1.append(")");
@@ -735,7 +735,7 @@ public class PoSTGeneratorTest {
       _builder_1.append("-->");
       _builder_1.newLine();
       _builder_1.append("    ");
-      _builder_1.append("(inv\'");
+      _builder_1.append("(inv0");
       _builder_1.newLine();
       _builder_1.append("      ");
       _builder_1.append("(toEnv");
@@ -744,7 +744,7 @@ public class PoSTGeneratorTest {
       _builder_1.append("(setVarAny");
       _builder_1.newLine();
       _builder_1.append("          ");
-      _builder_1.append("s0\'");
+      _builder_1.append("s0");
       _builder_1.newLine();
       _builder_1.append("          ");
       _builder_1.append("a\'value");
@@ -768,7 +768,7 @@ public class PoSTGeneratorTest {
       _builder_1.append("definition VC4 where");
       _builder_1.newLine();
       _builder_1.append("  ");
-      _builder_1.append("\"VC4 inv\' env\' s0\' a\'value \\<equiv>");
+      _builder_1.append("\"VC4 inv0 env s0 a\'value \\<equiv>");
       _builder_1.newLine();
       _builder_1.append("  ");
       _builder_1.append("(");
@@ -780,10 +780,10 @@ public class PoSTGeneratorTest {
       _builder_1.append("(");
       _builder_1.newLine();
       _builder_1.append("        ");
-      _builder_1.append("(inv\'");
+      _builder_1.append("(inv0");
       _builder_1.newLine();
       _builder_1.append("          ");
-      _builder_1.append("s0\'");
+      _builder_1.append("s0");
       _builder_1.newLine();
       _builder_1.append("        ");
       _builder_1.append(")");
@@ -792,13 +792,13 @@ public class PoSTGeneratorTest {
       _builder_1.append("\\<and>");
       _builder_1.newLine();
       _builder_1.append("        ");
-      _builder_1.append("(env\'");
+      _builder_1.append("(env");
       _builder_1.newLine();
       _builder_1.append("          ");
       _builder_1.append("(setVarAny");
       _builder_1.newLine();
       _builder_1.append("            ");
-      _builder_1.append("s0\'");
+      _builder_1.append("s0");
       _builder_1.newLine();
       _builder_1.append("            ");
       _builder_1.append("a\'value");
@@ -825,7 +825,7 @@ public class PoSTGeneratorTest {
       _builder_1.append("(setVarAny");
       _builder_1.newLine();
       _builder_1.append("            ");
-      _builder_1.append("s0\'");
+      _builder_1.append("s0");
       _builder_1.newLine();
       _builder_1.append("            ");
       _builder_1.append("a\'value");
@@ -834,7 +834,7 @@ public class PoSTGeneratorTest {
       _builder_1.append(")");
       _builder_1.newLine();
       _builder_1.append("          ");
-      _builder_1.append("process1");
+      _builder_1.append("process1\'");
       _builder_1.newLine();
       _builder_1.append("        ");
       _builder_1.append(")");
@@ -855,7 +855,7 @@ public class PoSTGeneratorTest {
       _builder_1.append("-->");
       _builder_1.newLine();
       _builder_1.append("    ");
-      _builder_1.append("(inv\'");
+      _builder_1.append("(inv0");
       _builder_1.newLine();
       _builder_1.append("      ");
       _builder_1.append("(toEnv");
@@ -864,7 +864,7 @@ public class PoSTGeneratorTest {
       _builder_1.append("(setVarAny");
       _builder_1.newLine();
       _builder_1.append("          ");
-      _builder_1.append("s0\'");
+      _builder_1.append("s0");
       _builder_1.newLine();
       _builder_1.append("          ");
       _builder_1.append("a\'value");
@@ -888,7 +888,7 @@ public class PoSTGeneratorTest {
       _builder_1.append("definition VC5 where");
       _builder_1.newLine();
       _builder_1.append("  ");
-      _builder_1.append("\"VC5 inv\' env\' s0\' a\'value \\<equiv>");
+      _builder_1.append("\"VC5 inv0 env s0 a\'value \\<equiv>");
       _builder_1.newLine();
       _builder_1.append("  ");
       _builder_1.append("(");
@@ -900,10 +900,10 @@ public class PoSTGeneratorTest {
       _builder_1.append("(");
       _builder_1.newLine();
       _builder_1.append("        ");
-      _builder_1.append("(inv\'");
+      _builder_1.append("(inv0");
       _builder_1.newLine();
       _builder_1.append("          ");
-      _builder_1.append("s0\'");
+      _builder_1.append("s0");
       _builder_1.newLine();
       _builder_1.append("        ");
       _builder_1.append(")");
@@ -912,13 +912,13 @@ public class PoSTGeneratorTest {
       _builder_1.append("\\<and>");
       _builder_1.newLine();
       _builder_1.append("        ");
-      _builder_1.append("(env\'");
+      _builder_1.append("(env");
       _builder_1.newLine();
       _builder_1.append("          ");
       _builder_1.append("(setVarAny");
       _builder_1.newLine();
       _builder_1.append("            ");
-      _builder_1.append("s0\'");
+      _builder_1.append("s0");
       _builder_1.newLine();
       _builder_1.append("            ");
       _builder_1.append("a\'value");
@@ -945,7 +945,7 @@ public class PoSTGeneratorTest {
       _builder_1.append("(setVarAny");
       _builder_1.newLine();
       _builder_1.append("            ");
-      _builder_1.append("s0\'");
+      _builder_1.append("s0");
       _builder_1.newLine();
       _builder_1.append("            ");
       _builder_1.append("a\'value");
@@ -954,7 +954,7 @@ public class PoSTGeneratorTest {
       _builder_1.append(")");
       _builder_1.newLine();
       _builder_1.append("          ");
-      _builder_1.append("process1");
+      _builder_1.append("process1\'");
       _builder_1.newLine();
       _builder_1.append("        ");
       _builder_1.append(")");
@@ -975,7 +975,7 @@ public class PoSTGeneratorTest {
       _builder_1.append("-->");
       _builder_1.newLine();
       _builder_1.append("    ");
-      _builder_1.append("(inv\'");
+      _builder_1.append("(inv0");
       _builder_1.newLine();
       _builder_1.append("      ");
       _builder_1.append("(toEnv");
@@ -984,7 +984,7 @@ public class PoSTGeneratorTest {
       _builder_1.append("(setVarAny");
       _builder_1.newLine();
       _builder_1.append("          ");
-      _builder_1.append("s0\'");
+      _builder_1.append("s0");
       _builder_1.newLine();
       _builder_1.append("          ");
       _builder_1.append("a\'value");
