@@ -26,4 +26,8 @@ theorem proof_4_4: "VC4 inv4 env s0 user_value pressure_value"
       apply(rule cut_rl[of "substate s3 s0"])
       using prems apply meson
       using prems(2)  by (simp split: if_splits)
+	apply(simp only: extraInv_def[symmetric])
+    using extra4 VC4_def by auto
+
+end
   

@@ -1,6 +1,7 @@
 theory Proof_6_2
-  imports Proofs_6
+  imports Proofs_6 Extra2
 begin
+
 
 theorem proof_6_2: "VC2 inv6 env s0 user_value pressure_value"
   apply(simp only: VC2_def inv6_def R6_def extraInv_def)
@@ -15,4 +16,7 @@ theorem proof_6_2: "VC2 inv6 env s0 user_value pressure_value"
     using prems(1) apply simp
     using substate_refl apply presburger
     using prems(1) by blast
-     
+  apply(simp only: extraInv_def[symmetric])
+  using extra2 VC2_def by auto
+
+end

@@ -2,7 +2,7 @@ theory ExtraInv
   imports RevolvingDoor
 begin
 
-definition extraInv where "extraInv s \<equiv>
+definition extraInv where "extraInv s \<equiv> toEnvP s \<and>
 (\<forall> s1. toEnvP s1 \<and> substate s1 s \<and> getPstate s1 Controller = Controller'motionless \<longrightarrow>
 (\<forall> s2. toEnvP s2 \<and> substate s2 s1  \<longrightarrow> getPstate s2 Controller = Controller'motionless \<and> \<not> getVarBool s2 user) \<or>
 (\<exists> s2 s3. toEnvP s2 \<and> substate s2 s3 \<and> substate s3 s1 \<and> toEnvNum s2 s3 = 1 \<and>
@@ -25,7 +25,7 @@ getPstate s1 Controller = Controller'rotating \<and> \<not> getVarBool s2 user) 
  getPstate s2 Controller = Controller'suspended) \<and> \<not> getVarBool s3 pressure \<and>
 (\<forall> s4. toEnvP s4 \<and> substate s3 s4 \<and> substate s4 s1 \<longrightarrow> getPstate s4 Controller = Controller'rotating))) \<and>
 (\<forall> s1. toEnvP s1 \<and> substate s1 s \<and> getPstate s1 Controller = Controller'suspended \<longrightarrow>
- ltime s1 Controller = SUSPENSION_TIME'TIMEOUT) \<and>
+ ltime s1 Controller \<le> SUSPENSION_TIME'TIMEOUT) \<and>
 (\<forall> s1. toEnvP s1 \<and> substate s1 s \<and> getPstate s1 Controller = Controller'suspended \<longrightarrow>
 (\<exists> s2 s3. toEnvP s2 \<and> toEnvP s3 \<and> substate s2 s3 \<and> substate s3 s1 \<and> toEnvNum s2 s3 = 1 \<and>
  toEnvNum s2 s1 = ltime s1 Controller \<and>
