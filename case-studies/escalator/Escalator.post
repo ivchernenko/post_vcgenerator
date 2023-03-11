@@ -1,0 +1,112 @@
+PROGRAM Escalator
+
+	VAR_INPUT
+		userAtTop : BOOL;
+		userAtBottom : BOOL;
+		directionSwitch : BOOL;
+		alarmButton: BOOL;
+		stuck: BOOL;
+	END_VAR
+
+	VAR_OUTPUT
+		up : BOOL;
+		down : BOOL;
+	END_VAR
+
+	VAR CONSTANT
+		UP : BOOL := TRUE;
+		DOWN : BOOL := FALSE;
+		DELAY : TIME := T#2m;
+		SUSPENSION_TIME : TIME := T#1s;
+	END_VAR
+
+	VAR
+		direction : BOOL;
+		moving : BOOL;
+	END_VAR
+
+	PROCESS Ctrl
+		STATE motionless
+			IF alarmButton THEN
+				SET STATE emergency;
+			ELSIF stuck THEN
+				SET STATE stuckState;
+			ELSIF userAtTop OR userAtBottom THEN
+				IF directionSwitch = UP THEN
+					up := TRUE;
+					moving := TRUE;
+					direction := UP;
+					SET STATE goUp;
+				ELSE
+					down := TRUE;
+					moving := TRUE;
+					direction := DOWN;
+					SET STATE goDown;
+				END_IF
+			ELSE
+				direction := directionSwitch;
+			END_IF
+		END_STATE
+
+		STATE goUp 
+			IF alarmButton THEN
+				SET STATE emergency;
+			ELSIF stuck THEN
+				SET STATE stuckState;
+			ELSIF userAtTop OR userAtBottom THEN
+				RESET TIMER;
+			END_IF
+			TIMEOUT DELAY THEN
+				up := FALSE;
+				moving := FALSE;
+				direction := directionSwitch;
+				SET STATE motionless;
+			END_TIMEOUT
+		END_STATE
+
+		STATE goDown 
+			IF alarmButton THEN
+				SET STATE emergency;
+			ELSIF stuck THEN
+				SET STATE stuckState;
+			ELSIF userAtTop OR userAtBottom THEN
+				RESET TIMER;
+			END_IF
+			TIMEOUT DELAY THEN
+				down := FALSE;
+				moving := FALSE;
+				direction := directionSwitch;
+				SET STATE motionless;
+			END_TIMEOUT
+		END_STATE
+
+		STATE stuckState
+			up := FALSE;
+			down := FALSE;
+			IF alarmButton THEN
+				SET STATE emergency;
+			ELSIF stuck THEN
+				RESET TIMER;
+			END_IF
+			TIMEOUT SUSPENSION_TIME THEN
+				IF moving THEN
+					IF direction = UP THEN
+						up := TRUE;
+						SET STATE goUp;
+					ELSE
+						down := TRUE;
+						SET STATE goDown;
+					END_IF
+				ELSE
+					SET STATE motionless;
+				END_IF
+			END_TIMEOUT
+		END_STATE
+
+		STATE emergency
+			up := FALSE;
+			down := FALSE;
+		END_STATE
+	END_PROCESS
+END_PROGRAM
+			
