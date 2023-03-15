@@ -769,6 +769,11 @@ toEnvNum emptyState s - (Suc n)" by auto
   with 2 show ?case ..  
 qed
 
+lemma toEnvP_ltime: "toEnvP s \<longrightarrow> ltime s p > 0"
+  apply(cases s)
+            apply auto
+  done
+
 
 lemma toEnvNum3: "substate s1 s2 \<and> substate s2 s3
  \<Longrightarrow> toEnvNum s1 s3 = toEnvNum s1 s2 + toEnvNum s2 s3"
