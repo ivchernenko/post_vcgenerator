@@ -1,5 +1,5 @@
 theory Proof_2_2
-  imports Proofs_2
+  imports Proofs_2 Extra2
 begin
 
 abbreviation s where "s s0 userAtTop_value userAtBottom_value directionSwitch_value alarmButton_value stuck_value \<equiv>
@@ -345,3 +345,7 @@ theorem proof_2_2: "VC2 inv2 env s0 userAtTop_value userAtBottom_value direction
     apply(rule conjI)
     using substate_refl apply fast
     using prems by fast
+  apply(simp only: extraInv_def[symmetric])
+  using extra2 VC2_def by auto
+
+end
