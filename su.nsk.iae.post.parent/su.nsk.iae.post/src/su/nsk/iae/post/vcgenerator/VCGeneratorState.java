@@ -169,7 +169,7 @@ public class VCGeneratorState {
 			if (prefix == null)
 				fullVarName = symVar.getName() + "'";
 			else
-				fullVarName = prefix + NAME_SEPARATOR + symVar.getName();
+				fullVarName = prefix + NAME_SEPARATOR + symVar.getName() + "'";
 			Constant varCode = new Constant(fullVarName, varNumber);
 			if (value != null && modType != ModificationType.CONSTANT || arraySpec != null) {
 				initializedVars.add(varCode);
@@ -250,6 +250,12 @@ public class VCGeneratorState {
 			return initializeArray(variable, state);
 		else
 			return initializeSimpleVar(variable, state);
+	}
+	
+	public Term initializeProcessVars(String processName, Term state) {
+		for (Constant initializedVar: getInitializedVars(processName))
+			state = initializeVar(initializedVar, state);
+		return state;
 	}
 
 	public IndexRange getIndexRange(Constant varCode) {
@@ -430,6 +436,6 @@ class StateList {
 
 	void addState(String stateName, String prefix, int stateCode) {
 		stateNames.add(stateName);
-		pstates.put(stateName, new Constant(prefix + VCGeneratorState.NAME_SEPARATOR + stateName, stateCode));
+		pstates.put(stateName, new Constant(prefix + VCGeneratorState.NAME_SEPARATOR + stateName + "'", stateCode));
 	}
 }

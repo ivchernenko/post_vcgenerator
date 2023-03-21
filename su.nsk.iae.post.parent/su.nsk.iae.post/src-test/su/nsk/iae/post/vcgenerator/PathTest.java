@@ -5,13 +5,14 @@ import org.junit.Test;
 
 import su.nsk.iae.post.poST.impl.ExpressionFactory;
 import su.nsk.iae.post.poST.impl.ProgramFactory;
-import su.nsk.iae.post.poST.impl.ResetTimerStatementImpl;
 import su.nsk.iae.post.poST.impl.StatementFactory;
 import su.nsk.iae.post.poST.*;
 
 import static su.nsk.iae.post.vcgenerator.TermFactory.*;
+import static su.nsk.iae.post.vcgenerator.Constant.*;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class PathTest {
@@ -501,6 +502,51 @@ public class PathTest {
 		Assert.assertNull(path.getPrecondition());
 		Assert.assertEquals(ExecutionStatus.NORMAL,  path.getStatus());
 	}
+	
+	@Test
+	public void testStartProcessWithVariableInitialization() {
+		/*PROCESS process1
+		 * VAR
+		 * var1: BOOL := TRUE;
+		 * STATE state1
+		 * ...
+		 * statement: START PROCESS process1
+		 * expected result: setPstate(s0, process1 state1)
+		 */
+		String var1Name = "var1";
+		String state1Name = "state1";
+		String state2Name = "state2";
+		String processName = "process1";
+		Term currentState = new Variable("s0");
+		SymbolicVariable var1Var = ExpressionFactory.createSymbolicVariable(var1Name);
+		su.nsk.iae.post.poST.Constant valueConst = ExpressionFactory.createBooleanConstant(true);
+		Expression value = ExpressionFactory.createConstantExpression(valueConst);
+		VarInitDeclaration varInitDecl = ProgramFactory.createSimpleVarDeclaration("BOOL", value, var1Var);
+		VarDeclaration varDecl = ProgramFactory.createVarDeclaration(false, Arrays.asList(varInitDecl));
+		State state1 = ProgramFactory.createState(state1Name, null, null);
+		State state2 = ProgramFactory.createState(state2Name, null, null);
+		List<InputVarDeclaration> inVars = new ArrayList<>();
+		List<OutputVarDeclaration> outVars = new ArrayList<>();
+		List<InputOutputVarDeclaration> inOutVars = new ArrayList<>();
+		List<VarDeclaration> vars = new ArrayList<>();
+		vars.add(varDecl);
+		List<State> states = new ArrayList<>();
+		states.add(state1);
+		states.add(state2);
+		su.nsk.iae.post.poST.Process process = ProgramFactory.createProcess(processName, inVars, outVars, inOutVars, vars, states);
+		StartProcessStatement statement = StatementFactory.createStartProcessStatement(process);
+		Path path = new Path(null, currentState);
+		VCGeneratorState vcGenVars = new VCGeneratorState();
+		Constant processCode = vcGenVars.addProcess(process);
+		Constant stateCode = vcGenVars.getState(state1Name);
+		Constant var1 = vcGenVars.getVariable(var1Name);
+		Term expected = setPstate(setVarBool(currentState, var1, True), processCode, stateCode);
+		path.startProcess(statement, vcGenVars);
+		Assert.assertEquals(expected, path.getCurrentState());
+		Assert.assertNull(path.getPrecondition());
+		Assert.assertEquals(ExecutionStatus.NORMAL,  path.getStatus());
+	}
+	
 	
 	@Test
 	public void testStartProcessRestart() {

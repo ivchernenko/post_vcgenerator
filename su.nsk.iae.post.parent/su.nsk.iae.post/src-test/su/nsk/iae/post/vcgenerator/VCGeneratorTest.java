@@ -551,7 +551,7 @@ public class VCGeneratorTest {
 		FunctionSymbol inv = new FunctionSymbol("inv", true);
 		FunctionSymbol env = new FunctionSymbol("env", true);
 		Term invs0 = new ComplexTerm(inv, s0);
-		Term s1 = setVarAny(s0);
+		Term s1 = s0;
 		Term envs1 = new ComplexTerm(env, s1);
 		VCGeneratorState vcGenVars = new VCGeneratorState();
 		VCGenerator vcGen = new VCGenerator();
@@ -572,23 +572,32 @@ public class VCGeneratorTest {
 		Term stateAfterProcess1 = setVarBool(s1, a, True);
 		List<Term> expected = new ArrayList<>();
 		expected.add(impl(eq(s0, toEnv(setPstate(emptyState, process1, state1))), invs0));
-		expected.add((impl(and(invs0, envs1, eq(getPstate(s1, process1), state1), eq(getPstate(stateAfterProcess1, process2), state2)), 
+		expected.add((impl(and(invs0, envs1, 
+				and(eq(getPstate(s1, process1), state1), eq(getPstate(stateAfterProcess1, process2), state2))), 
 				new ComplexTerm(inv, toEnv(setVarBool(stateAfterProcess1, b, True))))));
-		expected.add((impl(and(invs0, envs1, eq(getPstate(s1, process1), state1), eq(getPstate(stateAfterProcess1, process2), stop)), 
+		expected.add((impl(and(invs0, envs1, 
+				and(eq(getPstate(s1, process1), state1), eq(getPstate(stateAfterProcess1, process2), stop))), 
 				new ComplexTerm(inv, toEnv(stateAfterProcess1)))));
-		expected.add((impl(and(invs0, envs1, eq(getPstate(s1, process1), state1), eq(getPstate(stateAfterProcess1, process2), error)), 
+		expected.add((impl(and(invs0, envs1, 
+				and(eq(getPstate(s1, process1), state1), eq(getPstate(stateAfterProcess1, process2), error))), 
 				new ComplexTerm(inv, toEnv(stateAfterProcess1)))));
-		expected.add((impl(and(invs0, envs1, eq(getPstate(s1, process1), stop), eq(getPstate(s1, process2), state2)), 
+		expected.add((impl(and(invs0, envs1, 
+				and(eq(getPstate(s1, process1), stop), eq(getPstate(s1, process2), state2))), 
 				new ComplexTerm(inv, toEnv(setVarBool(s1, b, True))))));
-		expected.add((impl(and(invs0, envs1, eq(getPstate(s1, process1), stop), eq(getPstate(s1, process2), stop)), 
+		expected.add((impl(and(invs0, envs1, 
+				and(eq(getPstate(s1, process1), stop), eq(getPstate(s1, process2), stop))), 
 				new ComplexTerm(inv, toEnv(s1)))));
-		expected.add((impl(and(invs0, envs1, eq(getPstate(s1, process1), stop), eq(getPstate(s1, process2), error)), 
+		expected.add((impl(and(invs0, envs1, 
+				and(eq(getPstate(s1, process1), stop), eq(getPstate(s1, process2), error))), 
 				new ComplexTerm(inv, toEnv(s1)))));
-		expected.add((impl(and(invs0, envs1, eq(getPstate(s1, process1), error), eq(getPstate(s1, process2), state2)), 
+		expected.add((impl(and(invs0, envs1, 
+				and(eq(getPstate(s1, process1), error), eq(getPstate(s1, process2), state2))), 
 				new ComplexTerm(inv, toEnv(setVarBool(s1, b, True))))));
-		expected.add((impl(and(invs0, envs1, eq(getPstate(s1, process1), error), eq(getPstate(s1, process2), stop)), 
+		expected.add((impl(and(invs0, envs1, 
+				and(eq(getPstate(s1, process1), error), eq(getPstate(s1, process2), stop))), 
 				new ComplexTerm(inv, toEnv(s1)))));
-		expected.add((impl(and(invs0, envs1, eq(getPstate(s1, process1), error), eq(getPstate(s1, process2), error)), 
+		expected.add((impl(and(invs0, envs1, 
+				and(eq(getPstate(s1, process1), error), eq(getPstate(s1, process2), error))), 
 				new ComplexTerm(inv, toEnv(s1)))));
 		Assert.assertEquals(expected, vcGenVars.vcSet);
 	}
@@ -640,21 +649,25 @@ public class VCGeneratorTest {
 		FunctionSymbol inv = new FunctionSymbol("inv", true);
 		FunctionSymbol env = new FunctionSymbol("env", true);
 		Term invs0 = new ComplexTerm(inv, s0);
-		Term s1 = setVarAny(s0, inValue, inOutValue, pInValue, pInOutValue);
-		Term envs1 = new ComplexTerm(env, s1);
 		VCGeneratorState vcGenVars = new VCGeneratorState();
 		VCGenerator vcGen = new VCGenerator();
 		vcGen.globVars = vcGenVars;
 		Model model = parser.parse(programText);
 		Program program = model.getPrograms().get(0);
 		vcGen.generateProgram(program);
+		su.nsk.iae.post.vcgenerator.Constant in = vcGenVars.getVariable("in");
+		su.nsk.iae.post.vcgenerator.Constant inOut = vcGenVars.getVariable("inOut");
 		su.nsk.iae.post.vcgenerator.Constant var1 = vcGenVars.getVariable("var1");
 		su.nsk.iae.post.vcgenerator.Constant var2 = vcGenVars.getVariable("var2");
 		su.nsk.iae.post.vcgenerator.Constant var3 = vcGenVars.getVariable("var3");
 		su.nsk.iae.post.vcgenerator.Constant process1 = vcGenVars.getProcess("process1");
 		vcGenVars.setCurrentProcess("process1");
+		su.nsk.iae.post.vcgenerator.Constant pIn = vcGenVars.getVariable("pIn");
+		su.nsk.iae.post.vcgenerator.Constant pInOut = vcGenVars.getVariable("pInOut");
 		su.nsk.iae.post.vcgenerator.Constant pOut = vcGenVars.getVariable("pOut");
 		su.nsk.iae.post.vcgenerator.Constant state1 = vcGenVars.getState("state1");
+		Term s1 = setVarBool(setVarBool(setVarBool(setVarBool(s0, in, inValue), inOut, inOutValue), pIn, pInValue), pInOut, pInOutValue);
+		Term envs1 = new ComplexTerm(env, s1);
 		Term stateAfterVar12Initialization = setVarInt(setVarInt(emptyState, var1, var1Value), var2, var2Value);
 		Term stateAfterVar123Initialization = setVarInt(
 				stateAfterVar12Initialization,
@@ -704,17 +717,19 @@ public class VCGeneratorTest {
 		FunctionSymbol inv = new FunctionSymbol("inv", true);
 		FunctionSymbol env = new FunctionSymbol("env", true);
 		Term invs0 = new ComplexTerm(inv, s0);
-		Term s1 = setVarAny(s0, inValue, inOutValue);
-		Term envs1 = new ComplexTerm(env, s1);
 		VCGeneratorState vcGenVars = new VCGeneratorState();
 		VCGenerator vcGen = new VCGenerator();
 		vcGen.globVars = vcGenVars;
 		Model model = parser.parse(programText);
 		Program program = model.getPrograms().get(0);
 		vcGen.generateProgram(program);
+		su.nsk.iae.post.vcgenerator.Constant in = vcGenVars.getVariable("in");
+		su.nsk.iae.post.vcgenerator.Constant inOut = vcGenVars.getVariable("inOut");
 		su.nsk.iae.post.vcgenerator.Constant out = vcGenVars.getVariable("out");
 		su.nsk.iae.post.vcgenerator.Constant arr = vcGenVars.getVariable("arr");
 		su.nsk.iae.post.vcgenerator.Constant process1 = vcGenVars.getProcess("process1");
+		Term s1 = setVarBool(setVarBool(s0, in, inValue), inOut, inOutValue);
+		Term envs1 = new ComplexTerm(env, s1);
 		vcGenVars.setCurrentProcess("process1");
 		su.nsk.iae.post.vcgenerator.Constant state1 = vcGenVars.getState("state1");
 		Term stateAfterArr1Initialization = setVarArrayInt(emptyState, arr, plus(_1, _0), _1);
@@ -760,7 +775,7 @@ public class VCGeneratorTest {
 		FunctionSymbol inv = new FunctionSymbol("inv", true);
 		FunctionSymbol env = new FunctionSymbol("env", true);
 		Term invs0 = new ComplexTerm(inv, s0);
-		Term s1 = setVarAny(s0);
+		Term s1 = s0;
 		Term envs1 = new ComplexTerm(env, s1);
 		VCGenerator vcGen = new VCGenerator(defaultPeriod);
 		Model model = parser.parse(programText);
@@ -769,9 +784,9 @@ public class VCGeneratorTest {
 		su.nsk.iae.post.vcgenerator.Constant state1 = vcGenVars.getState("state1");
 		List<Term> expected = new ArrayList<>();
 		expected.add(impl(eq(s0, toEnv(setPstate(emptyState, process1, state1))), invs0));
-		expected.add(impl(and(invs0, envs1, eq(getPstate(s1, process1), state1), leq(timeout, ltime(s1, process1))),
+		expected.add(impl(and(invs0, envs1, and(eq(getPstate(s1, process1), state1), leq(timeout, ltime(s1, process1)))),
 				new ComplexTerm(inv, toEnv(s1))));
-		expected.add(impl(and(invs0, envs1, eq(getPstate(s1, process1), state1), not(leq(timeout, ltime(s1, process1)))),
+		expected.add(impl(and(invs0, envs1, and(eq(getPstate(s1, process1), state1), not(leq(timeout, ltime(s1, process1))))),
 				new ComplexTerm(inv, toEnv(s1))));
 		expected.add(impl(and(invs0, envs1, eq(getPstate(s1, process1), stop)),
 				new ComplexTerm(inv, toEnv(s1))));
@@ -799,7 +814,7 @@ public class VCGeneratorTest {
 		FunctionSymbol inv = new FunctionSymbol("inv", true);
 		FunctionSymbol env = new FunctionSymbol("env", true);
 		Term invs0 = new ComplexTerm(inv, s0);
-		Term s1 = setVarAny(s0);
+		Term s1 = s0;
 		Term envs1 = new ComplexTerm(env, s1);
 		VCGenerator vcGen = new VCGenerator(defaultPeriod);
 		Model model = parser.parse(programText);
@@ -808,9 +823,9 @@ public class VCGeneratorTest {
 		su.nsk.iae.post.vcgenerator.Constant state1 = vcGenVars.getState("state1");
 		List<Term> expected = new ArrayList<>();
 		expected.add(impl(eq(s0, toEnv(setPstate(emptyState, process1, state1))), invs0));
-		expected.add(impl(and(invs0, envs1, eq(getPstate(s1, process1), state1), leq(timeout, ltime(s1, process1))),
+		expected.add(impl(and(invs0, envs1, and(eq(getPstate(s1, process1), state1), leq(timeout, ltime(s1, process1)))),
 				new ComplexTerm(inv, toEnv(s1))));
-		expected.add(impl(and(invs0, envs1, eq(getPstate(s1, process1), state1), not(leq(timeout, ltime(s1, process1)))),
+		expected.add(impl(and(invs0, envs1, and(eq(getPstate(s1, process1), state1), not(leq(timeout, ltime(s1, process1))))),
 				new ComplexTerm(inv, toEnv(s1))));
 		expected.add(impl(and(invs0, envs1, eq(getPstate(s1, process1), stop)),
 				new ComplexTerm(inv, toEnv(s1))));
@@ -847,7 +862,7 @@ public class VCGeneratorTest {
 		FunctionSymbol inv = new FunctionSymbol("inv", true);
 		FunctionSymbol env = new FunctionSymbol("env", true);
 		Term invs0 = new ComplexTerm(inv, s0);
-		Term s1 = setVarAny(s0);
+		Term s1 = s0;
 		Term envs1 = new ComplexTerm(env, s1);
 		VCGenerator vcGen = new VCGenerator(defaultPeriod);
 		Model model = parser.parse(programText);
@@ -856,9 +871,9 @@ public class VCGeneratorTest {
 		su.nsk.iae.post.vcgenerator.Constant state1 = vcGenVars.getState("state1");
 		List<Term> expected = new ArrayList<>();
 		expected.add(impl(eq(s0, toEnv(setPstate(emptyState, process1, state1))), invs0));
-		expected.add(impl(and(invs0, envs1, eq(getPstate(s1, process1), state1), leq(timeout, ltime(s1, process1))),
+		expected.add(impl(and(invs0, envs1, and(eq(getPstate(s1, process1), state1), leq(timeout, ltime(s1, process1)))),
 				new ComplexTerm(inv, toEnv(s1))));
-		expected.add(impl(and(invs0, envs1, eq(getPstate(s1, process1), state1), not(leq(timeout, ltime(s1, process1)))),
+		expected.add(impl(and(invs0, envs1, and(eq(getPstate(s1, process1), state1), not(leq(timeout, ltime(s1, process1))))),
 				new ComplexTerm(inv, toEnv(s1))));
 		expected.add(impl(and(invs0, envs1, eq(getPstate(s1, process1), stop)),
 				new ComplexTerm(inv, toEnv(s1))));
@@ -896,7 +911,7 @@ public class VCGeneratorTest {
 		FunctionSymbol inv = new FunctionSymbol("inv", true);
 		FunctionSymbol env = new FunctionSymbol("env", true);
 		Term invs0 = new ComplexTerm(inv, s0);
-		Term s1 = setVarAny(s0);
+		Term s1 = s0;
 		Term envs1 = new ComplexTerm(env, s1);
 		VCGenerator vcGen = new VCGenerator(defaultPeriod);
 		Model model = parser.parse(programText);
@@ -905,9 +920,9 @@ public class VCGeneratorTest {
 		su.nsk.iae.post.vcgenerator.Constant state1 = vcGenVars.getState("state1");
 		List<Term> expected = new ArrayList<>();
 		expected.add(impl(eq(s0, toEnv(setPstate(emptyState, process1, state1))), invs0));
-		expected.add(impl(and(invs0, envs1, eq(getPstate(s1, process1), state1), leq(timeout, ltime(s1, process1))),
+		expected.add(impl(and(invs0, envs1, and(eq(getPstate(s1, process1), state1), leq(timeout, ltime(s1, process1)))),
 				new ComplexTerm(inv, toEnv(s1))));
-		expected.add(impl(and(invs0, envs1, eq(getPstate(s1, process1), state1), not(leq(timeout, ltime(s1, process1)))),
+		expected.add(impl(and(invs0, envs1, and(eq(getPstate(s1, process1), state1), not(leq(timeout, ltime(s1, process1))))),
 				new ComplexTerm(inv, toEnv(s1))));
 		expected.add(impl(and(invs0, envs1, eq(getPstate(s1, process1), stop)),
 				new ComplexTerm(inv, toEnv(s1))));

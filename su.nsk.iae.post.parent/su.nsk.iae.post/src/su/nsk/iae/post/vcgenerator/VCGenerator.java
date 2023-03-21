@@ -1,12 +1,13 @@
 package su.nsk.iae.post.vcgenerator;
 
 import java.util.*;
+
 import java.util.stream.Stream;
 
 import org.eclipse.emf.ecore.EObject;
 
 import su.nsk.iae.post.poST.*;
-import su.nsk.iae.post.vcgenerator.Constant;
+import static su.nsk.iae.post.vcgenerator.TermFactory.*;
 
 public class VCGenerator {
 	VCGeneratorState globVars;
@@ -146,18 +147,13 @@ public class VCGenerator {
 		globVars.addVcFunctionParam(env);
 		Term invs0 = new ComplexTerm(inv, s0);
 		List<Term> setVarAnyArgs = new ArrayList<>();
-		setVarAnyArgs.add(s0);
+		Term s1 = s0;
 		for (Constant envVar: globVars.envVars) {
-			String varValueName;
-			if (envVar.getName().endsWith(VCGeneratorState.NAME_SEPARATOR))
-				varValueName = envVar.getName() + "value";
-			else
-				varValueName = envVar.getName()+ VCGeneratorState.NAME_SEPARATOR + "value";
-			Variable var_value = new Variable(varValueName);
-			globVars.addVcVariableParam(var_value);
-			setVarAnyArgs.add(var_value);
+			String varValueName = envVar.getName() + "value";
+			Variable varValue = new Variable(varValueName);
+			globVars.addVcVariableParam(varValue);
+			s1 = TermFactory.setVar(globVars.getVarType(envVar), s1, envVar, varValue);
 		}
-		Term s1 = new ComplexTerm(FunctionSymbol.setVarAny, (Term[]) setVarAnyArgs.toArray(new Term[0]));
 		Term envs1 = new ComplexTerm(env, s1);
 		boolean initialProcess = true;
 		Term state = Constant.emptyState;
@@ -166,14 +162,13 @@ public class VCGenerator {
 		for (su.nsk.iae.post.poST.Process process: program.getProcesses()) {
 			globVars.setCurrentProcess(process.getName());
 			Constant processCode = globVars.getProcess(process.getName());
+			state = globVars.initializeProcessVars(process.getName(), state);
 			if (initialProcess) {
 				Constant initialState = globVars.getInitialState(process.getName());
 				Term setInitialPstate = new ComplexTerm(FunctionSymbol.setPstate, state, processCode, initialState);
 				setInitialPstate.addCondition(state.getPrecondition());
 				state = setInitialPstate;
 			}
-			for (Constant initializedVar: globVars.getInitializedVars(process.getName()))
-				state = globVars.initializeVar(initializedVar, state);
 			initialProcess = false;	
 		}
 		if (state.getPrecondition() != null) {
@@ -185,8 +180,7 @@ public class VCGenerator {
 				new ComplexTerm(inv, s0));	
 		globVars.addVerificationCondition(vcForInitPath);
 		List<Path> controlLoopBody = new ArrayList<>(1);
-		Path controlLoopBodyPath = new Path(invs0, s1);
-		controlLoopBodyPath = controlLoopBodyPath.addCondition(envs1);
+		Path controlLoopBodyPath = new Path(null, s1);
 		controlLoopBody.add(controlLoopBodyPath);
 		for (su.nsk.iae.post.poST.Process process: program.getProcesses()) {
 			List<Path> afterProcess = new ArrayList<>();
@@ -196,6 +190,7 @@ public class VCGenerator {
 		}
 		for (Path path: controlLoopBody) {
 			path.toEnv();
+			path = new Path(and(invs0, envs1, path.getPrecondition()), path.getCurrentState());
 			globVars.addVerificationCondition(path.generateVerificationCondition(inv));
 		}
 	}

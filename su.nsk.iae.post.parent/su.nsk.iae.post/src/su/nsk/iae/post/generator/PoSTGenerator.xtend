@@ -33,26 +33,19 @@ class PoSTGenerator implements AbstractGenerator {
 					vc.getFreeVariables(vcGenVars.getVcVariableParams()))
 		}
 		return '''
-			theory «theoryName» imports Complex_Main
+			theory «theoryName» imports VCTheory
 			begin
 			
-			type_synonym variable = nat
-			type_synonym process = nat
-			type_synonym pstate = nat
-			
 			«FOR v : vcGenVars.getVariables()»
-				«generateVariableCode(v)»
+				«generateCode("variable", v)»
 			 «ENDFOR»
 			
 			«FOR p : vcGenVars.getProcesses()»
-				«generateProcessCode(p)»
+				«generateCode("process", p)»
 			 «ENDFOR»
 			
-			abbreviation STOP:: pstate where "STOP \<equiv> 0"
-			abbreviation ERROR:: pstate where "ERROR \<equiv> 1"
-			
 			«FOR s : vcGenVars.getProcessStates()»
-				«generateProcessStateCode(s)»
+				«generateCode("pstate", s)»
 			«ENDFOR»
 			
 			«FOR c : vcGenVars.getConstants().entrySet()»
@@ -65,34 +58,6 @@ class PoSTGenerator implements AbstractGenerator {
 				«ENDIF»
 			«ENDFOR»
 			
-			«generateStateDataType(vcGenVars.getEnvVarTypes())»
-			
-			«generateGetVarBoolFunction(vcGenVars.getEnvVars(), vcGenVars.getBoolEnvVars())»
-			
-			«generateGetVarIntFunction(vcGenVars.getEnvVars(), vcGenVars.getIntEnvVars())»
-			
-			«generateGetVarRealFunction(vcGenVars.getEnvVars(), vcGenVars.getRealEnvVars())»
-			
-			«generateGetVarArrayBoolFunction(vcGenVars.getEnvVars())»
-			
-			«generateGetVarArrayIntFunction(vcGenVars.getEnvVars())»
-			
-			«generateGetVarArrayRealFunction(vcGenVars.getEnvVars())»
-			
-			«generateGetPstateFunction(vcGenVars.getEnvVars())»
-			
-			«generateSubstateFunction(vcGenVars.getEnvVars())»
-			
-			«generateToEnvNumFunction(vcGenVars.getEnvVars())»
-			
-			«generateToEnvPFunction()»
-			
-			«generateLtimeFunction(vcGenVars.getEnvVars())»
-			
-			«generatePredEnvFunction(vcGenVars.getEnvVars())»
-			
-			«generateShiftFunction()»
-			
 			(*Verification conditions*)
 			
 			«vcList»
@@ -100,7 +65,7 @@ class PoSTGenerator implements AbstractGenerator {
 		'''
 	}
 
-	def String generateVariableCode(Constant constant) {
+	def String generateCode(String type, Constant constant) {
 		val value = constant.getValue() as Integer
 		var stringValue = ""
 		for (var i = 0; i < value; i++) {
@@ -111,19 +76,7 @@ class PoSTGenerator implements AbstractGenerator {
 			stringValue = stringValue + ")"
 		}
 		return '''
-			abbreviation «constant.getName()» :: variable where "«constant.getName()» \<equiv> «stringValue»"
-		'''
-	}
-
-	def String generateProcessCode(Constant constant) {
-		return '''
-			abbreviation «constant.getName()» :: process where "«constant.getName()» \<equiv> «constant.getValue()»"
-		'''
-	}
-
-	def String generateProcessStateCode(Constant constant) {
-		return '''
-			abbreviation «constant.getName()» :: pstate where "«constant.getName()» \<equiv> «constant.getValue()»"
+			abbreviation «constant.getName()» :: «type» where "«constant.getName()» \<equiv> «stringValue»"
 		'''
 	}
 

@@ -27,25 +27,25 @@ class PoSTGeneratorTest {
 		val expected = '''
 		abbreviation a :: variable where "a \<equiv> (Suc (Suc 0))"
 		'''
-		val result = generator.generateVariableCode(varCode)
+		val result = generator.generateCode("variable", varCode)
 		Assert.assertEquals(expected, result)
 	}
 	
 	@Test def void testGenerateProcessCode() {
 		val varCode = new Constant("p", 2)
 		val expected = '''
-		abbreviation p :: process where "p \<equiv> 2"
+		abbreviation p :: process where "p \<equiv> (Suc (Suc 0))"
 		'''
-		val result = generator.generateProcessCode(varCode)
+		val result = generator.generateCode("process", varCode)
 		Assert.assertEquals(expected, result)
 	}
 	
 	@Test def void testGenerateProcessStateCode() {
 		val varCode = new Constant("s", 2)
 		val expected = '''
-		abbreviation s :: pstate where "s \<equiv> 2"
+		abbreviation s :: pstate where "s \<equiv> (Suc (Suc 0))"
 		'''
-		val result = generator.generateProcessStateCode(varCode)
+		val result = generator.generateCode("pstate", varCode)
 		Assert.assertEquals(expected, result)
 	}
 	
@@ -56,46 +56,6 @@ class PoSTGeneratorTest {
 		abbreviation a :: int where "a \<equiv> 2"
 		'''
 		val result = generator.generateConstant(type, constant)
-		Assert.assertEquals(expected, result)
-	}
-	
-	@Test def void testGenerateStateDataTypeBoolEnvVar() {
-		val envVarTypes = newArrayList("BOOL")
-		val expected = '''
-			datatype state =
-			  emptyState |
-			  toEnv state |
-			  setVarBool state variable bool |
-			  setVarInt state variable int |
-			  setVarReal state variable real |
-			  setVarArrayBool state variable int bool |
-			  setVarArrayInt state variable int int |
-			  setVarArrayReal state variable int real |
-			  setVarAny state bool |
-			  setPstate state process pstate |
-			  reset state process
-		'''
-		val result = generator.generateStateDataType(envVarTypes)
-		Assert.assertEquals(expected, result)
-	}
-	
-	@Test def void testGenerateStateDataTypeIntEnvVar() {
-		val envVarTypes = newArrayList("INT")
-		val expected = '''
-			datatype state =
-			  emptyState |
-			  toEnv state |
-			  setVarBool state variable bool |
-			  setVarInt state variable int |
-			  setVarReal state variable real |
-			  setVarArrayBool state variable int bool |
-			  setVarArrayInt state variable int int |
-			  setVarArrayReal state variable int real |
-			  setVarAny state int |
-			  setPstate state process pstate |
-			  reset state process
-		'''
-		val result = generator.generateStateDataType(envVarTypes)
 		Assert.assertEquals(expected, result)
 	}
 	
@@ -159,54 +119,19 @@ class PoSTGeneratorTest {
 		generator.model = model
 		generator.theoryName = theoryName
 		val expected = '''
-		theory «theoryName» imports Complex_Main
+		theory «theoryName» imports VCTheory
 		begin
-		
-		type_synonym variable = nat
-		type_synonym process = nat
-		type_synonym pstate = nat
 		
 		abbreviation a' :: variable where "a' \<equiv> (Suc 0)"
 		abbreviation b' :: variable where "b' \<equiv> (Suc (Suc 0))"
 		
-		abbreviation process1' :: process where "process1' \<equiv> 1"
+		abbreviation process1' :: process where "process1' \<equiv> (Suc 0)"
 		
-		abbreviation STOP:: pstate where "STOP \<equiv> 0"
-		abbreviation ERROR:: pstate where "ERROR \<equiv> 1"
-		
-		abbreviation process1'state1 :: pstate where "process1'state1 \<equiv> 2"
+		abbreviation process1'state1' :: pstate where "process1'state1' \<equiv> (Suc (Suc 0))"
 		
 		abbreviation t' :: nat where "t' \<equiv> 1000"
 		
 		abbreviation t'TIMEOUT :: nat where "t'TIMEOUT \<equiv> 10"
-		
-		«generator.generateStateDataType(newArrayList("BOOL"))»
-		
-		«generator.generateGetVarBoolFunction(envVars, envVars)»
-		
-		«generator.generateGetVarIntFunction(envVars, newArrayList())»
-		
-		«generator.generateGetVarRealFunction(envVars, newArrayList())»
-		
-		«generator.generateGetVarArrayBoolFunction(envVars)»
-		
-		«generator.generateGetVarArrayIntFunction(envVars)»
-		
-		«generator.generateGetVarArrayRealFunction(envVars)»
-		
-		«generator.generateGetPstateFunction(envVars)»
-		
-		«generator.generateSubstateFunction(envVars)»
-		
-		«generator.generateToEnvNumFunction(envVars)»
-		
-		«generator.generateToEnvPFunction()»
-		
-		«generator.generateLtimeFunction(envVars)»
-		
-		«generator.generatePredEnvFunction(envVars)»
-		
-		«generator.generateShiftFunction()»
 		
 		(*Verification conditions*)
 		
@@ -221,7 +146,7 @@ class PoSTGeneratorTest {
 		        (setPstate
 		          emptyState
 		          process1'
-		          process1'state1
+		          process1'state1'
 		        )
 		      )
 		    )
@@ -237,49 +162,53 @@ class PoSTGeneratorTest {
 		  (
 		    (
 		      (
-		        (
-		          (inv0
-		            s0
-		          )
-		        \<and>
-		          (env
-		            (setVarAny
-		              s0
-		              a'value
-		            )
-		          )
+		        (inv0
+		          s0
 		        )
 		      \<and>
+		        (env
+		          (setVarBool
+		            s0
+		            a'
+		            a'value
+		          )
+		        )
+		      )
+		    \<and>
+		      (
 		        (
 		          (getPstate
-		            (setVarAny
+		            (setVarBool
 		              s0
+		              a'
 		              a'value
 		            )
 		            process1'
 		          )
 		        =
-		          process1'state1
+		          process1'state1'
 		        )
-		      )
-		    \<and>
-		      (
-		        t'TIMEOUT
-		      <=
-		        (ltime
-		          (setVarAny
-		            s0
-		            a'value
+		      \<and>
+		        (
+		          t'TIMEOUT
+		        <=
+		          (ltime
+		            (setVarBool
+		              s0
+		              a'
+		              a'value
+		            )
+		            process1'
 		          )
-		          process1'
 		        )
 		      )
 		    )
 		  -->
 		    (inv0
 		      (toEnv
-		        (setVarAny
+		        (setVarBool
 		          s0
+		          a'
 		          a'value
 		        )
 		      )
@@ -292,42 +221,45 @@ class PoSTGeneratorTest {
 		  (
 		    (
 		      (
-		        (
-		          (inv0
-		            s0
-		          )
-		        \<and>
-		          (env
-		            (setVarAny
-		              s0
-		              a'value
-		            )
-		          )
+		        (inv0
+		          s0
 		        )
 		      \<and>
+		        (env
+		          (setVarBool
+		            s0
+		            a'
+		            a'value
+		          )
+		        )
+		      )
+		    \<and>
+		      (
 		        (
 		          (getPstate
-		            (setVarAny
+		            (setVarBool
 		              s0
+		              a'
 		              a'value
 		            )
 		            process1'
 		          )
 		        =
-		          process1'state1
+		          process1'state1'
 		        )
-		      )
-		    \<and>
-		      (\<not>
-		        (
-		          t'TIMEOUT
-		        <=
-		          (ltime
-		            (setVarAny
-		              s0
-		              a'value
+		      \<and>
+		        (\<not>
+		          (
+		            t'TIMEOUT
+		          <=
+		            (ltime
+		              (setVarBool
+		                s0
+		                a'
+		                a'value
+		              )
+		              process1'
 		            )
-		            process1'
 		          )
 		        )
 		      )
@@ -335,8 +267,9 @@ class PoSTGeneratorTest {
 		  -->
 		    (inv0
 		      (toEnv
-		        (setVarAny
+		        (setVarBool
 		          s0
+		          a'
 		          a'value
 		        )
 		      )
@@ -354,8 +287,9 @@ class PoSTGeneratorTest {
 		        )
 		      \<and>
 		        (env
-		          (setVarAny
+		          (setVarBool
 		            s0
+		            a'
 		            a'value
 		          )
 		        )
@@ -363,8 +297,9 @@ class PoSTGeneratorTest {
 		    \<and>
 		      (
 		        (getPstate
-		          (setVarAny
+		          (setVarBool
 		            s0
+		            a'
 		            a'value
 		          )
 		          process1'
@@ -376,8 +311,9 @@ class PoSTGeneratorTest {
 		  -->
 		    (inv0
 		      (toEnv
-		        (setVarAny
+		        (setVarBool
 		          s0
+		          a'
 		          a'value
 		        )
 		      )
@@ -395,8 +331,9 @@ class PoSTGeneratorTest {
 		        )
 		      \<and>
 		        (env
-		          (setVarAny
+		          (setVarBool
 		            s0
+		            a'
 		            a'value
 		          )
 		        )
@@ -404,8 +341,9 @@ class PoSTGeneratorTest {
 		    \<and>
 		      (
 		        (getPstate
-		          (setVarAny
+		          (setVarBool
 		            s0
+		            a'
 		            a'value
 		          )
 		          process1'
@@ -417,8 +355,9 @@ class PoSTGeneratorTest {
 		  -->
 		    (inv0
 		      (toEnv
-		        (setVarAny
+		        (setVarBool
 		          s0
+		          a'
 		          a'value
 		        )
 		      )

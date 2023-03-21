@@ -37,16 +37,6 @@ public class Path {
 			currentState = new ComplexTerm(FunctionSymbol.setVarInt, currentState, varNameCode, value);
 	}
 
-	public void increment(SymbolicVariable variable, AddExpression step, VCGeneratorState globVars) {		
-		PrimaryExpression varExpr = new PrimaryExpressionImpl();
-		varExpr.setVariable(variable);
-		AddExpression newValue = new AddExpressionImpl();
-		newValue.setAddOp(AddOperator.PLUS);
-		newValue.setLeft(varExpr);
-		newValue.setRight(step);
-		doAssignment(variable, newValue, globVars);
-	}
-
 	public void doAssignment(AssignmentStatement statement, VCGeneratorState globVars) {
 		if (status != ExecutionStatus.NORMAL)
 			return;
@@ -106,10 +96,12 @@ public class Path {
 			String processName = process.getName();
 			Constant processCode = globVars.getProcess(processName);
 			Constant initialState = globVars.getInitialState(processName);
+			currentState = globVars.initializeProcessVars(processName, currentState);
 			currentState = new ComplexTerm(FunctionSymbol.setPstate, currentState, processCode, initialState);
 		}
 		else { // RESTART
 			Constant initialState = globVars.getInitialState();
+			currentState = globVars.initializeProcessVars(globVars.currentProcessName, currentState);
 			currentState = new ComplexTerm(FunctionSymbol.setPstate, currentState, globVars.currentProcess, initialState);
 		}
 	}
