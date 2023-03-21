@@ -1,6 +1,15 @@
 # post_vcgenerator
 Generator of verification conditions for poST-programs in Isabelle/HOL format. This project based on poST language project (https://github.com/v-bashev/post_core).
 # Important files
-Symbolic evaluation of expressions: method <i>generateExpression</i> in https://github.com/ivchernenko/post_vcgenerator/tree/main/su.nsk.iae.post.parent/su.nsk.iae.post/src-gen/su/nsk/iae/post/poST/impl
+Computing the strongest postcondition:
+- for simple statements https://github.com/ivchernenko/post_vcgenerator/blob/main/su.nsk.iae.post.parent/su.nsk.iae.post/src/su/nsk/iae/post/vcgenerator/Path.java
+- for top-level constructions https://github.com/ivchernenko/post_vcgenerator/blob/main/su.nsk.iae.post.parent/su.nsk.iae.post/src/su/nsk/iae/post/vcgenerator/VCGenerator.java
 
-gen for statements: method <i>applyTo</i> in https://github.com/ivchernenko/post_vcgenerator/tree/main/su.nsk.iae.post.parent/su.nsk.iae.post/src-gen/su/nsk/iae/post/poST/impl
+# Выполнение программы
+## Запуск программы
+Для запуска программы на компьютере пользователя необходимо открыть командную строку, перейти в директорию, в которой необходимо создать файл теории для Isabelle/HOL, содержащей условия корректности, и запустить JAR-файл с программой. В качестве аргумента программе необходимо передать путь к файлу исходного кода poST-программы. Для этого необходимо выполнить команду «java -jar <vcgenerator.jar> <post_program>». Также можно указать временной интервал, соответствующий периоду активации, с помощью опции -i. Для этого необходимо выполнить команду «java -jar <vcgenerator.jar> -i <interval> <post_program>» или «java -jar <vcgenerator.jar> <post_program> -i <interval>», где <vcgenerator.jar>— путь к JAR файлу программы «Генератор условий корректности», <post_program>— путь к файлу с расширением «.post», который содержит исходный код программы на языке poST, а также может содержать конфигурацию для этой программы, <interval>— временной интервал, соответствующий периоду активации, указывается в таком же формате, как литералы типа TIME в языке poST, то есть T#<число_дней>d<число_часов>h<число_минут>m<число_секунд>s<число_миллисекунд>ms.
+Если в файле poST-программы присутствует конфигурация для этой программы с указанием периода активации, то в качестве периода активации используется значение из конфигурации. Значение аргумента опции -i в этом случае не учитывается. Если в файле poST-программы отсутствует конфигурация или в ней не задано значение периода активации и указана опция -i, в качестве периода активации используется значение <interval>. Иначе в качестве периода активации используется значение по умолчанию 100 мс.
+## Выполнение программы
+Во время выполнения программа создает в текущей директории файл с теорией Isabelle/HOL с условиями корректности. Имя созданной теории получается кодированием имени исходного файла с poST-программой без расширения с использованием символов, допустимых в имени теории Isabelle/HOL. Символы латинского алфавита и цифры остаются без изменений. Символы, которые не могут содержаться в имени теории, заменяются на _<ASCII  код символа>.
+В случае наличия синтаксических ошибок в poST-программе пользователю выдаются сообщения об ошибках и условия корректности не генерируются. Если в текущей директории есть файл теории с таким же именем, он остается без изменений. 
+
