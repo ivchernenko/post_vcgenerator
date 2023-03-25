@@ -33,7 +33,7 @@ public class StatementImpl extends MinimalEObjectImpl.Container implements State
   
   @Override
   public List<Path> applyTo(List<Path> paths, VCGeneratorState globVars) {
-	  return paths;
+	  throw new UnsupportedOperationException("Function blocks are not supported");
   }
 
   /**
