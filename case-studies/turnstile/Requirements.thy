@@ -3,9 +3,10 @@ theory Requirements
 begin
 
 definition R1 where "R1 s \<equiv> toEnvP s \<and>
-(\<forall> s1. substate s1 s \<and> toEnvP s1 \<and> toEnvNum s1 s \<ge> 10 \<and> getVarBool s1 PdOut' = True \<longrightarrow>
-(\<exists> s3. toEnvP s3 \<and> substate s1 s3 \<and> substate s3 s \<and> toEnvNum s1 s3 \<le> 10 \<and> \<not> getVarBool s3 open' \<and>
-(\<forall> s2. toEnvP s2 \<and> substate s1 s2 \<and> substate s2 s3 \<and> s2 \<noteq> s3 \<longrightarrow> getVarBool s2 open')))"
+(\<forall> s1 s2. substate s1 s2 \<and> substate s2 s \<and> toEnvP s1 \<and> toEnvP s2 \<and> toEnvNum s1 s2 = 1 \<and> toEnvNum s2 s \<ge> 10 - 1 \<and>
+ getVarBool s1 open' \<and> getVarBool s2 PdOut' = True \<longrightarrow>
+(\<exists> s4. toEnvP s4 \<and> substate s2 s4 \<and> substate s4 s \<and> toEnvNum s2 s4 \<le> 10 - 1 \<and> \<not> getVarBool s4 open' \<and>
+(\<forall> s3. toEnvP s3 \<and> substate s2 s3 \<and> substate s3 s4 \<and> s3 \<noteq> s4 \<longrightarrow> getVarBool s3 open')))"
 
 definition R2 where "R2 s \<equiv> toEnvP s \<and>
 (\<forall> s1 s2. substate s1 s2 \<and> substate s2 s \<and> toEnvP s1 \<and> toEnvP s2 \<and> toEnvNum s1 s2 = 1 \<and>

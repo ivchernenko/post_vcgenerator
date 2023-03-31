@@ -24,7 +24,7 @@ getPstate s2 Controller' = Controller'isClosed' \<and> getVarBool s3 paid')) \<a
 (\<forall> s1. toEnvP s1 \<and> substate s1 s \<and> getPstate s1 Controller' = Controller'isOpened' \<longrightarrow> ltime s1 Controller' \<le> 90) \<and>
 (\<forall> s1. toEnvP s1 \<and> substate s1 s \<and> getPstate s1 Controller' = Controller'isOpened' \<longrightarrow>
 (\<exists> s2 s3. toEnvP s2 \<and> toEnvP s3 \<and> substate s2 s3 \<and> substate s3 s1 \<and> toEnvNum s2 s3 = 1 \<and> toEnvNum s2 s1 = ltime s1 Controller' \<and>
-getPstate s2 Controller' = Controller'minimalOpened' \<and> \<not> getVarBool s3 passed')) \<and>
+getPstate s2 Controller' = Controller'minimalOpened' \<and> ltime s2 Controller' = 10 \<and> \<not> getVarBool s2 passed' \<and> \<not> getVarBool s3 PdOut')) \<and>
 (\<forall> s3. toEnvP s3 \<and> substate s3 s \<and> getPstate s3 Controller' = Controller'isOpened' \<longrightarrow>
 (\<forall> s1. toEnvP s1 \<and> substate s1 s3 \<and> toEnvNum s1 s3 < ltime s3 Controller' \<longrightarrow> getPstate s1 Controller' = Controller'isOpened') \<and>
 (\<forall> s2. toEnvP s2 \<and> substate s2 s3 \<and> toEnvNum s2 s3 + 1 < ltime s3 Controller' \<longrightarrow> \<not> getVarBool s2 PdOut')) \<and>
