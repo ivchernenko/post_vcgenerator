@@ -71,7 +71,7 @@ lemma isOpened_open: "toEnvP s1 \<and> toEnvP s2 \<and> toEnvP s0 \<and> substat
           substate s3 s1 \<and>
           toEnvNum s2 s3 = 1 \<and>
           toEnvNum s2 s1 = ltime s1 Init'init' \<and>
-          getPstate s2 Init'init' = Controller'minimalOpened' \<and> \<not> getVarBool s3 EntranceController'isOpened')) 
+          getPstate s2 Init'init' = Controller'minimalOpened' \<and> \<not> getVarBool s2 EntranceController'isOpened' \<and> \<not> getVarBool s3 PdOut')) 
 \<longrightarrow>
 (\<exists> s3. toEnvP s3 \<and> substate s2 s3 \<and> substate s3 s0 \<and> \<not> getVarBool s3 open')"
   apply(rule impI)
@@ -82,7 +82,7 @@ lemma isOpened_open: "toEnvP s1 \<and> toEnvP s2 \<and> toEnvP s0 \<and> substat
               substate s3 s0 \<and>
               toEnvNum s2 s3 = 1 \<and>
               toEnvNum s2 s0 = ltime s0 Init'init' \<and>
-              getPstate s2 Init'init' = Controller'minimalOpened' \<and> \<not> getVarBool s3 EntranceController'isOpened')"])
+              getPstate s2 Init'init' = Controller'minimalOpened' \<and> \<not> getVarBool s2 EntranceController'isOpened' \<and> \<not> getVarBool s3 PdOut')"])
   apply blast
   apply(drule exE)
    prefer 2

@@ -1,5 +1,5 @@
 theory Proof_4_338
-  imports Proofs4
+  imports Proofs4 Extra338
 begin
 
 abbreviation s where " s s0 PdOut'value paid'value opened'value \<equiv>
@@ -144,3 +144,7 @@ pred4 s1 s2 (s s0 PdOut_value paid_value opened_value) s5"])
     done
   done
   done
+  apply(fold extraInv_def)
+  using extra338 by (auto simp add: VC338_def)
+
+end

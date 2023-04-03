@@ -48,7 +48,7 @@ getPstate s2 Controller' = Controller'minimalOpened' \<and> ltime s2 Controller'
 (\<forall> s2. toEnvP s2 \<and> substate s2 s1 \<and> s2 \<noteq> s1 \<longrightarrow> getPstate s2 Init' \<noteq> Init'init')) \<and>
 (\<forall> s1. toEnvP s1 \<and> substate s1 s \<and> getPstate s1 Unlocker' = Unlocker'unlock' \<longrightarrow> ltime s1 Unlocker' \<le> 10) \<and>
 (\<forall> s1. toEnvP s1 \<and> substate s1 s \<and> getPstate s1 Unlocker' = Unlocker'unlock' \<longrightarrow>
-(\<exists> s2 s3. toEnvP s1 \<and> substate s2 s3 \<and> substate s3 s1 \<and> toEnvNum s2 s3 = 1 \<and> toEnvNum s2 s1 = ltime s1 Unlocker' \<and>
+(\<exists> s2 s3. toEnvP s2 \<and> toEnvP s3 \<and> substate s2 s3 \<and> substate s3 s1 \<and> toEnvNum s2 s3 = 1 \<and> toEnvNum s2 s1 = ltime s1 Unlocker' \<and>
 getPstate s2 EntranceController' = EntranceController'isOpened' \<and> \<not> getVarBool s3 opened')) \<and>
 (\<forall> s3. toEnvP s3 \<and> substate s3 s \<and> getPstate s3 Unlocker' = Unlocker'unlock' \<longrightarrow>
 (\<forall> s1. toEnvP s1 \<and> substate s1 s3 \<and> toEnvNum s1 s3 < ltime s3 Unlocker' \<longrightarrow> getPstate s1 Unlocker' =Unlocker'unlock') \<and>

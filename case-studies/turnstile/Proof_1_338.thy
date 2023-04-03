@@ -1,5 +1,5 @@
 theory Proof_1_338
-  imports Proofs1
+  imports Proofs1  Extra338
 begin
 
 abbreviation s where " s s0 PdOut'value paid'value opened'value \<equiv>
@@ -27,7 +27,7 @@ theorem proof_1_338: "VC338 inv1 env s0 PdOut_value paid_value opened_value"
   apply(rule conjI)
    apply(rule conjI)
     apply simp
-   apply(unfold extraInv_def)
+   apply(unfold extraInv_def)[1]
    apply(erule conjE)
    apply(erule conjE)
    apply((rule allI)+)
@@ -115,8 +115,9 @@ pred1 s1 s2 (s s0 PdOut_value paid_value opened_value) s5"])
     done
   done
   done
+  using extra338 by (auto simp add: VC338_def)
 
+end
 
-       
          
       
