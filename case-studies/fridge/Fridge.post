@@ -1,0 +1,81 @@
+PROGRAM Fridge
+
+	VAR_INPUT
+		fridgeTempGreaterMin : BOOL;
+		fridgeTempGreaterMax : BOOL;
+		freezerTempGreaterMin : BOOL;
+		freezerTempGreaterMax : BOOL;
+		fridgeDoor : BOOL;
+	END_VAR
+
+	VAR_OUTPUT
+		fridgeCompressor : BOOL;
+		freezerCompressor : BOOL;
+		lighting : BOOL;
+		doorSignal : BOOL;
+	END_VAR
+
+	VAR CONSTANT
+		OPEN : BOOL := TRUE;
+		CLOSED : BOOL := FALSE;
+
+		OPEN_DOOR_TIME_LIMIT : TIME := T#30s;
+	END_VAR
+
+	PROCESS Init
+		STATE begin
+			START PROCESS FridgeDoorController;
+			START PROCESS FridgeCompressorController;
+			START PROCESS FreezerCompressorController;
+			STOP;
+		END_STATE
+	END_PROCESS
+
+	PROCESS FridgeDoorController 
+		STATE closed
+			IF fridgeDoor = OPEN THEN
+				lighting := TRUE;
+				SET NEXT;
+			END_IF
+		END_STATE
+
+		STATE open 
+			IF fridgeDoor = CLOSED THEN
+				lighting := FALSE;
+				SET STATE closed;
+			END_IF
+			TIMEOUT OPEN_DOOR_TIME_LIMIT THEN
+				doorSignal := TRUE;
+				SET NEXT;
+			END_TIMEOUT
+		END_STATE
+
+		STATE longOpen
+			IF fridgeDoor = CLOSED THEN
+				lighting := FALSE;
+				doorSignal := FALSE;
+				SET STATE closed;
+			END_IF
+		END_STATE
+	END_PROCESS
+
+	PROCESS FridgeCompressorController 
+		STATE checkTemp LOOPED
+			IF fridgeTempGreaterMax THEN
+				fridgeCompressor := TRUE;
+			ELSIF NOT fridgeTempGreaterMin THEN
+				fridgeCompressor := FALSE;
+			END_IF
+		END_STATE
+	END_PROCESS
+
+	PROCESS FreezerCompressorController 
+		STATE checkTemp LOOPED
+			IF freezerTempGreaterMax THEN
+				freezerCompressor := TRUE;
+			ELSIF NOT freezerTempGreaterMin THEN
+				freezerCompressor := FALSE;
+			END_IF
+		END_STATE
+	END_PROCESS
+END_PROGRAM
