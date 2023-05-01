@@ -2,9 +2,7 @@ theory ExtraInv3
   imports Requirements
 begin
 
-
-
-definition extraInv3 where "extraInv3 s \<equiv> toEnvP s \<and>
+definition extraInv where "extraInv s \<equiv> toEnvP s \<and>
 (\<forall> s4. toEnvP s4 \<and> substate s4 s \<and> getPstate s4 FridgeDoorController' = FridgeDoorController'closed' \<longrightarrow>
 (\<forall> s1. toEnvP s1 \<and> substate s1 s4 \<and> toEnvNum s1 s4 \<le> OPEN_DOOR_TIME_LIMIT'TIMEOUT \<and> getVarBool s1 fridgeDoor' = OPEN' \<longrightarrow>
 (\<exists> s3. toEnvP s3 \<and> substate s1 s3 \<and> substate s3 s4 \<and> toEnvNum s1 s3 \<le> OPEN_DOOR_TIME_LIMIT'TIMEOUT \<and>
@@ -44,7 +42,11 @@ getVarBool s1 lighting' \<and> getVarBool s1 doorSignal') \<and>
 (\<forall> s1. toEnvP s1 \<and> substate s1 s \<longrightarrow> getPstate s1 Init' \<in> {Init'begin', STOP}) \<and>
 (\<forall> s1. toEnvP s1 \<and> substate s1 s \<longrightarrow> getPstate s1 FridgeDoorController'  \<in>
  {FridgeDoorController'closed', FridgeDoorController'open', FridgeDoorController'longOpen', STOP}) \<and>
-(\<forall> s1. toEnvP s1 \<and> substate s1 s \<longrightarrow> getPstate s1 FridgeCompressorController' \<in> {FridgeCompressorController'checkTemp', STOP})
+(\<forall> s1. toEnvP s1 \<and> substate s1 s \<longrightarrow> getPstate s1 FridgeCompressorController' \<in> {FridgeCompressorController'checkTemp', STOP}) \<and>
+(\<forall> s2. toEnvP s2 \<and> substate s2 s \<and>  getPstate s2 FridgeDoorController' = FridgeDoorController'open' \<longrightarrow>
+(\<forall> s1. toEnvP s1 \<and> substate s1 s2  \<and>  toEnvNum s1 s2  < ltime s2 FridgeDoorController' \<longrightarrow>
+ getVarBool s1 fridgeDoor' = OPEN')) \<and>
+(\<forall> s1. toEnvP s1 \<and> substate s1 s \<and> getPstate s1 Init' = Init'begin' \<longrightarrow> toEnvNum emptyState s1 = 1)
 "
 
 end

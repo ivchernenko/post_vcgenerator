@@ -2,13 +2,13 @@ theory Proof_R3_VC252
   imports ExtraInv3_VC252
 begin
 
-definition inv3 where "inv3 s0 \<equiv> R3 s0 \<and> extraInv3 s0"
+definition inv3 where "inv3 s0 \<equiv> R3 s0 \<and> extraInv s0"
 
 theorem proof_3_252: "VC252 inv3 env s0 fridgeTempGreaterMin_value fridgeTempGreaterMax_value freezerTempGreaterMin_value
  freezerTempGreaterMax_value fridgeDoor_value"
   apply(unfold VC252_def inv3_def R3_def)
   apply(rule impI)
-  apply(rule cut_rl[of "extraInv3 (s s0 fridgeTempGreaterMin_value fridgeTempGreaterMax_value freezerTempGreaterMin_value
+  apply(rule cut_rl[of "extraInv (s s0 fridgeTempGreaterMin_value fridgeTempGreaterMax_value freezerTempGreaterMin_value
  freezerTempGreaterMax_value fridgeDoor_value)"])
    apply(rule conjI)
     apply(rule conjI)
@@ -40,7 +40,7 @@ theorem proof_3_252: "VC252 inv3 env s0 fridgeTempGreaterMin_value fridgeTempGre
      apply(simp split: if_splits)
     subgoal premises req_prems
       apply(insert vc_prems(1))
-      apply(unfold extraInv3_def)
+      apply(unfold extraInv_def)
       apply((erule conjE)+)
       subgoal premises extraInvs
         apply(insert extraInvs(3))
@@ -53,4 +53,4 @@ theorem proof_3_252: "VC252 inv3 env s0 fridgeTempGreaterMin_value fridgeTempGre
       done
     done
   done
-  using extra_3_252 by (auto simp add: VC252_def)
+  using extra_252 by (auto simp add: VC252_def)

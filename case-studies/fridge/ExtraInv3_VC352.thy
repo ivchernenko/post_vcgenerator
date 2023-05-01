@@ -2,9 +2,9 @@ theory ExtraInv3_VC352
   imports ExtraInv3 RequirementLemmas
 begin
 
-theorem extra_3_352: "VC352 extraInv3 env s0 fridgeTempGreaterMin_value fridgeTempGreaterMax_value freezerTempGreaterMin_value
+theorem extra_352: "VC352 extraInv env s0 fridgeTempGreaterMin_value fridgeTempGreaterMax_value freezerTempGreaterMin_value
  freezerTempGreaterMax_value fridgeDoor_value"
-  apply(unfold VC352_def extraInv3_def)
+  apply(unfold VC352_def extraInv_def)
   apply(rule impI)
   apply(rule conjI)
    apply simp
@@ -37,9 +37,13 @@ theorem extra_3_352: "VC352 extraInv3 env s0 fridgeTempGreaterMin_value fridgeTe
       using ei(11) apply simp
       apply(rule conjI)
       using ei(12) apply simp
-      using ei(13) by simp
+      apply(rule conjI)
+      using ei(13) apply simp
+      apply(rule conjI)
+      using ei(14) apply simp
+      using ei(15) by simp
     done
   done
 
 end
-      
+   
