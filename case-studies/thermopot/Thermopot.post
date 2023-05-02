@@ -1,0 +1,80 @@
+PROGRAM Thermopot
+	VAR_INPUT
+		temperature : INT;
+		button1, button2, button3: BOOL;
+		boilingButton: BOOL;
+	END_VAR
+
+	VAR_OUTPUT
+		heater : BOOL;
+		lid : BOOL;
+		selectedTemp : INT;
+		boilingMode, maintainingMode : BOOL;
+	END_VAR
+
+	VAR CONSTANT
+		LOCKED : BOOL := TRUE;
+		UNLOCKED : BOOL := FALSE;
+		PRESSED : BOOL := TRUE;
+		
+		BOILING_POINT: INT := 100;
+		TEMP1 : INT := 98;
+		TEMP2 : INT := 85;
+		TEMP3 : INT := 60;
+	END_VAR
+
+	PROCESS Init
+		STATE begin
+			START PROCESS TempSelection;
+			START PROCESS HeaterController;
+			STOP;
+		END_STATE
+	END_PROCESS
+
+	PROCESS TempSelection
+		STATE tempSelection LOOPED
+			IF button1 = PRESSED THEN
+				selectedTemp := TEMP1;
+			ELSIF button2 = PRESSED THEN
+				selectedTemp := TEMP2;
+			ELSIF button3 = PRESSED THEN
+				selectedTemp := TEMP3;
+			END_IF
+		END_STATE
+	END_PROCESS
+
+	PROCESS HeaterController
+		STATE begin
+			IF boilingButton = PRESSED THEN
+				boilingMode := TRUE;
+				SET NEXT;
+			END_IF
+		END_STATE
+
+		STATE heating
+			heater := TRUE;
+			lid := LOCKED;
+			IF temperature >= BOILING_POINT THEN
+				heater := FALSE;
+				lid := UNLOCKED;
+				boilingMode := FALSE;
+				maintainingMode := TRUE;
+				SET NEXT;
+			END_IF
+		END_STATE
+
+		STATE maintaining
+			IF boilingButton = PRESSED THEN
+				maintainingMode := FALSE;
+				boilingMode := TRUE;
+				SET STATE heating;
+			ELSE
+				IF temperature >= selectedTemp THEN
+					heater := FALSE;
+				ELSIF temperature < selectedTemp - 5 THEN
+					heater := TRUE;
+				END_IF
+			END_IF
+		END_STATE
+	END_PROCESS
+END_PROGRAM
