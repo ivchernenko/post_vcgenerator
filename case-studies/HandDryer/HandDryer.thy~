@@ -218,17 +218,17 @@ inv s0
 definition VC2 where
 "
 VC2 \<equiv>
-inv s0 \<and>
+inv0 s0 k \<and>
 env (setVarAny s0 hands_value) hands_value \<and>
 getPstate (setVarAny s0 hands_value) Ctrl = waiting
  \<and> getVarBool (setVarAny s0 hands_value) hands = ON
-\<longrightarrow> inv
+\<longrightarrow> inv0
 (toEnv 
 (setPstate 
 (setVarBool (setVarAny s0 hands_value) dryer ON) 
 Ctrl
 drying)
-)
+) k
 "
 
 definition VC3 where

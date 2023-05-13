@@ -101,5 +101,3 @@ definition pred3 where
                   substate s3 s4 \<and> s3 \<noteq> s4 \<longrightarrow>
                   getVarBool s3 (Suc (Suc 0)) = ON \<and>
                   getVarBool s3 hands = OFF))"
-
-end

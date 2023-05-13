@@ -1,5 +1,5 @@
 theory Proofs
-  imports HandDryer Requirements  VCTheoryLemmas Extra
+  imports HandDryer VCTheoryLemmas Extra
 begin
 
 
@@ -67,7 +67,7 @@ getVarBool ( toEnv
 
 theorem proof_2_6:
 "VC6 inv2 s0 hands_value"
- apply(unfold VC6_def inv2_def R2_def
+ apply(simp only: VC6_def inv2_def R2_def
 dryer_def)
   apply(rule impI; rule conjI)
   apply(auto)

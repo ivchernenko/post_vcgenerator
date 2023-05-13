@@ -17,6 +17,11 @@ lemma substate_antisym:
   apply((induction s2 arbitrary: s1); (metis substate.simps substate_refl substate_trans))
   done 
 
+lemma toEnvP_imp_gtime_gt_0: "toEnvP s \<Longrightarrow> toEnvNum emptyState s > 0"
+  apply(cases s)
+           apply auto
+  done
+
 lemma predEnv_substate: "substate (predEnv s) s"
   apply(induction s)
    by auto
