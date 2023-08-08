@@ -43,7 +43,7 @@ toEnvP s1 \<and> toEnvP s2 \<and> toEnvNum s1 s2 = 1 \<and> toEnvNum s2 s \<ge> 
 getVarBool s1 brake \<and> \<not> getVarBool s2 pressure \<longrightarrow>
 (\<exists> s4. toEnvP s4 \<and> substate s2 s4 \<and> substate s4 s \<and> toEnvNum s2 s4 \<le> SUSPENSION_TIME'TIMEOUT \<and>
 (getVarBool s4 rotation = True \<or> getVarBool s4 pressure) \<and>
-(\<forall> s3. toEnvP s3 \<and> substate s2 s3 \<and> substate s3 s4 \<and> getVarBool s3 rotation = False \<and> \<not> getVarBool s3 pressure)))"
+(\<forall> s3. toEnvP s3 \<and> substate s2 s3 \<and> substate s3 s4 \<and> s3 \<noteq> s4 \<longrightarrow> getVarBool s3 rotation = False \<and> \<not> getVarBool s3 pressure)))"
 
 definition R6 where "R6 s \<equiv> toEnvP s \<and> (\<forall> s1. substate s1 s \<and> toEnvP s1 \<and> getVarBool s1 brake \<longrightarrow>
  getVarBool s1 rotation = False)"

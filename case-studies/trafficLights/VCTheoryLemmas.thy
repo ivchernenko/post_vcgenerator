@@ -2,7 +2,7 @@ theory VCTheoryLemmas
   imports trafficLights
 begin
 
-lemma substate_refl: "substate s s"
+lemma substate_refl[simp]: "substate s s"
   apply(cases s)
          apply(auto)
   done
@@ -496,7 +496,7 @@ lemma substate_total:
          apply(auto)
   done
 
-lemma toEnvNum_id: "toEnvNum s s = 0"
+lemma toEnvNum_id[simp]: "toEnvNum s s = 0"
   apply(cases s)
          apply(auto)
   done
@@ -1062,7 +1062,7 @@ lemma shiftEnvP_or_emptyState: "n \<noteq> 0 \<longrightarrow>
  toEnvP (shiftEnv s n) \<or> shiftEnv s n = emptyState"
   apply(cases n)
   using predEnvP_or_emptyState by auto
-
+(*
 lemma shift_toEnvNum: 
 "toEnvP s \<and> toEnvP s1 \<and> substate s1 s \<Longrightarrow>
 shiftEnv s (toEnvNum s1 s) = s1"
@@ -1110,7 +1110,7 @@ toEnvNum emptyState s1" by force
     with s2_def show ?thesis by simp
   qed
 qed
-
+*)
 lemma ltime_le_toEnvNum: 
 "ltimeEnv s p \<le> toEnvNum emptyState s"
   apply(induction s)
@@ -1154,6 +1154,26 @@ next
   qed
 qed
 
+lemma substate_imp_toEnvNum_le: "substate s1 s2 \<and> substate s2 s3 \<Longrightarrow> toEnvNum s2 s3 \<le> toEnvNum s1 s3"
+  using toEnvNum3 apply auto
+  done
+
+lemma toEnvNum_eq_imp_eq2: "substate s1 s3 \<and> substate s2 s3 \<and> toEnvP s1 \<and> toEnvP s2 \<and> toEnvNum s1 s3 = toEnvNum s2 s3 \<Longrightarrow>
+s1=s2"
+  using substate_total toEnvNum3 substate_toEnvNum_id
+  by (metis add_cancel_left_left)
+
+
+lemma toEnvNum_le_imp_substate: "substate s1 s3 \<and> substate s2 s3 \<and> toEnvP s1 \<and> toEnvP s2 \<and>toEnvNum s2 s3 \<le> toEnvNum s1 s3 \<Longrightarrow> substate s1 s2"
+  by (metis substate_total substate_refl le_antisym substate_imp_toEnvNum_le toEnvNum_eq_imp_eq2)
+
+
+lemma substate_or_substate_pair:
+"toEnvP s1 \<and> toEnvP s2 \<and> toEnvP s3 \<and> substate s1 s \<and> substate s2 s3 \<and> substate s3 s \<and> toEnvNum s2 s3 = 1 \<longrightarrow>
+substate s1 s2 \<or> substate s3 s1"
+  by (metis add_Suc_right gr0_conv_Suc le_add2 mult.right_neutral not_gr_zero one_eq_mult_iff substate_total substate_refl substate_toEnvNum_id toEnvNum_le_imp_substate verit_sum_simplify)
+
+(*
 lemma state_down_ind: 
 "toEnvP s \<and> toEnvP s1 \<Longrightarrow> P s \<Longrightarrow>
  (\<And> s2. toEnvP s2 \<Longrightarrow>
@@ -1248,5 +1268,5 @@ qed
 qed
 qed
 qed
-
+*)
 end

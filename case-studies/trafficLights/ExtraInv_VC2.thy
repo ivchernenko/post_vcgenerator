@@ -1,5 +1,5 @@
 theory ExtraInv_VC2
-  imports ExtraInv_new VCTheoryLemmas
+  imports ExtraInv_new VCTheoryLemmas RequirementLemmas
 begin
 
 abbreviation s where "s s0 trafficLight_value \<equiv>
@@ -52,7 +52,32 @@ theorem extra_2: "VC2 extraInv s0 trafficLight_value"
             by simp
           done
         using ei(7) by auto
-      using ei(8) by auto
+      apply(rule conjI)
+      using ei(8) apply auto[1]
+      apply(rule conjI)
+      using ei(9) apply simp
+      apply(rule conjI)
+      using ei(10) apply auto[1]
+      apply(rule conjI)
+      using ei(11) apply auto[1]
+      apply(rule conjI)
+       apply(cases "getVarBool s0 requestButtonPressed")
+      apply(insert ei(2))[2]
+        apply((rule P5_ex_or_all_imp_ex_or_all[OF ei(13) ei(12)]); (auto))
+       apply((rule P5_ex_imp_ex_or_all[OF ei(15) ei(12)]); (auto))
+      apply(rule conjI)
+      using ei(13) apply auto[1]
+      apply(rule conjI)
+      using ei(14) apply auto[1]
+      apply(rule conjI)
+      using ei(15) apply auto[1]
+      apply(rule conjI)
+      using ei(16) apply auto[1]
+      apply(rule conjI)
+      using ei(17) apply auto[1]
+      using ei(18) by auto
     done
   done
+
+end
 
