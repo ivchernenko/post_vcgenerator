@@ -1,4 +1,4 @@
-# post_vcgenerator
+# poST verification condition generator
 Generator of verification conditions for poST-programs in Isabelle/HOL format. This project based on poST language project (https://github.com/v-bashev/post_core).
 # Important files
 Computing the strongest postcondition:
