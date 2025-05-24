@@ -32,10 +32,18 @@ class PoSTLinkingService extends DefaultLinkingService {
 	
 	private def IEObjectDescription getSingleElement(Iterable<IEObjectDescription> elements, QualifiedName name) {
 		for (e : elements) {
-			if (e.qualifiedName.segments.last == name.segments.head) {
+			val predicate = new org.eclipse.xtext.xbase.lib.Functions.Function1<String, Boolean>() {
+				
+				override apply(String p) {
+					return true;
+				}
+				
+			}
+			if (e.qualifiedName.segments.findLast(predicate) == name.segments.head) {
 				return e
 			}
 		}
+		
 		return null
 	}
 	

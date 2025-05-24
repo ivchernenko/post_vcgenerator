@@ -112,7 +112,6 @@ public class Main {
 			return;
 		}
 
-		System.out.println("Code generation finished.");
 		printIssues(issues);
 	}
 

@@ -13,27 +13,15 @@ import java.io.File
 import static su.nsk.iae.post.vcgenerator.VCGeneratorState.*
 import org.eclipse.xtext.generator.AbstractGenerator
 
-class PoSTGenerator implements AbstractGenerator {
+class PoSTGenerator extends AbstractGenerator {
 	String theoryName;
 	public String interval;
 	Model model;
-
-	def String generateTheory() {
-		if (interval === null || interval.isEmpty()) {
-			interval = "T#100ms"
-		}
-		interval = interval.substring(2)
-		val vcGenerator = new VCGenerator(Utils.parseTime(interval))
-		val vcGenVars = vcGenerator.generateVCsForConfiguredProgram(model)
-		var vcList = ""
-		for (var i = 0; i < vcGenVars.getVcSet().size(); i++) {
-			val vc = vcGenVars.vcSet.get(i)
-			vcList = vcList +
-				generateVC(vc, i + 1, vc.getFreeFunctionVariables(vcGenVars.getVcFunctionParams()),
-					vc.getFreeVariables(vcGenVars.getVcVariableParams()))
-		}
+	final int MAX_VC_NUMBER_PER_FILE = 1000;
+	
+	def String generateBaseTheory(VCGeneratorState vcGenVars) {
 		return '''
-			theory «theoryName» imports VCTheory
+			theory «theoryName» imports VCProving.VCTheory
 			begin
 			
 			«FOR v : vcGenVars.getVariables()»
@@ -58,7 +46,23 @@ class PoSTGenerator implements AbstractGenerator {
 				«ENDIF»
 			«ENDFOR»
 			
-			(*Verification conditions*)
+			end
+			
+		'''
+	}
+
+	def String generateVCTheory(VCGeneratorState vcGenVars, int start, int end) {
+		var vcList = new StringBuilder()
+		for (var i = start; i < end; i++) {
+			val vc = vcGenVars.vcSet.get(i)
+			vcList.append(
+				generateVC(vc, i + 1, vc.getFreeFunctionVariables(vcGenVars.getVcFunctionParams()),
+					vc.getFreeVariables(vcGenVars.getVcVariableParams())))
+				
+		}
+		return '''
+			theory «theoryName»_VC_«start + 1»_«end» imports «theoryName»
+			begin
 			
 			«vcList»
 			end
@@ -447,7 +451,28 @@ class PoSTGenerator implements AbstractGenerator {
 		theoryName = theoryName.substring(0, theoryName.lastIndexOf("."))
 		theoryName = encodeFileName(theoryName)
 		model = input.getContents().get(0) as Model
-		fsa.generateFile(theoryName + ".thy", generateTheory())
+			if (interval === null || interval.isEmpty()) {
+			interval = "T#100ms"
+		}
+		interval = interval.substring(2)
+		val vcGenerator = new VCGenerator(Utils.parseTime(interval))
+		val vcGenVars = vcGenerator.generateVCsForConfiguredProgram(model)
+		val vcNumber = vcGenVars.getVcSet().size()
+		System.out.println(vcNumber);
+		val vcParams = vcGenVars.getVcVariableParams()
+		for (var i =0; i < vcParams.size(); i++) {
+			System.out.print(vcParams.get(i) + ' ')
+		} 
+		fsa.generateFile(theoryName + ".thy", 
+				generateBaseTheory(vcGenVars)
+			)
+		for (var i = 0; i < vcNumber; i += MAX_VC_NUMBER_PER_FILE) {
+			val start = i
+			val end = Math.min(i + MAX_VC_NUMBER_PER_FILE, vcNumber);
+			fsa.generateFile(theoryName + '_' + (start + 1) + '_' + end + ".thy", 
+				generateVCTheory(vcGenVars, start, end)
+			)
+		}
 	}
 
 }

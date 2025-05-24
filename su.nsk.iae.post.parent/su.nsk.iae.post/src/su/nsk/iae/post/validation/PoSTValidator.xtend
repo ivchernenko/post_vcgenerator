@@ -486,7 +486,14 @@ class PoSTValidator extends AbstractPoSTValidator {
 		}
 		val process = ele.getContainerOfType(Process)
 		val state = ele.getContainerOfType(su.nsk.iae.post.poST.State)
-		if (process.states.last === state) {
+		val predicate = new org.eclipse.xtext.xbase.lib.Functions.Function1<su.nsk.iae.post.poST.State, Boolean>() {
+				
+				override apply(su.nsk.iae.post.poST.State p) {
+					return true;
+				}
+				
+			}
+		if (process.states.findLast(predicate) === state) {
 			error("Invalid statement: No next state in the Process", ePackage.setStateStatement_Next)
 		}
 	}
