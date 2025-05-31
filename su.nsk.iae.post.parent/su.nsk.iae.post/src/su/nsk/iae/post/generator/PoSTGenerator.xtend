@@ -17,7 +17,7 @@ class PoSTGenerator extends AbstractGenerator {
 	String theoryName;
 	public String interval;
 	Model model;
-	final int MAX_VC_NUMBER_PER_FILE = 1000;
+	public int maxVCNumberPerFile = 100;
 	
 	def String generateBaseTheory(VCGeneratorState vcGenVars) {
 		return '''
@@ -458,18 +458,23 @@ class PoSTGenerator extends AbstractGenerator {
 		val vcGenerator = new VCGenerator(Utils.parseTime(interval))
 		val vcGenVars = vcGenerator.generateVCsForConfiguredProgram(model)
 		val vcNumber = vcGenVars.getVcSet().size()
-		System.out.println(vcNumber);
+		if (maxVCNumberPerFile <= 0) {
+			maxVCNumberPerFile = vcNumber;
+		}
 		val vcParams = vcGenVars.getVcVariableParams()
 		for (var i =0; i < vcParams.size(); i++) {
 			System.out.print(vcParams.get(i) + ' ')
 		} 
+		System.out.println();
 		fsa.generateFile(theoryName + ".thy", 
 				generateBaseTheory(vcGenVars)
 			)
-		for (var i = 0; i < vcNumber; i += MAX_VC_NUMBER_PER_FILE) {
+		for (var i = 0; i < vcNumber; i += maxVCNumberPerFile) {
 			val start = i
-			val end = Math.min(i + MAX_VC_NUMBER_PER_FILE, vcNumber);
-			fsa.generateFile(theoryName + '_' + (start + 1) + '_' + end + ".thy", 
+			val end = Math.min(i + maxVCNumberPerFile, vcNumber);
+			val fileName = theoryName + '_VC_' + (start + 1) + '_' + end;
+			System.out.println(fileName + ' ' + (start + 1) + ' ' + end)
+			fsa.generateFile(fileName + ".thy", 
 				generateVCTheory(vcGenVars, start, end)
 			)
 		}

@@ -167,9 +167,9 @@ public class VCGeneratorState {
 			++varNumber;
 			String fullVarName;
 			if (prefix == null)
-				fullVarName = symVar.getName() + "'";
+				fullVarName = "v_" + symVar.getName() + "'";
 			else
-				fullVarName = prefix + NAME_SEPARATOR + symVar.getName() + "'";
+				fullVarName = "p_" + prefix + NAME_SEPARATOR + "v_" + symVar.getName() + "'";
 			Constant varCode = new Constant(fullVarName, varNumber);
 			if (value != null && modType != ModificationType.CONSTANT || arraySpec != null) {
 				initializedVars.add(varCode);
@@ -214,7 +214,7 @@ public class VCGeneratorState {
 	public Constant addProcess(su.nsk.iae.post.poST.Process process) {
 		++processNumber;
 		String processName = process.getName();
-		Constant processCode = new Constant(processName + "'", processNumber);
+		Constant processCode = new Constant("p_" + processName + "'", processNumber);
 		processes.put(processName, processCode);
 		processStates.put(processName, new StateList());
 		initializedVars.put(processName, new ArrayList<>());
@@ -241,7 +241,7 @@ public class VCGeneratorState {
 					addVars(varDecl, processName, ModificationType.VAR);
 		//Encoding of states
 		for (State state: process.getStates())
-			addState(state.getName(), process.getName());
+			addState(state.getName(), processName);
 		return processCode;
 	}
 
@@ -436,6 +436,6 @@ class StateList {
 
 	void addState(String stateName, String prefix, int stateCode) {
 		stateNames.add(stateName);
-		pstates.put(stateName, new Constant(prefix + VCGeneratorState.NAME_SEPARATOR + stateName + "'", stateCode));
+		pstates.put(stateName, new Constant("p_" + prefix + VCGeneratorState.NAME_SEPARATOR + "s_" + stateName + "'", stateCode));
 	}
 }

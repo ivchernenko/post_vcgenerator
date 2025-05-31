@@ -28,17 +28,21 @@ public class Main {
 
 	public static void main(String[] args) {
 		String interval = null;
+		String maxVCNumberPerFile = null;
 		int intervalOptionIndex = Arrays.asList(args).indexOf("-i");
 		if (intervalOptionIndex >= 0 && intervalOptionIndex < args.length - 1)
 			interval = args[intervalOptionIndex + 1];
+		int maxVCOptionIndex = Arrays.asList(args).indexOf("-n");
+		if (maxVCOptionIndex >= 0 && maxVCOptionIndex < args.length - 1)
+			maxVCNumberPerFile = args[maxVCOptionIndex + 1];
 		if (!Arrays.stream(args).anyMatch(x -> x.equals("-d"))) {
-			singleExecutions(args, interval);
+			singleExecutions(args, interval, maxVCNumberPerFile);
 		} else {
-			service(args, interval);
+			service(args, interval, maxVCNumberPerFile);
 		}
 	}
 
-	private static void singleExecutions(String[] args, String interval) {
+	private static void singleExecutions(String[] args, String interval, String maxVCNumberPerFile) {
 		if (args.length == 0) {
 			System.err.println("Aborting: no path to poST file provided!");
 			return;
@@ -48,12 +52,12 @@ public class Main {
 		main.runGenerator(
 				Arrays.stream(args).filter(x -> x.contains(".post")).findFirst().get(), 
 				Arrays.stream(args).anyMatch(x -> x.equals("-l")),
-				interval);
+				interval, maxVCNumberPerFile);
 	}
 
 	private static boolean loop = true;
 
-	private static void service(String[] args, String interval) {
+	private static void service(String[] args, String interval, String maxVCNumberPerFile) {
 		boolean local = Arrays.stream(args).anyMatch(x -> x.equals("-l"));
 		Injector injector = new PoSTStandaloneSetup().createInjectorAndDoEMFRegistration();
 		Main main = injector.getInstance(Main.class);
@@ -66,7 +70,7 @@ public class Main {
 		Scanner scanner = new Scanner(System.in);
 		while (loop) {
 			String file = scanner.next();
-			main.runGenerator(file, local, interval);
+			main.runGenerator(file, local, interval, maxVCNumberPerFile);
 		}
 		scanner.close();
 	}
@@ -84,7 +88,7 @@ public class Main {
 	@Inject 
 	private JavaIoFileSystemAccess fileAccess;
 
-	protected void runGenerator(String string, boolean local, String interval) {
+	protected void runGenerator(String string, boolean local, String interval, String maxVCNumberPerFile) {
 		// Load the resource
 		ResourceSet set = resourceSetProvider.get();
 		Resource resource = set.getResource(URI.createFileURI(string), true);
@@ -103,6 +107,9 @@ public class Main {
 		context.setCancelIndicator(CancelIndicator.NullImpl);
 		if (interval != null) {
 			generator.interval = interval;
+		}
+		if (maxVCNumberPerFile != null) {
+			generator.maxVCNumberPerFile = Integer.parseInt(maxVCNumberPerFile);
 		}
 		try {
 			generator.doGenerate(resource, fileAccess, context);
